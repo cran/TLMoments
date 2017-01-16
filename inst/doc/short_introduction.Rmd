@@ -1,0 +1,121 @@
+---
+title: "Short introduction"
+date: "`r Sys.Date()`"
+output:
+  md_document:
+    variant: markdown_github
+vignette: >
+  %\VignetteIndexEntry{Short introduction}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteDepends{TLMoments}
+  %\VignettePackage{TLMoments}
+  \usepackage[utf8]{inputenc}	
+---
+
+# TLMoments
+
+`TLMoments` is a set of functions which main functionality is the calculation of Trimmed L-moments and their parameter and quantile estimates. One of the main goals is to reduce computation time compared to existing implementations (like `lmomco`, `Lmoments`, `Lmom`), therefore the core functions are written in C++ (see vignette "comparison of computation time" for speed comparisons). To ensure an easy usage, the package only contains a small set of functions. This vignette gives a short introduction to the most important ones and their usage. 
+
+# Short Introduction
+
+```{r echo=FALSE, message=FALSE}
+library(TLMoments)
+```
+
+## Calculation of empirical TL-moments, parameter and quantile estimates. 
+
+First we have a look at the basic functionality of calculating TL-moments and parameter and quantile estimates. Let assume we have a simple data vector:
+```{r}
+xvec <- evd::rgev(100, loc = 10, scale = 5, shape = .2)
+```
+
+To calculate TL-moments we can use the function `TLMoments` with arguments `leftrim`, `rightrim`, and `max.order` (generating an object of class `TLMoments`): 
+```{r}
+TLMoments(xvec)
+TLMoments(xvec, leftrim = 0, rightrim = 1, max.order = 2)
+```
+
+We can generate parameters estimates by putting a `TLMoments`-object to the function `parameters` and specifying argument `distr`: 
+```{r}
+tlm <- TLMoments(xvec)
+parameters(tlm, distr = "gev")
+
+tlm <- TLMoments(xvec, rightrim = 1)
+parameters(tlm, distr = "gev")
+```
+
+This generates an object of class `parameters`, which can be transmitted to `quantiles` to calculate quantile estimations: 
+```{r}
+tlm <- TLMoments(xvec)
+quantiles(parameters(tlm, distr = "gev"), c(.9, .99, .999))
+
+tlm <- TLMoments(xvec, rightrim = 1)
+quantiles(parameters(tlm, distr = "gev"), c(.9, .99, .999))
+```
+
+
+## Support for different data types: 
+
+These basic functions can not only be used for simple vectors of data, but for matrix-type data, list-type data, and data.frames as well. To demonstrate this, let's generate sample data of these four types: 
+```{r}
+xmat <- matrix(evd::rgev(100), nc = 4)
+xvec <- xmat[, 3]
+xlist <- lapply(1L:ncol(xmat), function(i) xmat[, i])
+xdat <- data.frame(station = rep(1:4, each = 25), hq = as.vector(xmat))
+```
+
+The type of `lambdas` and `ratios` returned by `TLMoments` matches the input type: 
+```{r}
+TLMoments(xvec, leftrim = 0, rightrim = 1)
+TLMoments(xmat, leftrim = 0, rightrim = 1)
+TLMoments(xlist, leftrim = 0, rightrim = 1)
+TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
+```
+
+This holds when parameter and quantile estimations are calculated: 
+```{r}
+tlm <- TLMoments(xvec, leftrim = 0, rightrim = 1)
+parameters(tlm, "gev")
+tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1)
+parameters(tlm, "gev")
+tlm <- TLMoments(xlist, leftrim = 0, rightrim = 1)
+parameters(tlm, "gev")
+tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
+parameters(tlm, "gev")
+
+tlm <- TLMoments(xvec, leftrim = 0, rightrim = 1)
+quantiles(parameters(tlm, "gev"), c(.99, .999))
+tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1)
+quantiles(parameters(tlm, "gev"), c(.99, .999))
+tlm <- TLMoments(xlist, leftrim = 0, rightrim = 1)
+quantiles(parameters(tlm, "gev"), c(.99, .999))
+tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
+quantiles(parameters(tlm, "gev"), c(.99, .999))
+```
+
+# Calculations using theoretical TL-moments and parameters
+
+The functions `as.TLMoments` and `as.parameters` can be used to construct `TLMoments`- or `parameters`-objects of theoretical values (not calculated from data). These objects can be used in the same way like before (to convert between TL-moments and their parameters or to calculate the corresponding quantiles): 
+```{r}
+(tlm <- as.TLMoments(c(14.1, 4.3, 1.32)))
+parameters(tlm, distr = "gev")
+quantiles(parameters(tlm, distr = "gev"), c(.9, .99, .999))
+
+(param <- as.parameters(loc = 10, scale = 5, shape = .2, distr = "gev"))
+quantiles(param, c(.9, .99, .999))
+TLMoments(param)
+TLMoments(param, rightrim = 1)
+```
+
+Note, that we can simply use the `TLMoments`-function to calculate TL-moments corresponding to an `quantiles`-object. 
+
+# Magrittr-Syntax
+
+`TLMoments` is built to support the use in `magrittr`-Syntax. The nesting of functions can be written more readable as: 
+```{r}
+library(magrittr)
+
+TLMoments(xvec, leftrim = 0, rightrim = 1) %>% 
+  parameters("gev") %>% 
+  quantiles(c(.99, .999))
+```

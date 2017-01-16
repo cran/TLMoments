@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Comparison of computation times</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: #990073
+   }
+
+   pre .number {
+     color: #099;
+   }
+
+   pre .comment {
+     color: #998;
+     font-style: italic
+   }
+
+   pre .keyword {
+     color: #900;
+     font-weight: bold
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: #d14;
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>Comparison of computation times</h1>
+
+<p>This document shows a comparison of computation time of TL-moments between different packages available, as well as between the different approaches built-in in this package. </p>
+
+<p>This package offers the following computation methods (available via <code>computation.method</code>-attribute in <code>TLMoments</code> or <code>TLMoment</code>): </p>
+
+<ul>
+<li><p><code>direct</code>: Calculation as a weighted mean of the ordered data vector</p></li>
+<li><p><code>pwm</code>: Calculation of probabilty-weighted moments and using the conversion to TL-moments</p></li>
+<li><p><code>recursive</code>: An alternative recursive estimation of the weights of the direct approach</p></li>
+<li><p><code>recurrence</code>: Estimating the L-moments first and using the recurrence property to derive TL-moments</p></li>
+</ul>
+
+<p>For a complete and thorough analysis of all these approaches and another speed comparison see Hosking &amp; Balakrishnan (2015, <em>A uniqueness result for L-estimators, with applications to L-moments</em>, Statistical Methodology, 24, 69-80). </p>
+
+<p>Besides our implementation, L-moments and/or TL-moments can be calculated using the packages</p>
+
+<ul>
+<li><p><code>lmomco</code>: L-moments and TL-moments</p></li>
+<li><p><code>Lmoments</code>: L-moments and TL(1,1)-moments</p></li>
+<li><p><code>lmom</code>: only L-moments</p></li>
+</ul>
+
+<p>(all availabe at CRAN). The functions <code>lmomco::lmoms</code>, <code>lmomco::TLmoms</code>, and <code>Lmoments::Lmoments</code> return list objects with (T)L-moments and (T)L-moment-ratios and are therefore compared to our <code>TLMoments</code>; <code>lmom::samlmu</code> returns a vector of lambdas and is compared to <code>TLMoment</code> (which is a fast bare-bone function to compute TL-moments but is not suited to be transmitted to <code>parameters</code> or other functions of this package). </p>
+
+<h1>Calculation of L-moments</h1>
+
+<p>First we check, if all approaches give the same results (lmomco::lmoms is added as comparison). </p>
+
+<pre><code class="r">n &lt;- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
+sapply(n, function(nn) {
+  x &lt;- evd::rgev(nn)
+  check &lt;- lmomco::lmoms(x, 4)$lambdas
+  sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+</code></pre>
+
+<pre><code>##           [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## direct    TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+## pwm       TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+## recursive TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+</code></pre>
+
+<p>Now we compare the functions giving L-moments are L-moment-ratios simultaneously. </p>
+
+<pre><code class="r">x &lt;- evd::rgev(50)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;), 
+  TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;), 
+  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;), 
+  lmomco::lmoms(x, 4), 
+  Lmoments::Lmoments(x, returnobject = TRUE)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                           expr       min
+##     TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;)  1.247122
+##        TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;)  1.130172
+##  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;)  1.000000
+##                                            lmomco::lmoms(x, 4) 16.859149
+##                     Lmoments::Lmoments(x, returnobject = TRUE)  1.561048
+##         lq      mean    median        uq       max neval
+##   1.222758  1.221947  1.219421  1.196435 0.9779966   100
+##   1.122484  1.077012  1.103262  1.070005 1.0088183   100
+##   1.000000  1.000000  1.000000  1.000000 1.0000000   100
+##  15.910520 15.051809 15.785747 15.164405 4.7700152   100
+##   1.599098  1.533678  1.550068  1.549785 1.3017797   100
+</code></pre>
+
+<pre><code class="r">x &lt;- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;), 
+  TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;), 
+  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;), 
+  lmomco::lmoms(x, 4), 
+  Lmoments::Lmoments(x, returnobject = TRUE)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                           expr        min
+##     TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;)   3.321905
+##        TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;)   2.205974
+##  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;)   1.000000
+##                                            lmomco::lmoms(x, 4) 223.127604
+##                     Lmoments::Lmoments(x, returnobject = TRUE)   1.526841
+##          lq       mean     median         uq       max neval
+##    3.187929   2.762694   3.128699   2.415718  1.060299   100
+##    2.136949   1.942266   2.122409   1.747743  1.314967   100
+##    1.000000   1.000000   1.000000   1.000000  1.000000   100
+##  218.238503 184.517412 214.280436 153.821135 74.407946   100
+##    1.559509   1.457766   1.681487   1.284248  1.050548   100
+</code></pre>
+
+<p>As we see, our implementation of the <em>recursive approach</em> is clearly the fastest. After this, the <em>pwm approach</em> is to be prefered over the <em>direct approach</em>. The implementation in <code>lmomco</code> is slow, compared to the others, especially for longer data vectors. <code>Lmoments</code> is constantly slower than the <em>recursive approach</em> of this package. </p>
+
+<p>Comparison of functions that only return a vector of L-moments:</p>
+
+<pre><code class="r">x &lt;- evd::rgev(50)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;), 
+  TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;), 
+  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;), 
+  lmom::samlmu(x, 4), 
+  Lmoments::Lmoments(x, returnobject = FALSE)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                        expr       min
+##     TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;)  2.570050
+##        TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;)  1.696397
+##  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;)  1.000000
+##                                          lmom::samlmu(x, 4)  1.129594
+##                 Lmoments::Lmoments(x, returnobject = FALSE) 10.209451
+##        lq      mean   median       uq        max neval
+##  2.424083 1.3833811 2.365908 2.073667 0.04954821   100
+##  1.641955 0.9742055 1.557987 1.486879 0.06139103   100
+##  1.000000 1.0000000 1.000000 1.000000 1.00000000   100
+##  1.305138 1.6472206 1.317427 1.239205 2.31513787   100
+##  9.791030 5.3566622 8.852538 7.888361 0.21767345   100
+</code></pre>
+
+<pre><code class="r">x &lt;- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;), 
+  TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;), 
+  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;), 
+  lmom::samlmu(x, 4), 
+  Lmoments::Lmoments(x, returnobject = FALSE)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                        expr       min
+##     TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;) 16.219514
+##        TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;)  9.618965
+##  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;)  2.498241
+##                                          lmom::samlmu(x, 4)  1.000000
+##                 Lmoments::Lmoments(x, returnobject = FALSE)  8.424014
+##         lq      mean    median        uq       max neval
+##  13.432317 13.202580 12.758043 12.711764 19.388344   100
+##   7.991693  7.581657  7.613630  7.388048  4.918289   100
+##   2.134150  2.060077  2.062312  2.022563  1.576473   100
+##   1.000000  1.000000  1.000000  1.000000  1.000000   100
+##   7.190713  8.730290  6.893787  6.939898 15.822386   100
+</code></pre>
+
+<p>For smaller data vectors our implementation is the fastest, but with longer data vectors <code>lmom::samlmu</code> excels. </p>
+
+<h1>Calculation of TL-moments</h1>
+
+<p>First we check, if all approaches give the same results (lmomco::Tlmoms is added as comparison)</p>
+
+<pre><code class="r">n &lt;- c(25, 50, 100, 150, 200, 500, 1000, 10000)
+sapply(n, function(nn) {
+  x &lt;- evd::rgev(nn)
+  check &lt;- lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)$lambdas
+  sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;, &quot;recurrence&quot;), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, rightrim = 1, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+</code></pre>
+
+<pre><code>##            [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]
+## direct     TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+## pwm        TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+## recursive  TRUE TRUE TRUE TRUE FALSE FALSE FALSE FALSE
+## recurrence TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+</code></pre>
+
+<pre><code class="r">sapply(n, function(nn) {
+  x &lt;- evd::rgev(nn)
+  check &lt;- lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)$lambdas
+  sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;, &quot;recurrence&quot;), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, leftrim = 2, rightrim = 4, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+</code></pre>
+
+<pre><code>##            [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]
+## direct     TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+## pwm        TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+## recursive  TRUE TRUE TRUE TRUE FALSE FALSE FALSE FALSE
+## recurrence TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+</code></pre>
+
+<p>The <em>recursive approach</em> fails when n exceeds 150. All other implementations give the same results. </p>
+
+<pre><code class="r">x &lt;- evd::rgev(50)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;direct&quot;), 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;pwm&quot;), 
+  #TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recursive&quot;), 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recurrence&quot;), 
+  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                                          expr
+##      TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;direct&quot;)
+##         TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;pwm&quot;)
+##  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recurrence&quot;)
+##                               lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+##        min        lq      mean    median        uq       max neval
+##   2.668809  2.470516  2.053001  2.375475  1.834268 1.0513829   100
+##   1.139518  1.091660  1.027709  1.068730  1.037583 0.4708621   100
+##   1.000000  1.000000  1.000000  1.000000  1.000000 1.0000000   100
+##  15.934675 15.572023 13.158572 14.979562 12.424656 5.0555835   100
+</code></pre>
+
+<pre><code class="r">x &lt;- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, 4, rightrim = 1, computation.method = &quot;direct&quot;), 
+  TLMoments(x, 4, rightrim = 1, computation.method = &quot;pwm&quot;), 
+  #TLMoments(x, 4, rightrim = 1, computation.method = &quot;recursive&quot;), 
+  TLMoments(x, 4, rightrim = 1, computation.method = &quot;recurrence&quot;), 
+  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                              expr
+##      TLMoments(x, 4, rightrim = 1, computation.method = &quot;direct&quot;)
+##         TLMoments(x, 4, rightrim = 1, computation.method = &quot;pwm&quot;)
+##  TLMoments(x, 4, rightrim = 1, computation.method = &quot;recurrence&quot;)
+##                   lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+##        min         lq       mean     median         uq        max neval
+##   19.67398  19.039676  17.206067  18.865113  15.840915  11.986615   100
+##    2.31780   2.258958   2.156351   2.255527   2.104023   1.794551   100
+##    1.00000   1.000000   1.000000   1.000000   1.000000   1.000000   100
+##  175.03363 174.683893 160.128850 174.278530 145.368904 157.478230   100
+</code></pre>
+
+<pre><code class="r">x &lt;- evd::rgev(50)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;), 
+  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recursive&quot;), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;), 
+  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                                                       expr
+##      TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;)
+##         TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;)
+##  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;)
+##                                            lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+##        min        lq      mean    median        uq       max neval
+##   2.613737  2.525881  2.193864  2.427569  2.337747 0.5354382   100
+##   1.238346  1.213057  1.092128  1.195855  1.192582 0.2911162   100
+##   1.000000  1.000000  1.000000  1.000000  1.000000 1.0000000   100
+##  14.233170 13.943644 13.282826 13.962493 14.849329 4.0831986   100
+</code></pre>
+
+<pre><code class="r">x &lt;- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;), 
+  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recursive&quot;), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;), 
+  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+)
+</code></pre>
+
+<pre><code>## Unit: relative
+##                                                                                       expr
+##      TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;)
+##         TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;)
+##  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;)
+##                                            lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+##         min         lq       mean     median         uq       max neval
+##   18.976983  18.545630  16.008043  17.986779  14.332200  7.338456   100
+##    3.658313   3.608269   3.290836   3.726356   2.991202  2.088247   100
+##    1.000000   1.000000   1.000000   1.000000   1.000000  1.000000   100
+##  167.100396 168.762797 148.164529 164.255487 130.182296 95.636781   100
+</code></pre>
+
+<p>In this calculations the <em>recurrence approach</em> clearly outperforms the other implementations. Calculation using <em>probabilty-weighted moments</em> is relatively fast, but using the <em>direct calculation</em> should be avoided, regarding calculation speed. This package&#39;s implementation is clearly faster than those in <code>lmomco</code>. </p>
+
+<h1>Conclusion</h1>
+
+<p>This results encourage to use the <em>recursive approach</em> for L-moments and the <em>recurrence approach</em> when calculating TL-moments. Therefore these are the defaults in this package, but the other computation methods are still available. </p>
+
+</body>
+
+</html>

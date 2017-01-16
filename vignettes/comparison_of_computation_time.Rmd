@@ -1,0 +1,168 @@
+---
+title: "Comparison of computation time"
+date: "`r Sys.Date()`"
+output:
+  md_document:
+    variant: markdown_github
+vignette: >
+  %\VignetteIndexEntry{Comparison of computation time}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteDepends{TLMoments}
+  %\VignettePackage{TLMoments}
+  \usepackage[utf8]{inputenc}	
+---
+
+# Comparison of computation times
+
+```{r echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+library(TLMoments)
+```
+
+This document shows a comparison of computation time of TL-moments between different packages available, as well as between the different approaches built-in in this package. 
+
+This package offers the following computation methods (available via `computation.method`-attribute in `TLMoments` or `TLMoment`): 
+
+* `direct`: Calculation as a weighted mean of the ordered data vector
+
+* `pwm`: Calculation of probabilty-weighted moments and using the conversion to TL-moments
+
+* `recursive`: An alternative recursive estimation of the weights of the direct approach
+
+* `recurrence`: Estimating the L-moments first and using the recurrence property to derive TL-moments
+
+For a complete and thorough analysis of all these approaches and another speed comparison see Hosking & Balakrishnan (2015, *A uniqueness result for L-estimators, with applications to L-moments*, Statistical Methodology, 24, 69-80). 
+
+Besides our implementation, L-moments and/or TL-moments can be calculated using the packages
+
+* `lmomco`: L-moments and TL-moments
+
+* `Lmoments`: L-moments and TL(1,1)-moments
+
+* `lmom`: only L-moments
+
+(all availabe at CRAN). The functions `lmomco::lmoms`, `lmomco::TLmoms`, and `Lmoments::Lmoments` return list objects with (T)L-moments and (T)L-moment-ratios and are therefore compared to our `TLMoments`; `lmom::samlmu` returns a vector of lambdas and is compared to `TLMoment` (which is a fast bare-bone function to compute TL-moments but is not suited to be transmitted to `parameters` or other functions of this package). 
+
+
+# Calculation of L-moments
+
+First we check, if all approaches give the same results (lmomco::lmoms is added as comparison). 
+```{r}
+n <- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
+sapply(n, function(nn) {
+  x <- evd::rgev(nn)
+  check <- lmomco::lmoms(x, 4)$lambdas
+  sapply(c("direct", "pwm", "recursive"), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+```
+
+Now we compare the functions giving L-moments are L-moment-ratios simultaneously. 
+```{r}
+x <- evd::rgev(50)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, max.order = 4, computation.method = "direct"), 
+  TLMoments(x, max.order = 4, computation.method = "pwm"), 
+  TLMoments(x, max.order = 4, computation.method = "recursive"), 
+  lmomco::lmoms(x, 4), 
+  Lmoments::Lmoments(x, returnobject = TRUE)
+)
+x <- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, max.order = 4, computation.method = "direct"), 
+  TLMoments(x, max.order = 4, computation.method = "pwm"), 
+  TLMoments(x, max.order = 4, computation.method = "recursive"), 
+  lmomco::lmoms(x, 4), 
+  Lmoments::Lmoments(x, returnobject = TRUE)
+)
+```
+As we see, our implementation of the *recursive approach* is clearly the fastest. After this, the *pwm approach* is to be prefered over the *direct approach*. The implementation in `lmomco` is slow, compared to the others, especially for longer data vectors. `Lmoments` is constantly slower than the *recursive approach* of this package. 
+
+Comparison of functions that only return a vector of L-moments:
+```{r}
+x <- evd::rgev(50)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoment(x, order = 1:4, computation.method = "direct"), 
+  TLMoment(x, order = 1:4, computation.method = "pwm"), 
+  TLMoment(x, order = 1:4, computation.method = "recursive"), 
+  lmom::samlmu(x, 4), 
+  Lmoments::Lmoments(x, returnobject = FALSE)
+)
+x <- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoment(x, order = 1:4, computation.method = "direct"), 
+  TLMoment(x, order = 1:4, computation.method = "pwm"), 
+  TLMoment(x, order = 1:4, computation.method = "recursive"), 
+  lmom::samlmu(x, 4), 
+  Lmoments::Lmoments(x, returnobject = FALSE)
+)
+```
+For smaller data vectors our implementation is the fastest, but with longer data vectors `lmom::samlmu` excels. 
+
+
+# Calculation of TL-moments
+
+First we check, if all approaches give the same results (lmomco::Tlmoms is added as comparison)
+```{r}
+n <- c(25, 50, 100, 150, 200, 500, 1000, 10000)
+sapply(n, function(nn) {
+  x <- evd::rgev(nn)
+  check <- lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)$lambdas
+  sapply(c("direct", "pwm", "recursive", "recurrence"), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, rightrim = 1, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+sapply(n, function(nn) {
+  x <- evd::rgev(nn)
+  check <- lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)$lambdas
+  sapply(c("direct", "pwm", "recursive", "recurrence"), function(comp) {
+    isTRUE(all.equal(TLMoment(x, order = 1:4, leftrim = 2, rightrim = 4, computation.method = comp), check, check.attributes = FALSE))
+  })
+})
+```
+The *recursive approach* fails when n exceeds 150. All other implementations give the same results. 
+
+```{r}
+x <- evd::rgev(50)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = "direct"), 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = "pwm"), 
+  #TLMoments(x, max.order = 4, rightrim = 1, computation.method = "recursive"), 
+  TLMoments(x, max.order = 4, rightrim = 1, computation.method = "recurrence"), 
+  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+)
+x <- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, 4, rightrim = 1, computation.method = "direct"), 
+  TLMoments(x, 4, rightrim = 1, computation.method = "pwm"), 
+  #TLMoments(x, 4, rightrim = 1, computation.method = "recursive"), 
+  TLMoments(x, 4, rightrim = 1, computation.method = "recurrence"), 
+  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+)
+```
+```{r}
+x <- evd::rgev(50)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "direct"), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "pwm"), 
+  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "recursive"), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "recurrence"), 
+  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+)
+x <- evd::rgev(1000)
+microbenchmark::microbenchmark(unit = "relative", 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "direct"), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "pwm"), 
+  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "recursive"), 
+  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = "recurrence"), 
+  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
+)
+```
+
+In this calculations the *recurrence approach* clearly outperforms the other implementations. Calculation using *probabilty-weighted moments* is relatively fast, but using the *direct calculation* should be avoided, regarding calculation speed. This package's implementation is clearly faster than those in `lmomco`. 
+
+
+# Conclusion
+
+This results encourage to use the *recursive approach* for L-moments and the *recurrence approach* when calculating TL-moments. Therefore these are the defaults in this package, but the other computation methods are still available. 
