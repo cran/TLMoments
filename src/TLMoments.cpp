@@ -9,7 +9,7 @@ double pwm_C(NumericVector x, int r);
 
 // [[Rcpp::export]]
 double z_C(int r, int k, int s, int t) {
-  double out = Rcpp::internal::factorial(r) * Rcpp::internal::factorial(r+s+t+1) / ((r+1) * Rcpp::internal::factorial(r+s) * Rcpp::internal::factorial(r+t)) * pow(-1, s+r+k) * R::choose(r+t, k-s) * R::choose(r+k, r);
+  double out = Rcpp::internal::factorial(r) * Rcpp::internal::factorial(r+s+t+1) / ((r+1) * Rcpp::internal::factorial(r+s) * Rcpp::internal::factorial(r+t)) * std::pow(-1.0, s+r+k) * R::choose(r+t, k-s) * R::choose(r+k, r);
   return out;
 }
 
@@ -61,12 +61,12 @@ NumericVector w_direct(int r, int n, double s, double t) {
   double sum;
   double add;
 
-  if (s == 0.0 & t == 0.0) { // L-Momente
+  if ((s == 0.0) & (t == 0.0)) { // L-Momente
 
     for (int i = 1; i <= n; i++) {
       sum = 0;
       for (int k = 0; k < r; k++) {
-        sum += pow(-1, k) * R::choose(r-1, k) * R::choose(i-1, r+s-k-1) * R::choose(n-i, t+k);
+        sum += std::pow(-1.0, k) * R::choose(r-1, k) * R::choose(i-1, r+s-k-1) * R::choose(n-i, t+k);
       }
       out[i-1] = sum / r / R::choose(n, r+s+t);
     }
@@ -76,7 +76,7 @@ NumericVector w_direct(int r, int n, double s, double t) {
     for (int i = 1; i <= n; i++) {
       sum = 0;
       for (int k = 0; k < r; k++) {
-        add = pow(-1, k) / r / i / (n-i+1) / R::beta(k+1, r-k) / R::beta(r+s-k, i-r-s+k+1) / R::beta(t+k+1, n-i-t-k+1);
+        add = std::pow(-1.0, k) / r / i / (n-i+1) / R::beta(k+1, r-k) / R::beta(r+s-k, i-r-s+k+1) / R::beta(t+k+1, n-i-t-k+1);
         if (NumericVector::is_na(add)) {
           add = 0;
         }
@@ -89,7 +89,7 @@ NumericVector w_direct(int r, int n, double s, double t) {
 
   // NaN zu Null und außerhalb der Grenzen zu Null (damit Trimmung eingehalten wird)
   for (int i = 1; i <= n; i++) {
-    if (i < s | i > n-t+1 | NumericVector::is_na(out[i-1])) {
+    if ((i < s) | (i > n-t+1) | NumericVector::is_na(out[i-1])) {
       out[i-1] = 0;
     }
   }
@@ -114,7 +114,7 @@ double TLMoment_direct(NumericVector x, int r, double s, double t) {
 NumericMatrix W_recursive(int maxr, int n, double s, double t) {
   NumericMatrix out(maxr, n);
 
-  if (s == 0.0 & t == 0.0) { // L-Momente
+  if ((s == 0.0) & (t == 0.0)) { // L-Momente
 
 
     for (int r = 1; r <= maxr; r++) {
@@ -166,7 +166,7 @@ NumericMatrix W_recursive(int maxr, int n, double s, double t) {
   // NaN zu Null und außerhalb der Grenzen zu Null (damit Trimmung eingehalten wird)
   for (int r = 1; r <= maxr; r++) {
     for (int i = 1; i <= n; i++) {
-      if (i < s | i > n-t+1 | NumericVector::is_na(out(r-1,i-1))) {
+      if ((i < s) | (i > n-t+1) | NumericVector::is_na(out(r-1,i-1))) {
         out(r-1, i-1) = 0;
       }
     }

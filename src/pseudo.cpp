@@ -18,11 +18,12 @@ NumericMatrix pseudo_C(NumericVector x, NumericVector k) {
   for (int j = 0; j < K; j++) {
 
     for (int i = 0; i < n; i++) {
-      vec1(i, j) = x[i] * pow(Emp[i], k[j]);
+      vec1(i, j) = x[i] * std::pow(Emp[i], k[j]);
     }
 
-    for (int i = (n-1); i >= 0; i--) {
-      vec2(i, j) = (double)1/n * x[i] * k[j] * pow(Emp[i], k[j]-1) + vec2(i+1, j);
+    vec2(n-1, j) = (double)1/n * x[n-1] * k[j] * std::pow(Emp[n-1], k[j]-1);
+    for (int i = (n-2); i >= 0; i--) {
+      vec2(i, j) = (double)1/n * x[i] * k[j] * std::pow(Emp[i], k[j]-1) + vec2(i+1, j);
     }
 
     for (int i = 0; i < n; i++) {

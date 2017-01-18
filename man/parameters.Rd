@@ -77,6 +77,12 @@ tlm <- TLMoments(evd::rgev(1000, loc = 10, scale = 5, shape = .4), leftrim = 0, 
 parameters(tlm, "gev")
 
 # Its A LOT slower:
+# system.time(replicate(500,
+#   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 1), "gumbel")
+# ))[3]
+# system.time(replicate(500,
+#   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 2), "gumbel")
+# ))[3]
 
 }
 \references{

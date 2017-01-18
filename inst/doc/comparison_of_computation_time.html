@@ -248,108 +248,88 @@ sapply(n, function(nn) {
 
 <p>Now we compare the functions giving L-moments are L-moment-ratios simultaneously. </p>
 
-<pre><code class="r">x &lt;- evd::rgev(50)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;), 
-  TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;), 
-  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;), 
-  lmomco::lmoms(x, 4), 
-  Lmoments::Lmoments(x, returnobject = TRUE)
+<pre><code class="r">possib &lt;- list(
+  TLMoments_direct = function(x) TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;), 
+  TLMoments_pwm = function(x) TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;), 
+  TLMoments_recursive = function(x) TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;), 
+  lmomco = function(x) lmomco::lmoms(x, 4), 
+  Lmoments = function(x) Lmoments::Lmoments(x, returnobject = TRUE)
 )
+
+# n = 50
+datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                           expr       min
-##     TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;)  1.247122
-##        TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;)  1.130172
-##  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;)  1.000000
-##                                            lmomco::lmoms(x, 4) 16.859149
-##                     Lmoments::Lmoments(x, returnobject = TRUE)  1.561048
-##         lq      mean    median        uq       max neval
-##   1.222758  1.221947  1.219421  1.196435 0.9779966   100
-##   1.122484  1.077012  1.103262  1.070005 1.0088183   100
-##   1.000000  1.000000  1.000000  1.000000 1.0000000   100
-##  15.910520 15.051809 15.785747 15.164405 4.7700152   100
-##   1.599098  1.533678  1.550068  1.549785 1.3017797   100
+<pre><code>##                     elapsed
+## TLMoments_direct      0.043
+## TLMoments_pwm         0.037
+## TLMoments_recursive   0.033
+## lmomco                0.634
+## Lmoments              0.054
 </code></pre>
 
-<pre><code class="r">x &lt;- evd::rgev(1000)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;), 
-  TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;), 
-  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;), 
-  lmomco::lmoms(x, 4), 
-  Lmoments::Lmoments(x, returnobject = TRUE)
-)
+<pre><code class="r"># n = 1000
+datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                           expr        min
-##     TLMoments(x, max.order = 4, computation.method = &quot;direct&quot;)   3.321905
-##        TLMoments(x, max.order = 4, computation.method = &quot;pwm&quot;)   2.205974
-##  TLMoments(x, max.order = 4, computation.method = &quot;recursive&quot;)   1.000000
-##                                            lmomco::lmoms(x, 4) 223.127604
-##                     Lmoments::Lmoments(x, returnobject = TRUE)   1.526841
-##          lq       mean     median         uq       max neval
-##    3.187929   2.762694   3.128699   2.415718  1.060299   100
-##    2.136949   1.942266   2.122409   1.747743  1.314967   100
-##    1.000000   1.000000   1.000000   1.000000  1.000000   100
-##  218.238503 184.517412 214.280436 153.821135 74.407946   100
-##    1.559509   1.457766   1.681487   1.284248  1.050548   100
+<pre><code>##                     elapsed
+## TLMoments_direct      0.181
+## TLMoments_pwm         0.123
+## TLMoments_recursive   0.057
+## lmomco               11.880
+## Lmoments              0.120
 </code></pre>
 
 <p>As we see, our implementation of the <em>recursive approach</em> is clearly the fastest. After this, the <em>pwm approach</em> is to be prefered over the <em>direct approach</em>. The implementation in <code>lmomco</code> is slow, compared to the others, especially for longer data vectors. <code>Lmoments</code> is constantly slower than the <em>recursive approach</em> of this package. </p>
 
 <p>Comparison of functions that only return a vector of L-moments:</p>
 
-<pre><code class="r">x &lt;- evd::rgev(50)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;), 
-  TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;), 
-  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;), 
-  lmom::samlmu(x, 4), 
-  Lmoments::Lmoments(x, returnobject = FALSE)
+<pre><code class="r">possib &lt;- list(
+  TLMoments_direct = function(x) TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;), 
+  TLMoments_pwm = function(x) TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;), 
+  TLMoments_recursive = function(x) TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;), 
+  lmom = function(x) lmom::samlmu(x, 4), 
+  Lmoments = function(x) Lmoments::Lmoments(x, returnobject = FALSE)
 )
+
+# n = 50
+datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                        expr       min
-##     TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;)  2.570050
-##        TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;)  1.696397
-##  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;)  1.000000
-##                                          lmom::samlmu(x, 4)  1.129594
-##                 Lmoments::Lmoments(x, returnobject = FALSE) 10.209451
-##        lq      mean   median       uq        max neval
-##  2.424083 1.3833811 2.365908 2.073667 0.04954821   100
-##  1.641955 0.9742055 1.557987 1.486879 0.06139103   100
-##  1.000000 1.0000000 1.000000 1.000000 1.00000000   100
-##  1.305138 1.6472206 1.317427 1.239205 2.31513787   100
-##  9.791030 5.3566622 8.852538 7.888361 0.21767345   100
+<pre><code>##                     elapsed
+## TLMoments_direct      0.011
+## TLMoments_pwm         0.008
+## TLMoments_recursive   0.005
+## lmom                  0.009
+## Lmoments              0.048
 </code></pre>
 
-<pre><code class="r">x &lt;- evd::rgev(1000)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;), 
-  TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;), 
-  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;), 
-  lmom::samlmu(x, 4), 
-  Lmoments::Lmoments(x, returnobject = FALSE)
-)
+<pre><code class="r"># n = 1000
+datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                        expr       min
-##     TLMoment(x, order = 1:4, computation.method = &quot;direct&quot;) 16.219514
-##        TLMoment(x, order = 1:4, computation.method = &quot;pwm&quot;)  9.618965
-##  TLMoment(x, order = 1:4, computation.method = &quot;recursive&quot;)  2.498241
-##                                          lmom::samlmu(x, 4)  1.000000
-##                 Lmoments::Lmoments(x, returnobject = FALSE)  8.424014
-##         lq      mean    median        uq       max neval
-##  13.432317 13.202580 12.758043 12.711764 19.388344   100
-##   7.991693  7.581657  7.613630  7.388048  4.918289   100
-##   2.134150  2.060077  2.062312  2.022563  1.576473   100
-##   1.000000  1.000000  1.000000  1.000000  1.000000   100
-##   7.190713  8.730290  6.893787  6.939898 15.822386   100
+<pre><code>##                     elapsed
+## TLMoments_direct      0.137
+## TLMoments_pwm         0.084
+## TLMoments_recursive   0.023
+## lmom                  0.010
+## Lmoments              0.087
 </code></pre>
 
 <p>For smaller data vectors our implementation is the fastest, but with longer data vectors <code>lmom::samlmu</code> excels. </p>
@@ -393,103 +373,85 @@ sapply(n, function(nn) {
 
 <p>The <em>recursive approach</em> fails when n exceeds 150. All other implementations give the same results. </p>
 
-<pre><code class="r">x &lt;- evd::rgev(50)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;direct&quot;), 
-  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;pwm&quot;), 
-  #TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recursive&quot;), 
-  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recurrence&quot;), 
-  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+<pre><code class="r">possib &lt;- list(
+  TLMoments_direct = function(x) TLMoments(x, leftrim = 0, rightrim = 1, max.order = 4, computation.method = &quot;direct&quot;), 
+  TLMoments_pwm = function(x) TLMoments(x, leftrim = 0, rightrim = 1, max.order = 4, computation.method = &quot;pwm&quot;), 
+  TLMoments_recurrence = function(x) TLMoments(x, leftrim = 0, rightrim = 1, max.order = 4, computation.method = &quot;recurrence&quot;), 
+  lmomco = function(x) lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
 )
+
+# n = 50
+datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                                          expr
-##      TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;direct&quot;)
-##         TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;pwm&quot;)
-##  TLMoments(x, max.order = 4, rightrim = 1, computation.method = &quot;recurrence&quot;)
-##                               lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
-##        min        lq      mean    median        uq       max neval
-##   2.668809  2.470516  2.053001  2.375475  1.834268 1.0513829   100
-##   1.139518  1.091660  1.027709  1.068730  1.037583 0.4708621   100
-##   1.000000  1.000000  1.000000  1.000000  1.000000 1.0000000   100
-##  15.934675 15.572023 13.158572 14.979562 12.424656 5.0555835   100
+<pre><code>##                      elapsed
+## TLMoments_direct       0.093
+## TLMoments_pwm          0.041
+## TLMoments_recurrence   0.036
+## lmomco                 0.632
 </code></pre>
 
-<pre><code class="r">x &lt;- evd::rgev(1000)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, 4, rightrim = 1, computation.method = &quot;direct&quot;), 
-  TLMoments(x, 4, rightrim = 1, computation.method = &quot;pwm&quot;), 
-  #TLMoments(x, 4, rightrim = 1, computation.method = &quot;recursive&quot;), 
-  TLMoments(x, 4, rightrim = 1, computation.method = &quot;recurrence&quot;), 
-  lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
+<pre><code class="r"># n = 1000
+datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
+</code></pre>
+
+<pre><code>##                      elapsed
+## TLMoments_direct       1.273
+## TLMoments_pwm          0.151
+## TLMoments_recurrence   0.057
+## lmomco                12.251
+</code></pre>
+
+<pre><code class="r">possib &lt;- list(
+  TLMoments_direct = function(x) TLMoments(x, leftrim = 2, rightrim = 4, max.order = 4, computation.method = &quot;direct&quot;), 
+  TLMoments_pwm = function(x) TLMoments(x, leftrim = 2, rightrim = 4, max.order = 4, computation.method = &quot;pwm&quot;), 
+  TLMoments_recurrence = function(x) TLMoments(x, leftrim = 2, rightrim = 4, max.order = 4, computation.method = &quot;recurrence&quot;), 
+  lmomco = function(x) lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
 )
+
+# n = 50
+datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                              expr
-##      TLMoments(x, 4, rightrim = 1, computation.method = &quot;direct&quot;)
-##         TLMoments(x, 4, rightrim = 1, computation.method = &quot;pwm&quot;)
-##  TLMoments(x, 4, rightrim = 1, computation.method = &quot;recurrence&quot;)
-##                   lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)
-##        min         lq       mean     median         uq        max neval
-##   19.67398  19.039676  17.206067  18.865113  15.840915  11.986615   100
-##    2.31780   2.258958   2.156351   2.255527   2.104023   1.794551   100
-##    1.00000   1.000000   1.000000   1.000000   1.000000   1.000000   100
-##  175.03363 174.683893 160.128850 174.278530 145.368904 157.478230   100
+<pre><code>##                      elapsed
+## TLMoments_direct       0.099
+## TLMoments_pwm          0.047
+## TLMoments_recurrence   0.038
+## lmomco                 0.590
 </code></pre>
 
-<pre><code class="r">x &lt;- evd::rgev(50)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;), 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;), 
-  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recursive&quot;), 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;), 
-  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
-)
+<pre><code class="r"># n = 1000
+datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+
+do.call(&quot;rbind&quot;, lapply(possib, function(f) {
+  system.time(lapply(datalist, f))[3]
+}))
 </code></pre>
 
-<pre><code>## Unit: relative
-##                                                                                       expr
-##      TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;)
-##         TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;)
-##  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;)
-##                                            lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
-##        min        lq      mean    median        uq       max neval
-##   2.613737  2.525881  2.193864  2.427569  2.337747 0.5354382   100
-##   1.238346  1.213057  1.092128  1.195855  1.192582 0.2911162   100
-##   1.000000  1.000000  1.000000  1.000000  1.000000 1.0000000   100
-##  14.233170 13.943644 13.282826 13.962493 14.849329 4.0831986   100
-</code></pre>
-
-<pre><code class="r">x &lt;- evd::rgev(1000)
-microbenchmark::microbenchmark(unit = &quot;relative&quot;, 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;), 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;), 
-  #TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recursive&quot;), 
-  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;), 
-  lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
-)
-</code></pre>
-
-<pre><code>## Unit: relative
-##                                                                                       expr
-##      TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;direct&quot;)
-##         TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;pwm&quot;)
-##  TLMoments(x, max.order = 4, leftrim = 2, rightrim = 4, computation.method = &quot;recurrence&quot;)
-##                                            lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)
-##         min         lq       mean     median         uq       max neval
-##   18.976983  18.545630  16.008043  17.986779  14.332200  7.338456   100
-##    3.658313   3.608269   3.290836   3.726356   2.991202  2.088247   100
-##    1.000000   1.000000   1.000000   1.000000   1.000000  1.000000   100
-##  167.100396 168.762797 148.164529 164.255487 130.182296 95.636781   100
+<pre><code>##                      elapsed
+## TLMoments_direct       1.292
+## TLMoments_pwm          0.260
+## TLMoments_recurrence   0.074
+## lmomco                12.024
 </code></pre>
 
 <p>In this calculations the <em>recurrence approach</em> clearly outperforms the other implementations. Calculation using <em>probabilty-weighted moments</em> is relatively fast, but using the <em>direct calculation</em> should be avoided, regarding calculation speed. This package&#39;s implementation is clearly faster than those in <code>lmomco</code>. </p>
 
 <h1>Conclusion</h1>
 
-<p>This results encourage to use the <em>recursive approach</em> for L-moments and the <em>recurrence approach</em> when calculating TL-moments. Therefore these are the defaults in this package, but the other computation methods are still available. </p>
+<p>This results encourage to use the <em>recursive approach</em> for L-moments and the <em>recurrence approach</em> when calculating TL-moments. Therefore these are the defaults in this package, but the other computation methods (<em>direct</em> and <em>pwm</em>) are still available. </p>
 
 </body>
 
