@@ -26,20 +26,24 @@ It is printed with \code{print.summary.parameters}.
 Calculating and printing of summary statistics to a given parameters-object.
 }
 \examples{
-x <- cbind(evd::rgev(100, shape = .2), evd::rgev(100, shape = .2))
+x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
 
 p <- parameters(TLMoments(x[, 1]), "gev")
 summary(p)
+summary(p, select = c("scale", "shape"))
 
 p <- parameters(TLMoments(x[, 1], rightrim = 1), "gev")
 summary(p)
 
 p <- parameters(TLMoments(x), "gev")
 summary(p)
+summary(p, select = "shape")
 
 p <- as.parameters(loc = 10, scale = 5, shape = .3, distr = "gev")
-summary(p, rightrim = 0, n = 100)
-summary(p, rightrim = 1, n = 100)
+summary(p)
+summary(p, rightrim = 1, set.n = 250)
 
 }
-
+\seealso{
+\code{\link{parameters}}, \code{\link{est_cov}}
+}

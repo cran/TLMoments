@@ -43,4 +43,6 @@ Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. J
 
 Hosking, J. R. M., & Balakrishnan, N. (2015). A uniqueness result for L-estimators, with applications to L-moments. Statistical Methodology, 24, 69-80.
 }
-
+\seealso{
+\code{\link{TLMoments}}
+}

@@ -26,12 +26,16 @@ It is printed with \code{print.summary.PWMs}.
 Calculating and printing of summary statistics to a given PWMs-object.
 }
 \examples{
-x <- cbind(evd::rgev(100, shape = .2), evd::rgev(100, shape = .2))
+x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
 
 summary(PWMs(x[, 1]))
 summary(PWMs(x[, 1]), distr = "gev")
+summary(PWMs(x[, 1]), distr = "gev", select = 1:2)
 
 summary(PWMs(x))
+summary(PWMs(x), select = 1:2)
 
 }
-
+\seealso{
+\code{\link{PWMs}}, \code{\link{est_cov}}
+}

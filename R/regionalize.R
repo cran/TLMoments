@@ -21,7 +21,7 @@
 #' }
 #' @examples
 #' tlm <- TLMoments(
-#'   matrix(evd::rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
+#'   matrix(rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
 #'   leftrim = 0, rightrim = 1)
 #' regionalize(tlm)
 #' parameters(regionalize(tlm), "gev")
@@ -30,7 +30,7 @@
 #'
 #' # With magrittr
 #' library(magrittr)
-#' matrix(evd::rgev(200, shape = .3), nc = 5) %>%
+#' matrix(rgev(200, shape = .3), nc = 5) %>%
 #'  TLMoments(rightrim = 1) %>%
 #'  regionalize %>%
 #'  parameters("gev") %>%
@@ -60,5 +60,6 @@ regionalize <- function(x, w = rep(1, ncol(x$lambdas)), reg.lambdas = TRUE) {
   # Adjust attributes
   attr(out, "source") <- attr(x, "source")
   attr(out, "source")$func <- c(attr(out, "source")$func, "regionalize")
+  attr(out, "source")$reg.weights <- w
   out
 }

@@ -2,8 +2,8 @@
 % Please edit documentation in R/est_pwmcov.R
 \name{est_pwmcov}
 \alias{est_pwmcov}
-\alias{est_pwmcov.matrix}
 \alias{est_pwmcov.numeric}
+\alias{est_pwmcov.matrix}
 \title{Estimate the covariance matrix of PWM estimations}
 \usage{
 est_pwmcov(x, order = 0:3, distr = NULL, distr.trim = c(0, 0))
@@ -29,18 +29,17 @@ to calculate parameters if a parametric assumption is used (i.e. \code{distr} is
 numeric matrix
 }
 \description{
-description not done yet
+Internal function. Use \link{est_cov}. Description not done yet.
 }
 \examples{
 ### Numeric vectors
-x <- evd::rgev(500, shape = .2)
+x <- rgev(500, shape = .2)
 est_pwmcov(x)
 est_pwmcov(x, distr = "gev")
 
 ### Numeric matrices
-x <- matrix(evd::rgev(600, shape = .2), nc = 3)
+x <- matrix(rgev(600, shape = .2), nc = 3)
 est_pwmcov(x, order = 0:2)
 est_pwmcov(x, order = 0:2, distr = "gev")
 
 }
-

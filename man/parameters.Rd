@@ -10,7 +10,7 @@ parameters(tlm, distr, ...)
 \item{tlm}{object returned by TLMoments}
 
 \item{distr}{character object defining the distribution. Supported types are
-"gev", "gumbel", and "gpd"}
+"gev", "gum", "gpd", and "ln3"}
 
 \item{...}{additional arguments}
 }
@@ -23,13 +23,13 @@ class \code{parameters}. The object contains the following attributes: \itemize{
 The attributes are hidden in the print-function for a clearer presentation.
 }
 \description{
-Converts TL-moments to distribution parameters. By now, conversions only for GEV, GUMBEL, and GPD
+Converts TL-moments to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
 are available. Important trimming options are calculated through known formulas (see references for
 some of them), other options are calculated through a numerical optimization. In this case there's a
 warning informing about the experimental nature of this feature.
 }
 \examples{
-xmat <- matrix(evd::rgev(100, shape = .2), nc = 4)
+xmat <- matrix(rgev(100, shape = .2), nc = 4)
 xvec <- xmat[, 3]
 xlist <- lapply(1L:ncol(xmat), function(i) xmat[, i])
 xdat <- data.frame(
@@ -42,7 +42,7 @@ tlm <- TLMoments(xvec, leftrim = 0, rightrim = 0)
 parameters(tlm, "gev")
 
 tlm <- TLMoments(xmat, leftrim = 1, rightrim = 1)
-parameters(tlm, "gumbel")
+parameters(tlm, "gum")
 
 tlm <- TLMoments(xlist)
 parameters(tlm, "gpd")
@@ -53,36 +53,44 @@ parameters(tlm, "gev")
 tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
 parameters(tlm, "gev")
 
-library(magrittr)
-TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) \%>\%
- parameters("gpd")
+tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
+parameters(tlm, "ln3")
 
-TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) \%>\%
- parameters("gpd", u = 10)
-
-TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 1) \%>\%
- parameters("gpd")
-
-TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 2) \%>\%
- parameters("gpd")
 
 # Numerical calculation
-tlm <- TLMoments(evd::rgumbel(1000, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
-parameters(tlm, "gumbel")
 
-tlm <- TLMoments(evd::rgumbel(1000, loc = 5000, scale = 2000), leftrim = 1, rightrim = 4)
-parameters(tlm, "gumbel")
+tlm <- TLMoments(rgum(200, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
+parameters(tlm, "gum")
 
-tlm <- TLMoments(evd::rgev(1000, loc = 10, scale = 5, shape = .4), leftrim = 0, rightrim = 5)
+tlm <- TLMoments(rgev(200, loc = 10, scale = 5, shape = .4), leftrim = 2, rightrim = 2)
 parameters(tlm, "gev")
 
-# Its A LOT slower:
+tlm <- TLMoments(rln3(200, loc = 3, scale = 1.5, shape = 2), leftrim = 0, rightrim = 1)
+parameters(tlm, "ln3")
+
+# It's A LOT slower:
 # system.time(replicate(500,
-#   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 1), "gumbel")
+#   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
 # ))[3]
 # system.time(replicate(500,
-#   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 2), "gumbel")
+#   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
 # ))[3]
+
+
+# Using magrittr
+library(magrittr)
+
+TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) \%>\%
+ parameters("gpd")
+
+TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) \%>\%
+ parameters("gpd", u = 10)
+
+TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 1) \%>\%
+ parameters("gpd")
+
+TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 2) \%>\%
+ parameters("gpd")
 
 }
 \references{
@@ -94,4 +102,6 @@ Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using
 
 Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 }
-
+\seealso{
+\code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{quantiles}}, \code{\link{summary.parameters}}, \code{\link{as.parameters}}. Built-in distributions: \code{\link{pgev}}, \code{\link{pgum}}, \code{\link{pgpd}}, \code{\link{pln3}}.
+}

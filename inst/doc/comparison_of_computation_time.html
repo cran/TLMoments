@@ -232,7 +232,7 @@ hr {
 
 <pre><code class="r">n &lt;- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
 sapply(n, function(nn) {
-  x &lt;- evd::rgev(nn)
+  x &lt;- rgev(nn)
   check &lt;- lmomco::lmoms(x, 4)$lambdas
   sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;), function(comp) {
     isTRUE(all.equal(TLMoment(x, order = 1:4, computation.method = comp), check, check.attributes = FALSE))
@@ -257,7 +257,7 @@ sapply(n, function(nn) {
 )
 
 # n = 50
-datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist &lt;- replicate(200, rgev(50), simplify = FALSE)
 
 do.call(&quot;rbind&quot;, lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -267,9 +267,9 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 <pre><code>##                     elapsed
 ## TLMoments_direct      0.043
 ## TLMoments_pwm         0.037
-## TLMoments_recursive   0.033
-## lmomco                0.634
-## Lmoments              0.054
+## TLMoments_recursive   0.034
+## lmomco                0.608
+## Lmoments              0.053
 </code></pre>
 
 <pre><code class="r"># n = 1000
@@ -281,10 +281,10 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                     elapsed
-## TLMoments_direct      0.181
-## TLMoments_pwm         0.123
-## TLMoments_recursive   0.057
-## lmomco               11.880
+## TLMoments_direct      0.163
+## TLMoments_pwm         0.114
+## TLMoments_recursive   0.053
+## lmomco               11.900
 ## Lmoments              0.120
 </code></pre>
 
@@ -301,7 +301,7 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 )
 
 # n = 50
-datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist &lt;- replicate(200, rgev(50), simplify = FALSE)
 
 do.call(&quot;rbind&quot;, lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -317,7 +317,7 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code class="r"># n = 1000
-datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+datalist &lt;- replicate(200, rgev(1000), simplify = FALSE)
 
 do.call(&quot;rbind&quot;, lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -325,50 +325,53 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                     elapsed
-## TLMoments_direct      0.137
+## TLMoments_direct      0.128
 ## TLMoments_pwm         0.084
-## TLMoments_recursive   0.023
-## lmom                  0.010
-## Lmoments              0.087
+## TLMoments_recursive   0.024
+## lmom                  0.009
+## Lmoments              0.086
 </code></pre>
 
-<p>For smaller data vectors our implementation is the fastest, but with longer data vectors <code>lmom::samlmu</code> excels. </p>
+<p>For smaller data vectors our <em>recursive</em>-implementation is as fast as <code>lmom::samlmu</code>, but with longer data vectors <code>lmom::samlmu</code> excels. </p>
 
 <h1>Calculation of TL-moments</h1>
 
 <p>First we check, if all approaches give the same results (lmomco::Tlmoms is added as comparison)</p>
 
 <pre><code class="r">n &lt;- c(25, 50, 100, 150, 200, 500, 1000, 10000)
+names(n) &lt;- paste(&quot;n&quot;, n, sep = &quot;=&quot;)
 sapply(n, function(nn) {
-  x &lt;- evd::rgev(nn)
+  x &lt;- rgev(nn)
   check &lt;- lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)$lambdas
   sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;, &quot;recurrence&quot;), function(comp) {
-    isTRUE(all.equal(TLMoment(x, order = 1:4, rightrim = 1, computation.method = comp), check, check.attributes = FALSE))
+    tlm &lt;- suppressWarnings(TLMoments(x, rightrim = 1, computation.method = comp)$lambdas)
+    isTRUE(all.equal(tlm, check, check.attributes = FALSE))
   })
 })
 </code></pre>
 
-<pre><code>##            [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]
-## direct     TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
-## pwm        TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
-## recursive  TRUE TRUE TRUE TRUE FALSE FALSE FALSE FALSE
-## recurrence TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+<pre><code>##            n=25 n=50 n=100 n=150 n=200 n=500 n=1000 n=10000
+## direct     TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
+## pwm        TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
+## recursive  TRUE TRUE  TRUE  TRUE FALSE FALSE  FALSE   FALSE
+## recurrence TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
 </code></pre>
 
 <pre><code class="r">sapply(n, function(nn) {
-  x &lt;- evd::rgev(nn)
+  x &lt;- rgev(nn)
   check &lt;- lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)$lambdas
   sapply(c(&quot;direct&quot;, &quot;pwm&quot;, &quot;recursive&quot;, &quot;recurrence&quot;), function(comp) {
-    isTRUE(all.equal(TLMoment(x, order = 1:4, leftrim = 2, rightrim = 4, computation.method = comp), check, check.attributes = FALSE))
+    tlm &lt;- suppressWarnings(TLMoments(x, leftrim = 2, rightrim = 4, computation.method = comp)$lambdas)
+    isTRUE(all.equal(tlm, check, check.attributes = FALSE))
   })
 })
 </code></pre>
 
-<pre><code>##            [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]
-## direct     TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
-## pwm        TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
-## recursive  TRUE TRUE TRUE TRUE FALSE FALSE FALSE FALSE
-## recurrence TRUE TRUE TRUE TRUE  TRUE  TRUE  TRUE  TRUE
+<pre><code>##            n=25 n=50 n=100 n=150 n=200 n=500 n=1000 n=10000
+## direct     TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
+## pwm        TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
+## recursive  TRUE TRUE  TRUE  TRUE FALSE FALSE  FALSE   FALSE
+## recurrence TRUE TRUE  TRUE  TRUE  TRUE  TRUE   TRUE    TRUE
 </code></pre>
 
 <p>The <em>recursive approach</em> fails when n exceeds 150. All other implementations give the same results. </p>
@@ -381,7 +384,7 @@ sapply(n, function(nn) {
 )
 
 # n = 50
-datalist &lt;- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist &lt;- replicate(200, rgev(50), simplify = FALSE)
 
 do.call(&quot;rbind&quot;, lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -389,14 +392,14 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                      elapsed
-## TLMoments_direct       0.093
-## TLMoments_pwm          0.041
-## TLMoments_recurrence   0.036
-## lmomco                 0.632
+## TLMoments_direct       0.092
+## TLMoments_pwm          0.039
+## TLMoments_recurrence   0.035
+## lmomco                 0.596
 </code></pre>
 
 <pre><code class="r"># n = 1000
-datalist &lt;- replicate(200, evd::rgev(1000), simplify = FALSE)
+datalist &lt;- replicate(200, rgev(1000), simplify = FALSE)
 
 do.call(&quot;rbind&quot;, lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -404,10 +407,10 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                      elapsed
-## TLMoments_direct       1.273
-## TLMoments_pwm          0.151
-## TLMoments_recurrence   0.057
-## lmomco                12.251
+## TLMoments_direct       1.242
+## TLMoments_pwm          0.147
+## TLMoments_recurrence   0.056
+## lmomco                11.868
 </code></pre>
 
 <pre><code class="r">possib &lt;- list(
@@ -426,10 +429,10 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                      elapsed
-## TLMoments_direct       0.099
-## TLMoments_pwm          0.047
-## TLMoments_recurrence   0.038
-## lmomco                 0.590
+## TLMoments_direct       0.091
+## TLMoments_pwm          0.045
+## TLMoments_recurrence   0.036
+## lmomco                 0.530
 </code></pre>
 
 <pre><code class="r"># n = 1000
@@ -441,10 +444,10 @@ do.call(&quot;rbind&quot;, lapply(possib, function(f) {
 </code></pre>
 
 <pre><code>##                      elapsed
-## TLMoments_direct       1.292
-## TLMoments_pwm          0.260
-## TLMoments_recurrence   0.074
-## lmomco                12.024
+## TLMoments_direct       1.278
+## TLMoments_pwm          0.250
+## TLMoments_recurrence   0.072
+## lmomco                11.830
 </code></pre>
 
 <p>In this calculations the <em>recurrence approach</em> clearly outperforms the other implementations. Calculation using <em>probabilty-weighted moments</em> is relatively fast, but using the <em>direct calculation</em> should be avoided, regarding calculation speed. This package&#39;s implementation is clearly faster than those in <code>lmomco</code>. </p>

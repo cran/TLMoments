@@ -9,6 +9,7 @@
 #' set to 0:(length(x)-1).
 #' @param ... additional arguments.
 #' @return a PWMs-object, see PWMs-help
+#' @seealso \code{\link{PWMs}}
 #' @examples
 #' xmat <- cbind(c(0.12, .41, .38, .33), c(.05, 0.28, .25, .22))
 #' xvec <- xmat[, 1]

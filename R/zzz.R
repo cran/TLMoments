@@ -1,4 +1,4 @@
-#' @import stats Rcpp evd
+#' @import stats Rcpp
 .onAttach <- function(libname, pkgname) {
-  #packageStartupMessage(">> TLMoments version 0.6.3.1")
+  #packageStartupMessage(">> TLMoments version 0.7.2.1")
 }

@@ -2,8 +2,8 @@
 % Please edit documentation in R/est_paramcov.R
 \name{est_paramcov}
 \alias{est_paramcov}
-\alias{est_paramcov.matrix}
 \alias{est_paramcov.numeric}
+\alias{est_paramcov.matrix}
 \alias{est_paramcov.parameters}
 \title{Estimate the covariance matrix of parameter estimations}
 \usage{
@@ -13,7 +13,7 @@ est_paramcov(x, distr, leftrim = 0L, rightrim = 0L, ...)
   np.cov = FALSE, ...)
 
 \method{est_paramcov}{matrix}(x, distr, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, ...)
+  np.cov = FALSE, reg.weights = NULL, ...)
 
 \method{est_paramcov}{parameters}(x, distr = attr(x, "distribution"),
   leftrim = attr(x, "source")$trimmings[1], rightrim = attr(x,
@@ -30,37 +30,39 @@ est_paramcov(x, distr, leftrim = 0L, rightrim = 0L, ...)
 
 \item{np.cov}{boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).}
 
+\item{reg.weights}{numeric vector of weights for regionalized TLMoments.}
+
 \item{set.n}{hypothetical data length n if theoretical values are given.}
 }
 \value{
 numeric matrix
 }
 \description{
-description not done yet
+Internal function. Use \link{est_cov}. Description not done yet.
 }
 \examples{
 ### Numeric vectors
-x <- evd::rgev(500, shape = .2)
+x <- rgev(500, shape = .2)
 
 parameters(TLMoments(x), "gev")
 est_paramcov(x, "gev", 0, 0)
-#cov(t(replicate(10000, parameters(TLMoments(evd::rgev(500, shape = .2)), "gev"))))
+#cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2)), "gev"))))
 
 parameters(TLMoments(x, rightrim = 1), "gev")
 est_paramcov(x, "gev", 0, 1)
-#cov(t(replicate(10000, parameters(TLMoments(evd::rgev(500, shape = .2), rightrim = 1), "gev"))))
+#cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev"))))
 
 parameters(TLMoments(x, rightrim = 2), "gev")
 est_paramcov(x, "gev", 0, 2)
-#cov(t(replicate(10000, parameters(TLMoments(evd::rgev(500, shape = .2), rightrim = 2), "gev"))))
+#cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 2), "gev"))))
 
 ### Numeric matrices
-x <- matrix(evd::rgev(600, shape = .2), nc = 3)
+x <- matrix(rgev(600, shape = .2), nc = 3)
 
 parameters(TLMoments(x), "gev")
 est_paramcov(x, "gev", 0, 0)
 #cov(t(replicate(5000,
-#  as.vector(parameters(TLMoments(matrix(evd::rgev(600, shape = .2), nc = 3)), "gev")))
+#  as.vector(parameters(TLMoments(matrix(rgev(600, shape = .2), nc = 3)), "gev")))
 #))
 
 ### parameters-object
@@ -71,4 +73,3 @@ est_paramcov(x, leftrim = 0, rightrim = 0, set.n = 100)
 # distr-argument can be neglected
 
 }
-

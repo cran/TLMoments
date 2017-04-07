@@ -34,7 +34,7 @@ of TL-moments and TL-moment ratios.
 }
 \examples{
 tlm <- TLMoments(
-  matrix(evd::rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
+  matrix(rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
   leftrim = 0, rightrim = 1)
 regionalize(tlm)
 parameters(regionalize(tlm), "gev")
@@ -43,10 +43,9 @@ quantiles(parameters(regionalize(tlm, reg.lambdas = FALSE), "gev"), c(.99, .999)
 
 # With magrittr
 library(magrittr)
-matrix(evd::rgev(200, shape = .3), nc = 5) \%>\%
+matrix(rgev(200, shape = .3), nc = 5) \%>\%
  TLMoments(rightrim = 1) \%>\%
  regionalize \%>\%
  parameters("gev") \%>\%
  quantiles(c(.99, .999))
 }
-

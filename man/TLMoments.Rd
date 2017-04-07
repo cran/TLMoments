@@ -2,11 +2,11 @@
 % Please edit documentation in R/TLMoments.R
 \name{TLMoments}
 \alias{TLMoments}
-\alias{TLMoments.PWMs}
-\alias{TLMoments.data.frame}
-\alias{TLMoments.list}
-\alias{TLMoments.matrix}
 \alias{TLMoments.numeric}
+\alias{TLMoments.matrix}
+\alias{TLMoments.list}
+\alias{TLMoments.data.frame}
+\alias{TLMoments.PWMs}
 \alias{TLMoments.parameters}
 \title{Trimmed L-moments}
 \usage{
@@ -88,6 +88,7 @@ PWMs, as.PWMs.
 
 \item \code{parameters}: TLMoments for parameters-object
 }}
+
 \examples{
 # Generating data sets:
 xmat <- matrix(rnorm(100), nc = 4)
@@ -144,4 +145,6 @@ Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. J
 
 Hosking, J. R. M., & Balakrishnan, N. (2015). A uniqueness result for L-estimators, with applications to L-moments. Statistical Methodology, 24, 69-80.
 }
-
+\seealso{
+\code{\link{PWMs}}, \code{\link{parameters}}, \code{\link{quantiles}}, \code{\link{summary.TLMoments}}, \code{\link{as.TLMoments}}
+}

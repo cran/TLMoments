@@ -77,7 +77,7 @@ PWMs.matrix <- function(x, max.order = 4L, na.rm = FALSE, ...) {
   attr(out, "order") <- 0L:max.order
   attr(out, "source") <- list(func = "PWMs",
                               data = x,
-                              n = nrow(x),
+                              n = apply(x, 2, function(y) sum(!is.na(y))),
                               formula = NA)
   class(out) <- c("PWMs", "matrix")
   out

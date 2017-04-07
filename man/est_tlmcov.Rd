@@ -2,9 +2,9 @@
 % Please edit documentation in R/est_tlmcov.R
 \name{est_tlmcov}
 \alias{est_tlmcov}
-\alias{est_tlmcov.TLMoments}
-\alias{est_tlmcov.matrix}
 \alias{est_tlmcov.numeric}
+\alias{est_tlmcov.matrix}
+\alias{est_tlmcov.TLMoments}
 \title{Estimate the covariance matrix of TL-moments estimations}
 \usage{
 est_tlmcov(x, leftrim = 0L, rightrim = 0L, order = 1:3, distr = NULL,
@@ -14,7 +14,8 @@ est_tlmcov(x, leftrim = 0L, rightrim = 0L, order = 1:3, distr = NULL,
   distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, ...)
 
 \method{est_tlmcov}{matrix}(x, leftrim = 0L, rightrim = 0L, order = 1:3,
-  distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, ...)
+  distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, reg.weights = NULL,
+  ...)
 
 \method{est_tlmcov}{TLMoments}(x, leftrim = attr(x, "leftrim"),
   rightrim = attr(x, "leftrim"), order = attr(x, "order"), distr = NULL,
@@ -35,23 +36,25 @@ est_tlmcov(x, leftrim = 0L, rightrim = 0L, order = 1:3, distr = NULL,
 
 \item{...}{additional arguments, ignored.}
 
+\item{reg.weights}{numeric vector of weights for regionalized TLMoments.}
+
 \item{set.n}{hypothetical data length n if theoretical values are given.}
 }
 \value{
 a list of numeric matrices (if \code{lambda.cov} and \code{ratio.cov} are TRUE (default)), or a single matrix.
 }
 \description{
-description not done yet
+Internal function. Use \link{est_cov}. Description not done yet.
 }
 \examples{
 ### Numeric vectors
-x <- evd::rgev(500, loc = 10, scale = 5, shape = .1)
+x <- rgev(500, loc = 10, scale = 5, shape = .1)
 
 est_tlmcov(x)
 est_tlmcov(x, order = 2:3)
 est_tlmcov(x, rightrim = 1, order = 4:5)
-# cov(t(replicate(10000, TLMoments(evd::rgev(500, loc = 10, scale = 5, shape = .1))$lambdas)))
-# cov(t(replicate(10000, TLMoments(evd::rgev(500, loc = 10, scale = 5, shape = .1))$ratios)))
+# cov(t(replicate(10000, TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$lambdas)))
+# cov(t(replicate(10000, TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$ratios)))
 
 est_tlmcov(x, ratio.cov = FALSE)
 est_tlmcov(x, lambda.cov = FALSE)
@@ -60,26 +63,26 @@ est_tlmcov(x, distr = "gev")
 
 est_tlmcov(x, leftrim = 0, rightrim = 1)
 # cov(t(replicate(10000,
-#  TLMoments(evd::rgev(500, loc = 10, scale = 5, shape = .1), 0, 1, 3)$lambdas
+#  TLMoments(rgev(500, loc = 10, scale = 5, shape = .1), 0, 1, 3)$lambdas
 # )))
 # cov(t(replicate(10000,
-#  TLMoments(evd::rgev(500, loc = 10, scale = 5, shape = .1), 0, 1, 3)$ratios
+#  TLMoments(rgev(500, loc = 10, scale = 5, shape = .1), 0, 1, 3)$ratios
 # )))
 
 ### Numeric matrices
-x <- matrix(evd::rgev(600), nc = 3)
+x <- matrix(rgev(600), nc = 3)
 
 est_tlmcov(x)
 est_tlmcov(x, order = 3:4)
-# cov(t(replicate(10000, as.vector(TLMoments(matrix(evd::rgev(600), nc = 3))$lambdas[3:4, ]))))
-# cov(t(replicate(10000, as.vector(TLMoments(matrix(evd::rgev(600), nc = 3))$ratios[3:4, ]))))
+# cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[3:4, ]))))
+# cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[3:4, ]))))
 
 est_tlmcov(x, ratio.cov = FALSE)
 est_tlmcov(x, lambda.cov = FALSE)
 
-est_tlmcov(x, order = 2:3, distr = "gev")
-# cov(t(replicate(10000, as.vector(TLMoments(matrix(evd::rgev(600), nc = 3))$lambdas[2:3, ]))))
-# cov(t(replicate(10000, as.vector(TLMoments(matrix(evd::rgev(600), nc = 3))$ratios[2:3, ]))))
+TLMoments:::est_tlmcov(x, order = 2:3, distr = "gev")
+# cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[2:3, ]))))
+# cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[2:3, ]))))
 
 ### TLMoments-object (theoretical calculation)
 tlm <- TLMoments(as.parameters(loc = 10, scale = 5, shape = .1, distr = "gev"), 0, 1)
@@ -88,4 +91,3 @@ est_tlmcov(tlm, distr = "gev", set.n = 100, ratio.cov = FALSE)
 est_tlmcov(tlm, distr = "gev", set.n = 100, lambda.cov = FALSE)
 
 }
-

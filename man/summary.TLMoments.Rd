@@ -28,23 +28,25 @@ It is printed with \code{print.summary.TLMoments}.
 Calculating and printing of summary statistics to a given TLMoments-object.
 }
 \examples{
-tlm <- TLMoments(evd::rgev(100, shape = .2))
+tlm <- TLMoments(rgev(100, shape = .2))
 summary(tlm)
 
-tlm <- TLMoments(evd::rgev(100, shape = .2), rightrim = 1)
+tlm <- TLMoments(rgev(100, shape = .2), rightrim = 1)
+summary(tlm, select = 3:4)
+
+tlm <- TLMoments(rgev(100, shape = .2), max.order = 2, rightrim = 1)
 summary(tlm)
 
-tlm <- TLMoments(evd::rgev(100, shape = .2), max.order = 2, rightrim = 1)
-summary(tlm)
+tlm <- TLMoments(matrix(rgev(100, shape = .2), nc = 2))
+summary(tlm, select = 3:4)
 
-tlm <- TLMoments(matrix(evd::rgev(100, shape = .2), nc = 2))
-summary(tlm)
-
-tlm <- TLMoments(matrix(evd::rgev(100, shape = .2), nc = 2), max.order = 3)
+tlm <- TLMoments(matrix(rgev(100, shape = .2), nc = 2), max.order = 3)
 summary(tlm, ci = .95, distr = "gev")
 
 tlm <- as.TLMoments(c(15, 5, 1.3))
-summary(tlm, distr = "gev", n = 100)
+summary(tlm, distr = "gev", set.n = 100)
 
 }
-
+\seealso{
+\code{\link{TLMoments}}, \code{\link{est_cov}}
+}

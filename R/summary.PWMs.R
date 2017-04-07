@@ -12,13 +12,16 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.PWMs}.
+#' @seealso \code{\link{PWMs}}, \code{\link{est_cov}}
 #' @examples
-#' x <- cbind(evd::rgev(100, shape = .2), evd::rgev(100, shape = .2))
+#' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
 #'
 #' summary(PWMs(x[, 1]))
 #' summary(PWMs(x[, 1]), distr = "gev")
+#' summary(PWMs(x[, 1]), distr = "gev", select = 1:2)
 #'
 #' summary(PWMs(x))
+#' summary(PWMs(x), select = 1:2)
 #'
 #' @method summary PWMs
 #' @export
@@ -36,12 +39,13 @@ summary.PWMs.numeric <- function(object, ci.level = .9, ...) {
 
   # param ci
   cov <- est_cov(object, ...)
-  pwm_ci <- object %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- names(object) %in% colnames(cov)
+  pwm_ci <- object[sel] %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     pwm = object,
     ci.level = ci.level,
-    ci = cbind(LCL = pwm_ci[, 1], pwm = object, UCL = pwm_ci[, 2]),
+    ci = cbind(LCL = pwm_ci[, 1], pwm = object[sel], UCL = pwm_ci[, 2]),
     cov = cov
   )
 
@@ -56,12 +60,13 @@ summary.PWMs.matrix <- function(object, ci.level = .9, ...) {
 
   # lambda ci
   cov <- est_cov(object, ...)
-  pwm_ci <- as.vector(object) %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- paste(rownames(object), col(object), sep = "_") %in% colnames(cov)
+  pwm_ci <- as.vector(object[sel]) %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     pwm = object,
     ci.level = ci.level,
-    ci = cbind(LCL = pwm_ci[, 1], pwm = as.vector(object), UCL = pwm_ci[, 2]),
+    ci = cbind(LCL = pwm_ci[, 1], pwm = as.vector(object[sel]), UCL = pwm_ci[, 2]),
     cov = cov
   )
 

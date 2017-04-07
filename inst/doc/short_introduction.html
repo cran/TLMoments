@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>TLMoments</title>
+<title>Short Introduction</title>
 
 <script type="text/javascript">
 window.onload = function() {
@@ -201,43 +201,41 @@ hr {
 </head>
 
 <body>
-<h1>TLMoments</h1>
-
-<p><code>TLMoments</code> is a set of functions which main functionality is the calculation of Trimmed L-moments and their parameter and quantile estimates. One of the main goals is to reduce computation time compared to existing implementations (like <code>lmomco</code>, <code>Lmoments</code>, <code>Lmom</code>), therefore the core functions are written in C++ (see vignette &ldquo;comparison of computation time&rdquo; for speed comparisons). To ensure an easy usage, the package only contains a small set of functions. This vignette gives a short introduction to the most important ones and their usage. </p>
-
 <h1>Short Introduction</h1>
+
+<p><code>TLMoments</code> is a set of functions whose main functionality is the calculation of Trimmed L-moments and their parameter and quantile estimates. One of the goals is to reduce computation time compared to existing implementations (in packages like <code>lmomco</code>, <code>Lmoments</code>, <code>Lmom</code>), therefore the core functions are written in C++ (see vignette &ldquo;comparison of computation time&rdquo; for speed comparisons). Furthermore, the package expands the combinations of trimmings that can be used to estimate distribution parameters in comparison to existing packages (which mainly supports parameter estimation with L-moments). To ensure an easy usage, the package only contains a small set of functions. This vignette gives a short introduction to the most important ones and their usage. </p>
 
 <h2>Calculation of empirical TL-moments, parameter and quantile estimates.</h2>
 
-<p>First we have a look at the basic functionality of calculating TL-moments and parameter and quantile estimates. Let assume we have a simple data vector:</p>
+<p>First we have a look at the basic functionality of calculating TL-moments and parameter and quantile estimates. Let assume we have a simple random data vector generated from a GEV distribution:</p>
 
-<pre><code class="r">xvec &lt;- evd::rgev(100, loc = 10, scale = 5, shape = .2)
+<pre><code class="r">xvec &lt;- rgev(100, loc = 10, scale = 5, shape = .2)
 </code></pre>
 
-<p>To calculate TL-moments we can use the function <code>TLMoments</code> with arguments <code>leftrim</code>, <code>rightrim</code>, and <code>max.order</code> (generating an object of class <code>TLMoments</code>): </p>
+<p>TL-moments are calculated by the function <code>TLMoments</code> with arguments <code>leftrim</code>, <code>rightrim</code>, and <code>max.order</code> (generating an object of class <code>TLMoments</code>): </p>
 
 <pre><code class="r">TLMoments(xvec)
 </code></pre>
 
 <pre><code>## $lambdas
-##        L1        L2        L3        L4 
-## 16.126145  5.718887  2.565133  2.203902 
+##         L1         L2         L3         L4 
+## 14.0173473  4.0593659  1.3221238  0.9849437 
 ## 
 ## $ratios
 ##        T1        T2        T3        T4 
-##        NA 0.3546345 0.4485372 0.3853725
+##        NA 0.2895959 0.3256971 0.2426349
 </code></pre>
 
 <pre><code class="r">TLMoments(xvec, leftrim = 0, rightrim = 1, max.order = 2)
 </code></pre>
 
 <pre><code>## $lambdas
-##        L1        L2 
-## 10.407258  2.365315 
+##       L1       L2 
+## 9.957981 2.052932 
 ## 
 ## $ratios
 ##        T1        T2 
-##        NA 0.2272755
+##        NA 0.2061594
 </code></pre>
 
 <p>We can generate parameters estimates by putting a <code>TLMoments</code>-object to the function <code>parameters</code> and specifying argument <code>distr</code>: </p>
@@ -247,7 +245,7 @@ parameters(tlm, distr = &quot;gev&quot;)
 </code></pre>
 
 <pre><code>##        loc      scale      shape 
-## 10.2584823  4.8724640  0.3929233
+## 10.1085022  4.5048954  0.2296688
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xvec, rightrim = 1)
@@ -255,7 +253,7 @@ parameters(tlm, distr = &quot;gev&quot;)
 </code></pre>
 
 <pre><code>##        loc      scale      shape 
-## 10.6773283  5.2712489  0.1815583
+## 10.1635352  4.5531879  0.1981091
 </code></pre>
 
 <p>This generates an object of class <code>parameters</code>, which can be transmitted to <code>quantiles</code> to calculate quantile estimations: </p>
@@ -264,8 +262,8 @@ parameters(tlm, distr = &quot;gev&quot;)
 quantiles(parameters(tlm, distr = &quot;gev&quot;), c(.9, .99, .999))
 </code></pre>
 
-<pre><code>##       0.9      0.99     0.999 
-##  27.88089  73.44206 184.98014
+<pre><code>##      0.9     0.99    0.999 
+## 23.38218 46.91199 86.33208
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xvec, rightrim = 1)
@@ -273,49 +271,49 @@ quantiles(parameters(tlm, distr = &quot;gev&quot;), c(.9, .99, .999))
 </code></pre>
 
 <pre><code>##      0.9     0.99    0.999 
-## 25.32957 48.57354 83.39360
+## 23.07477 44.35414 77.48191
 </code></pre>
 
 <h2>Support for different data types:</h2>
 
-<p>These basic functions can not only be used for simple vectors of data, but for matrix-type data, list-type data, and data.frames as well. To demonstrate this, let&#39;s generate sample data of these four types: </p>
+<p>These three functions, <code>TLMoments</code>, <code>parameters</code>, and <code>quantiles</code>, provide the main functionality of the package. In the code above we used single data vectors only, but the same functions can be used for data matrices, lists, and data.frames as well. To demonstrate this, let&#39;s generate sample data of these four types: </p>
 
-<pre><code class="r">xmat &lt;- matrix(evd::rgev(100), nc = 4)
+<pre><code class="r">xmat &lt;- matrix(rgev(100), nc = 4)
 xvec &lt;- xmat[, 3]
 xlist &lt;- lapply(1L:ncol(xmat), function(i) xmat[, i])
 xdat &lt;- data.frame(station = rep(1:4, each = 25), hq = as.vector(xmat))
 </code></pre>
 
-<p>The type of <code>lambdas</code> and <code>ratios</code> returned by <code>TLMoments</code> matches the input type: </p>
+<p>Note that the type of the dimensions <code>lambdas</code> and <code>ratios</code> returned by <code>TLMoments</code> matches the input type: </p>
 
 <pre><code class="r">TLMoments(xvec, leftrim = 0, rightrim = 1)
 </code></pre>
 
 <pre><code>## $lambdas
-##         L1         L2         L3         L4 
-## 0.29096370 0.33247496 0.06313653 0.02529157 
+##           L1           L2           L3           L4 
+## -0.118853990  0.345356673  0.001151761  0.056987284 
 ## 
 ## $ratios
-##         T1         T2         T3         T4 
-##         NA 1.14266816 0.18989861 0.07607061
+##           T1           T2           T3           T4 
+##           NA -2.905722163  0.003334991  0.165009942
 </code></pre>
 
 <pre><code class="r">TLMoments(xmat, leftrim = 0, rightrim = 1)
 </code></pre>
 
 <pre><code>## $lambdas
-##           [,1]        [,2]       [,3]         [,4]
-## L1  0.33880926 -0.12420371 0.29096370  0.211534716
-## L2  0.40994525  0.53657150 0.33247496  0.391885938
-## L3 -0.05142481 -0.07326315 0.06313653  0.071872452
-## L4  0.06086067  0.05417065 0.02529157 -0.007922799
+##          [,1]        [,2]         [,3]        [,4]
+## L1 0.02344548 -0.23776608 -0.118853990 -0.11898376
+## L2 0.30767794  0.42364590  0.345356673  0.45702513
+## L3 0.03664748 -0.02546122  0.001151761  0.10543062
+## L4 0.06705632  0.08328394  0.056987284  0.08181004
 ## 
 ## $ratios
-##          [,1]       [,2]       [,3]       [,4]
-## T1         NA         NA         NA         NA
-## T2  1.2099588 -4.3200922 1.14266816  1.8525845
-## T3 -0.1254431 -0.1365394 0.18989861  0.1834015
-## T4  0.1484605  0.1009570 0.07607061 -0.0202171
+##          [,1]        [,2]         [,3]       [,4]
+## T1         NA          NA           NA         NA
+## T2 13.1231242 -1.78177604 -2.905722163 -3.8410715
+## T3  0.1191099 -0.06010024  0.003334991  0.2306889
+## T4  0.2179432  0.19658857  0.165009942  0.1790056
 </code></pre>
 
 <pre><code class="r">TLMoments(xlist, leftrim = 0, rightrim = 1)
@@ -323,56 +321,56 @@ xdat &lt;- data.frame(station = rep(1:4, each = 25), hq = as.vector(xmat))
 
 <pre><code>## $lambdas
 ## $lambdas[[1]]
-##          L1          L2          L3          L4 
-##  0.33880926  0.40994525 -0.05142481  0.06086067 
+##         L1         L2         L3         L4 
+## 0.02344548 0.30767794 0.03664748 0.06705632 
 ## 
 ## $lambdas[[2]]
 ##          L1          L2          L3          L4 
-## -0.12420371  0.53657150 -0.07326315  0.05417065 
+## -0.23776608  0.42364590 -0.02546122  0.08328394 
 ## 
 ## $lambdas[[3]]
-##         L1         L2         L3         L4 
-## 0.29096370 0.33247496 0.06313653 0.02529157 
+##           L1           L2           L3           L4 
+## -0.118853990  0.345356673  0.001151761  0.056987284 
 ## 
 ## $lambdas[[4]]
-##           L1           L2           L3           L4 
-##  0.211534716  0.391885938  0.071872452 -0.007922799 
+##          L1          L2          L3          L4 
+## -0.11898376  0.45702513  0.10543062  0.08181004 
 ## 
 ## 
 ## $ratios
 ## $ratios[[1]]
 ##         T1         T2         T3         T4 
-##         NA  1.2099588 -0.1254431  0.1484605 
+##         NA 13.1231242  0.1191099  0.2179432 
 ## 
 ## $ratios[[2]]
-##         T1         T2         T3         T4 
-##         NA -4.3200922 -0.1365394  0.1009570 
+##          T1          T2          T3          T4 
+##          NA -1.78177604 -0.06010024  0.19658857 
 ## 
 ## $ratios[[3]]
-##         T1         T2         T3         T4 
-##         NA 1.14266816 0.18989861 0.07607061 
+##           T1           T2           T3           T4 
+##           NA -2.905722163  0.003334991  0.165009942 
 ## 
 ## $ratios[[4]]
 ##         T1         T2         T3         T4 
-##         NA  1.8525845  0.1834015 -0.0202171
+##         NA -3.8410715  0.2306889  0.1790056
 </code></pre>
 
 <pre><code class="r">TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
 </code></pre>
 
 <pre><code>## $lambdas
-##   station         L1        L2          L3           L4
-## 1       1  0.3388093 0.4099452 -0.05142481  0.060860673
-## 2       2 -0.1242037 0.5365715 -0.07326315  0.054170648
-## 3       3  0.2909637 0.3324750  0.06313653  0.025291574
-## 4       4  0.2115347 0.3918859  0.07187245 -0.007922799
+##   station          L1        L2           L3         L4
+## 1       1  0.02344548 0.3076779  0.036647475 0.06705632
+## 2       2 -0.23776608 0.4236459 -0.025461222 0.08328394
+## 3       3 -0.11885399 0.3453567  0.001151761 0.05698728
+## 4       4 -0.11898376 0.4570251  0.105430617 0.08181004
 ## 
 ## $ratios
-##   station        T2         T3          T4
-## 1       1  1.209959 -0.1254431  0.14846049
-## 2       2 -4.320092 -0.1365394  0.10095700
-## 3       3  1.142668  0.1898986  0.07607061
-## 4       4  1.852585  0.1834015 -0.02021710
+##   station        T2           T3        T4
+## 1       1 13.123124  0.119109857 0.2179432
+## 2       2 -1.781776 -0.060100243 0.1965886
+## 3       3 -2.905722  0.003334991 0.1650099
+## 4       4 -3.841072  0.230688882 0.1790056
 </code></pre>
 
 <p>This holds when parameter and quantile estimations are calculated: </p>
@@ -381,18 +379,18 @@ xdat &lt;- data.frame(station = rep(1:4, each = 25), hq = as.vector(xmat))
 parameters(tlm, &quot;gev&quot;)
 </code></pre>
 
-<pre><code>##       loc     scale     shape 
-## 0.2777838 0.6939624 0.3646478
+<pre><code>##         loc       scale       shape 
+## -0.01397485  0.80481126 -0.04136686
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xmat, leftrim = 0, rightrim = 1)
 parameters(tlm, &quot;gev&quot;)
 </code></pre>
 
-<pre><code>##             [,1]       [,2]      [,3]      [,4]
-## loc    0.5725407  0.1942973 0.2777838 0.2002232
-## scale  0.9604546  1.2536894 0.6939624 0.8225573
-## shape -0.3665712 -0.3965968 0.3646478 0.3516276
+<pre><code>##             [,1]        [,2]        [,3]       [,4]
+## loc   0.04889176 -0.05425236 -0.01397485 -0.1670314
+## scale 0.67814071  0.99798598  0.80481126  0.9185783
+## shape 0.21866118 -0.19640922 -0.04136686  0.4447258
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xlist, leftrim = 0, rightrim = 1)
@@ -401,47 +399,47 @@ parameters(tlm, &quot;gev&quot;)
 
 <pre><code>## [[1]]
 ##        loc      scale      shape 
-##  0.5725407  0.9604546 -0.3665712 
+## 0.04889176 0.67814071 0.21866118 
 ## 
 ## [[2]]
-##        loc      scale      shape 
-##  0.1942973  1.2536894 -0.3965968 
+##         loc       scale       shape 
+## -0.05425236  0.99798598 -0.19640922 
 ## 
 ## [[3]]
-##       loc     scale     shape 
-## 0.2777838 0.6939624 0.3646478 
+##         loc       scale       shape 
+## -0.01397485  0.80481126 -0.04136686 
 ## 
 ## [[4]]
-##       loc     scale     shape 
-## 0.2002232 0.8225573 0.3516276
+##        loc      scale      shape 
+## -0.1670314  0.9185783  0.4447258
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
 parameters(tlm, &quot;gev&quot;)
 </code></pre>
 
-<pre><code>##   station       loc     scale      shape
-## 1       1 0.5725407 0.9604546 -0.3665712
-## 2       2 0.1942973 1.2536894 -0.3965968
-## 3       3 0.2777838 0.6939624  0.3646478
-## 4       4 0.2002232 0.8225573  0.3516276
+<pre><code>##   station         loc     scale       shape
+## 1       1  0.04889176 0.6781407  0.21866118
+## 2       2 -0.05425236 0.9979860 -0.19640922
+## 3       3 -0.01397485 0.8048113 -0.04136686
+## 4       4 -0.16703142 0.9185783  0.44472579
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xvec, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, &quot;gev&quot;), c(.99, .999))
 </code></pre>
 
-<pre><code>##      0.99     0.999 
-##  8.559723 21.997221
+<pre><code>##    0.99   0.999 
+## 3.35734 4.82140
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xmat, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, &quot;gev&quot;), c(.99, .999))
 </code></pre>
 
-<pre><code>##           [,1]     [,2]      [,3]      [,4]
-## 0.99  2.707383 2.845484  8.559723  9.652509
-## 0.999 2.984347 3.151178 21.997221 24.400251
+<pre><code>##            [,1]     [,2]    [,3]     [,4]
+## 0.99   5.427518 2.968302 3.35734 13.74486
+## 0.999 10.991346 3.718393 4.82140 42.34384
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xlist, leftrim = 0, rightrim = 1)
@@ -449,34 +447,38 @@ quantiles(parameters(tlm, &quot;gev&quot;), c(.99, .999))
 </code></pre>
 
 <pre><code>## [[1]]
-##     0.99    0.999 
-## 2.707383 2.984347 
+##      0.99     0.999 
+##  5.427518 10.991346 
 ## 
 ## [[2]]
 ##     0.99    0.999 
-## 2.845484 3.151178 
+## 2.968302 3.718393 
 ## 
 ## [[3]]
-##      0.99     0.999 
-##  8.559723 21.997221 
+##    0.99   0.999 
+## 3.35734 4.82140 
 ## 
 ## [[4]]
-##      0.99     0.999 
-##  9.652509 24.400251
+##     0.99    0.999 
+## 13.74486 42.34384
 </code></pre>
 
 <pre><code class="r">tlm &lt;- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, &quot;gev&quot;), c(.99, .999))
 </code></pre>
 
-<pre><code>##   station     0.99     0.999
-## 1       1 2.707383  2.984347
-## 2       2 2.845484  3.151178
-## 3       3 8.559723 21.997221
-## 4       4 9.652509 24.400251
+<pre><code>##   station      0.99     0.999
+## 1       1  5.427518 10.991346
+## 2       2  2.968302  3.718393
+## 3       3  3.357340  4.821400
+## 4       4 13.744859 42.343836
 </code></pre>
 
-<h1>Calculations using theoretical TL-moments and parameters</h1>
+<h2>Distributions</h2>
+
+<p><code>TLMoments</code> offers functions (distributions, density, quantile, random number generation) for the generalized extreme value distribution (<code>gev</code>), Gumbel distribution (<code>gum</code>), generalized Pareto distribution (<code>gpd</code>), and three-parameter lognormal distribution (<code>ln3</code>) in the common <code>p|d|q|r</code>-syntax. The parameter (and quantile) estimation functionality works for all of them, but more complex functionality like estimation of the covariance matrix of parameter or quantile estimators only works for GEV by now. </p>
+
+<h2>Calculations using theoretical TL-moments and parameters</h2>
 
 <p>The functions <code>as.TLMoments</code> and <code>as.parameters</code> can be used to construct <code>TLMoments</code>- or <code>parameters</code>-objects of theoretical values (not calculated from data). These objects can be used in the same way like before (to convert between TL-moments and their parameters or to calculate the corresponding quantiles): </p>
 
@@ -544,11 +546,78 @@ quantiles(parameters(tlm, &quot;gev&quot;), c(.99, .999))
 ##        NA 0.2306924 0.1113701 0.1132056
 </code></pre>
 
-<p>Note, that we can simply use the <code>TLMoments</code>-function to calculate TL-moments corresponding to an <code>quantiles</code>-object. </p>
+<p>Note, that we can simply use the <code>TLMoments</code>-function to calculate TL-moments corresponding to a <code>parameters</code>-object. </p>
 
-<h1>Magrittr-Syntax</h1>
+<h2>Summary functions</h2>
 
-<p><code>TLMoments</code> is built to support the use in <code>magrittr</code>-Syntax. The nesting of functions can be written more readable as: </p>
+<p>Objects of type <code>TLMoments</code>, <code>parameters</code>, or <code>quantiles</code> (i.e. results from the functions of the same name) feature <code>summary</code>-functions, which give confidence intervals and an overview of the data. </p>
+
+<pre><code class="r">tlm &lt;- TLMoments(rgev(100), leftrim = 0, rightrim = 1)
+
+summary(tlm)
+</code></pre>
+
+<pre><code>## 1 data row(s) with n = 100.
+## TL(0,1) calculated. 
+## 
+## Approximate 0.9% confidence interval of TL moments: 
+##             LCL   lambda_hat        UCL
+## L1 -0.120675775  0.033253218 0.18718221
+## L2  0.353034660  0.397368875 0.44170309
+## L3 -0.031864235 -0.004586798 0.02269064
+## L4  0.005323102  0.024067309 0.04281152
+## Approximate 0.9% confidence interval of TL moment ratios: 
+##             LCL     tau_hat         UCL
+## T2 -43.08154521 11.94978699 66.98111919
+## T3  -0.08012055 -0.01154292  0.05703471
+## T4   0.01167740  0.06056667  0.10945594
+</code></pre>
+
+<pre><code class="r">summary(tlm, ci.level = .95, select = 3:4)
+</code></pre>
+
+<pre><code>## 1 data row(s) with n = 100.
+## TL(0,1) calculated. 
+## 
+## Approximate 0.95% confidence interval of TL moments: 
+##             LCL   lambda_hat        UCL
+## L3 -0.037089869 -0.004586798 0.02791627
+## L4  0.001732209  0.024067309 0.04640241
+## Approximate 0.95% confidence interval of TL moment ratios: 
+##             LCL    tau_hat       UCL
+## T3 -0.021148618 0.06056667 0.1422820
+## T4  0.002311506 0.06056667 0.1188218
+</code></pre>
+
+<pre><code class="r">summary(parameters(tlm, &quot;gev&quot;))
+</code></pre>
+
+<pre><code>## 1 data row(s) with n = 100.
+## TL(0,1) used to generate GEV parameters. 
+## 
+## Approximate 0.9% confidence interval of parameters: 
+##               LCL      param        UCL
+## loc   -0.01082746  0.1658265 0.34248044
+## scale  0.80458149  0.9296128 1.05464414
+## shape -0.23910542 -0.0768813 0.08534282
+</code></pre>
+
+<pre><code class="r">summary(quantiles(parameters(tlm, &quot;gev&quot;), .99))
+</code></pre>
+
+<pre><code>## 1 data row(s) with n = 100.
+## TL(0,1) used to generate GEV parameters to calculate 0.99 quantile estimates. 
+## 
+## Approximate 0.9% confidence interval of quantiles: 
+##           LCL quantile      UCL
+## 0.99 2.564796 3.767776 4.970755
+</code></pre>
+
+<p>At the moment, the summary functions does not work for data in lists or data.frames. </p>
+
+<h2>Magrittr syntax</h2>
+
+<p><code>TLMoments</code> is built to support the use in <code>magrittr</code> syntax. The nesting of functions can be written more readable as: </p>
 
 <pre><code class="r">library(magrittr)
 
@@ -557,8 +626,8 @@ TLMoments(xvec, leftrim = 0, rightrim = 1) %&gt;%
   quantiles(c(.99, .999))
 </code></pre>
 
-<pre><code>##      0.99     0.999 
-##  8.559723 21.997221
+<pre><code>##    0.99   0.999 
+## 3.35734 4.82140
 </code></pre>
 
 </body>

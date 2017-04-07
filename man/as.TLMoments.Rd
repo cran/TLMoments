@@ -2,10 +2,10 @@
 % Please edit documentation in R/as.TLMoments.R
 \name{as.TLMoments}
 \alias{as.TLMoments}
-\alias{as.TLMoments.data.frame}
-\alias{as.TLMoments.list}
-\alias{as.TLMoments.matrix}
 \alias{as.TLMoments.numeric}
+\alias{as.TLMoments.matrix}
+\alias{as.TLMoments.list}
+\alias{as.TLMoments.data.frame}
 \title{Convert vector or matrix to a TLMoments-object}
 \usage{
 as.TLMoments(x, ..., leftrim, rightrim, ratios)
@@ -57,6 +57,7 @@ The trimming has to be given using the \code{leftrim} and \code{rightrim} argume
 
 \item \code{data.frame}: as.TLMoments for numeric data.frames
 }}
+
 \examples{
 ### Vector or matrix as input
 xmat <- cbind(c(1, .2, .05), c(1, .2, .04), c(1.3, .3, .1))
@@ -97,4 +98,6 @@ parameters(as.TLMoments(xvec, ratios = TRUE), "gev")
 #lmomco::lmom2par(lmomco::vec2lmom(c(10, .2, -.05)), "gev")$para
 
 }
-
+\seealso{
+\code{\link{TLMoments}}
+}

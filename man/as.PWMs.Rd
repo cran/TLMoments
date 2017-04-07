@@ -2,10 +2,10 @@
 % Please edit documentation in R/as.PWMs.R
 \name{as.PWMs}
 \alias{as.PWMs}
-\alias{as.PWMs.data.frame}
-\alias{as.PWMs.list}
-\alias{as.PWMs.matrix}
 \alias{as.PWMs.numeric}
+\alias{as.PWMs.matrix}
+\alias{as.PWMs.list}
+\alias{as.PWMs.data.frame}
 \title{Convert to PWMs-object}
 \usage{
 as.PWMs(x, ..., order = NULL)
@@ -45,6 +45,7 @@ calculation of PWMs here. If PWMs should be calculated from data, use PWMs.
 
 \item \code{data.frame}: as.PWMs for numeric data.frames
 }}
+
 \examples{
 xmat <- cbind(c(0.12, .41, .38, .33), c(.05, 0.28, .25, .22))
 xvec <- xmat[, 1]
@@ -81,4 +82,6 @@ parameters(TLMoments(p), "gpd", u = 10)
 #TLMoments(p) # => error
 
 }
-
+\seealso{
+\code{\link{PWMs}}
+}

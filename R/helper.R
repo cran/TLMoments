@@ -16,7 +16,7 @@ select_computation <- function(leftrim, rightrim) {
 
 # calculate pseudo observations
 pseudo <- function(x, k) {
-  .Call('TLMoments_pseudo_C', PACKAGE = 'TLMoments', sort(na.omit(x)), k)[rank(x, na.last = "keep"), ]
+  as.matrix(.Call('TLMoments_pseudo_C', PACKAGE = 'TLMoments', sort(stats::na.omit(x)), k)[rank(x, na.last = "keep"), ])
 }
 
 # Functions for general error catching
@@ -31,19 +31,8 @@ are.numeric <- function(...) {
 `%-+%` <- function(a, b) { cbind(a - b, a + b) }
 
 
-calcTLMom <- function(maxr, s, t, qfunc) {
-  if (s < 0 | t < 0 | maxr < 1) stop("s and t have to be >= 0, maxr has to be >= 1")
-  if (!is.function(qfunc)) stop("Wrong qfunc")
-
-  vapply(1L:maxr, function(r) {
-    sum(vapply(0:(r-1), function(j) {
-      i <- integrate(function(u) u^(s+j) * (1-u)^(t+r-j-1) * qfunc(u), lower = 0, upper = 1)
-      if (i$message != "OK") stop("Error occurred while integrating. ")
-      (-1)^(r-j-1) * factorial(r-1)*factorial(r+s+t) /r /factorial(j) /factorial(r+t-j-1) /factorial(r-j-1) /factorial(s+j) * i$value
-    }, numeric(1)))
-  }, numeric(1))
-}
-#
+# @description calculates the first maxr TL-moments of order s, t given a quantile function qfunc
+# @examples
 # calcTLMom(4, 0, 2, function(u) evd::qgumbel(u, loc = 0, scale = 1))
 # lmomco::theoTLmoms(lmomco::vec2par(c(0, 1), type = "gum"), nmom = 4, leftrim = 0, rightrim = 2)$lambdas
 #
@@ -54,20 +43,39 @@ calcTLMom <- function(maxr, s, t, qfunc) {
 #   calcTLMom(4, 2, 1, function(u) evd::qgev(u, loc = 0, scale = 1, shape = .2)),
 #   lmomco::theoTLmoms(lmomco::vec2par(c(0, 1, -.2), type = "gev"), nmom = 4, leftrim = 2, rightrim = 1)$lambdas
 # )
+calcTLMom <- function(maxr, s, t, qfunc, ...) {
+  #if (!are.integer.like(maxr, s, t)) stop("s, t, and maxr have to be integer-like. ")
+  if (s < 0 | t < 0 | maxr < 1) stop("s and t have to be >= 0, maxr has to be >= 1. ")
+  if (!is.function(qfunc)) stop("qfunc has to be a function. ")
+
+  vapply(1L:maxr, function(r) {
+    sum(vapply(0:(r-1), function(j) {
+      tryCatch(
+        i <- stats::integrate(f <- function(u) u^(s+j) * (1-u)^(t+r-j-1) * qfunc(u, ...), lower = 0, upper = 1),
+        error = function(e) stop(e)
+      )
+      if (i$message != "OK") stop("Error occurred while integrating. ")
+      (-1)^(r-j-1) * factorial(r-1)*factorial(r+s+t) /r /factorial(j) /factorial(r+t-j-1) /factorial(r-j-1) /factorial(s+j) * i$value
+    }, numeric(1)))
+  }, numeric(1))
+}
 
 
+# @description extracts the quantile function of a parameters-object or a character string (like evd::gev)
+# @examples
+# getQ(as.parameters(loc = 9, scale = 5, shape = .3, distr = "evd::gev"))
+# getQ("evd::gev", loc = 10, scale = 4, shape = .2)
 getQ <- function(x, ...) {
   if (!("parameters" %in% class(x)) & !("character" %in% class(x)))
     stop("x must be of class parameters or character vector")
 
   UseMethod("getQ")
 }
-
 getQ.character <- function(x, ...) {
   distr <- x
   args <- list(...)
 
-  if (grepl("::", x = distr)) { # Falls pkg::func
+  if (grepl("::", x = distr)) { # if pkg::func
     f <- sub("^([a-zA-Z0-9]*)::([a-zA-Z0-9]*)$", "\\1::q\\2", x = distr)
     q <- eval(parse(text = paste0("match.fun(", f,")")))
   } else { # falls nur func
@@ -79,7 +87,6 @@ getQ.character <- function(x, ...) {
   formals(q)[names(args)] <- args
   q
 }
-
 getQ.parameters <- function(x) {
   if (!("numeric" %in% class(x))) stop("ATM only for parameters, numeric!")
 
@@ -88,9 +95,6 @@ getQ.parameters <- function(x) {
 
   do.call(getQ.character, c(x = distr, args))
 }
-#
-# getQ(as.parameters(loc = 9, scale = 5, shape = .3, type = "evd::gev"))
-# getQ.character("evd::gev", loc = 10, scale = 4, shape = .2)
 
 
 getFormulaSides <- function(formula, names = NULL) {
@@ -113,7 +117,7 @@ getFormulaSides <- function(formula, names = NULL) {
   }
 
   list(lhs = lhs, rhs = rhs, all = all,
-       new.formula = as.formula(paste0("cbind(", paste0(lhs, collapse = ","), ") ~ ", paste0(rhs, collapse = "+"))))
+       new.formula = stats::as.formula(paste0("cbind(", paste0(lhs, collapse = ","), ") ~ ", paste0(rhs, collapse = "+"))))
 }
 # getFormulaSides(z ~ x + y)
 # getFormulaSides(cbind(z1, z2) ~ x + y)
@@ -124,7 +128,7 @@ getFormulaSides <- function(formula, names = NULL) {
 
 
 blockdiag <- function(x, j, back = NULL) {
-  d <- dim(x)
+  d <- dim(as.matrix(x))
   if (!is.null(back) & (dim(back)[1] != d[1]*j || dim(back)[2] != d[2]*j)) {
     warning("Wrong dimensions of background matrix. Set to Zero-Matrix. ")
     back <- NULL
@@ -178,4 +182,13 @@ removeAttributes <- function(x) {
   attr(x, "rightrim") <- NULL
   attr(x, "computation.method") <- NULL
   x
+}
+
+
+buildNames <- function(prefix, order, stations = NULL) {
+  if (is.null(stations) || length(stations) == 1) {
+    paste0(prefix, order)
+  } else {
+    paste0(rep(paste0(prefix, order), length(stations)), "_", rep(stations, each = length(order)))
+  }
 }

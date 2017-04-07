@@ -2,8 +2,8 @@
 % Please edit documentation in R/est_quancov.R
 \name{est_quancov}
 \alias{est_quancov}
-\alias{est_quancov.matrix}
 \alias{est_quancov.numeric}
+\alias{est_quancov.matrix}
 \alias{est_quancov.quantiles}
 \title{Estimate the covariance matrix of quantile estimations}
 \usage{
@@ -13,7 +13,7 @@ est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L, ...)
   np.cov = FALSE, ...)
 
 \method{est_quancov}{matrix}(x, distr, p, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, ...)
+  np.cov = FALSE, reg.weights = NULL, ...)
 
 \method{est_quancov}{quantiles}(x, distr = attr(x, "distribution"),
   p = attr(x, "p"), leftrim = attr(x, "source")$trimmings[1],
@@ -32,35 +32,37 @@ est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L, ...)
 
 \item{np.cov}{boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).}
 
+\item{reg.weights}{numeric vector of weights for regionalized TLMoments.}
+
 \item{set.n}{hypothetical data length n if theoretical values are given.}
 }
 \value{
 numeric matrix
 }
 \description{
-description not done yet
+Internal function. Use \link{est_cov}. Description not done yet.
 }
 \examples{
 ### Numeric vectors
-x <- evd::rgev(500, shape = .2)
+x <- rgev(500, shape = .2)
 
 quantiles(parameters(TLMoments(x), "gev"), c(.9, .95, .99))
 est_quancov(x, "gev", c(.9, .95, .99), 0, 0)
 #cov(t(replicate(5000,
-#  quantiles(parameters(TLMoments(evd::rgev(500, shape = .2)), "gev"), c(.9, .95, .99))
+#  quantiles(parameters(TLMoments(rgev(500, shape = .2)), "gev"), c(.9, .95, .99))
 #)))
 
 quantiles(parameters(TLMoments(x, rightrim = 1), "gev"), c(.9, .95, .99))
 est_quancov(x, "gev", c(.9, .95, .99), 0, 1)
 #cov(t(replicate(5000,
 #  quantiles(
-#    parameters(TLMoments(evd::rgev(500, shape = .2), rightrim = 1), "gev"),
+#    parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev"),
 #    c(.9, .95, .99)
 #  )
 #)))
 
 ### Numeric matrices
-x <- matrix(evd::rgev(600, shape = .2), nc = 3)
+x <- matrix(rgev(600, shape = .2), nc = 3)
 
 quantiles(parameters(TLMoments(x), "gev"), c(.9, .95, .99))
 est_quancov(x, "gev", c(.9, .95, .99), 0, 0)
@@ -68,7 +70,7 @@ est_quancov(x, "gev", c(.9, .95, .99), 0, 0)
 est_quancov(x, "gev", .9, 0, 0)
 #cov(t(replicate(5000,
 # quantiles(
-#   parameters(TLMoments(matrix(evd::rgev(600, shape = .2), nc = 3)),
+#   parameters(TLMoments(matrix(rgev(600, shape = .2), nc = 3)),
 #  "gev"), .9)
 #  )
 #))
@@ -80,4 +82,3 @@ est_quancov(q, leftrim = 0, rightrim = 0)
 est_quancov(q, leftrim = 0, rightrim = 0, set.n = 10)
 
 }
-

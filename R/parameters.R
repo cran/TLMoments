@@ -1,13 +1,13 @@
 #' @title
 #' Converting TL-moments to distribution parameters
 #' @description
-#' Converts TL-moments to distribution parameters. By now, conversions only for GEV, GUMBEL, and GPD
+#' Converts TL-moments to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
 #' are available. Important trimming options are calculated through known formulas (see references for
 #' some of them), other options are calculated through a numerical optimization. In this case there's a
 #' warning informing about the experimental nature of this feature.
 #' @param tlm object returned by TLMoments
 #' @param distr character object defining the distribution. Supported types are
-#' "gev", "gumbel", and "gpd"
+#' "gev", "gum", "gpd", and "ln3"
 #' @param ... additional arguments
 #' @return Numeric vector, matrix, list, or data.frame of parameter estimates with
 #' class \code{parameters}. The object contains the following attributes: \itemize{
@@ -19,8 +19,9 @@
 #' @references Fischer, S., Fried, R., & Schumann, A. (2015). Examination for robustness of parametric estimators for flood statistics in the context of extraordinary extreme events. Hydrology and Earth System Sciences Discussions, 12, 8553-8576.
 #' @references Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 #' @references Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
+#' @seealso \code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{quantiles}}, \code{\link{summary.parameters}}, \code{\link{as.parameters}}. Built-in distributions: \code{\link{pgev}}, \code{\link{pgum}}, \code{\link{pgpd}}, \code{\link{pln3}}.
 #' @examples
-#' xmat <- matrix(evd::rgev(100, shape = .2), nc = 4)
+#' xmat <- matrix(rgev(100, shape = .2), nc = 4)
 #' xvec <- xmat[, 3]
 #' xlist <- lapply(1L:ncol(xmat), function(i) xmat[, i])
 #' xdat <- data.frame(
@@ -33,7 +34,7 @@
 #' parameters(tlm, "gev")
 #'
 #' tlm <- TLMoments(xmat, leftrim = 1, rightrim = 1)
-#' parameters(tlm, "gumbel")
+#' parameters(tlm, "gum")
 #'
 #' tlm <- TLMoments(xlist)
 #' parameters(tlm, "gpd")
@@ -44,62 +45,65 @@
 #' tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
 #' parameters(tlm, "gev")
 #'
-#' library(magrittr)
-#' TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) %>%
-#'  parameters("gpd")
+#' tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
+#' parameters(tlm, "ln3")
 #'
-#' TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) %>%
-#'  parameters("gpd", u = 10)
-#'
-#' TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 1) %>%
-#'  parameters("gpd")
-#'
-#' TLMoments(evd::rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 2) %>%
-#'  parameters("gpd")
 #'
 #' # Numerical calculation
-#' tlm <- TLMoments(evd::rgumbel(1000, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
-#' parameters(tlm, "gumbel")
 #'
-#' tlm <- TLMoments(evd::rgumbel(1000, loc = 5000, scale = 2000), leftrim = 1, rightrim = 4)
-#' parameters(tlm, "gumbel")
+#' tlm <- TLMoments(rgum(200, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
+#' parameters(tlm, "gum")
 #'
-#' tlm <- TLMoments(evd::rgev(1000, loc = 10, scale = 5, shape = .4), leftrim = 0, rightrim = 5)
+#' tlm <- TLMoments(rgev(200, loc = 10, scale = 5, shape = .4), leftrim = 2, rightrim = 2)
 #' parameters(tlm, "gev")
 #'
-#' # Its A LOT slower:
+#' tlm <- TLMoments(rln3(200, loc = 3, scale = 1.5, shape = 2), leftrim = 0, rightrim = 1)
+#' parameters(tlm, "ln3")
+#'
+#' # It's A LOT slower:
 #' # system.time(replicate(500,
-#' #   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 1), "gumbel")
+#' #   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
 #' # ))[3]
 #' # system.time(replicate(500,
-#' #   parameters(TLMoments(evd::rgumbel(100, loc = 5, scale = 2), 1, 2), "gumbel")
+#' #   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
 #' # ))[3]
+#'
+#'
+#' # Using magrittr
+#' library(magrittr)
+#'
+#' TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) %>%
+#'  parameters("gpd")
+#'
+#' TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 0) %>%
+#'  parameters("gpd", u = 10)
+#'
+#' TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 1) %>%
+#'  parameters("gpd")
+#'
+#' TLMoments(rgpd(500, loc = 10, scale = 3, shape = .3), rightrim = 2) %>%
+#'  parameters("gpd")
 #'
 #' @export
 parameters <- function(tlm, distr, ...) {
-  # if (!("TLMoments" %in% class(tlm)) &
-  #     !(tlm$source %in% c("TLmoms", "vec2TLmoms"))) stop("tlm has to be a return of TLMoments, lmomco::TLmoms, or lmomco::vec2TLmoms")
-
   if (!("TLMoments" %in% class(tlm))) stop("tlm has to be of class TLMoments")
-  if (!(distr %in% c("gev", "gumbel", "gpd"))) stop("distr has to be \"gev\", \"gumbel\", or \"gpd\"")
+
+  valid.distr <- c("gev", "gum", "gpd", "ln3")
+  if (!(distr %in% valid.distr))
+    stop(paste0("distr has to be one of ", paste(valid.distr, collapse = ", "), "."))
 
   # Check for sufficient data:
   if (distr == "gev") {
-    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of GEV needs L1, L2, and L3")
-  } else if (distr == "gumbel") {
-    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of GUMBEL needs L1, and L2")
+    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gev\" needs at least the first three TL-moments")
+  } else if (distr == "gum") {
+    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gum\" needs at least the first two TL-moments")
   } else if (distr == "gpd" & "u" %in% names(list(...))) {
-    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of GPD needs L1, and L2")
+    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first two TL-moments")
   } else if (distr == "gpd") {
-    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of GPD needs L1, L2, and L3")
+    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first three TL-moments")
+  } else if (distr == "ln3") {
+    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"ln3\" needs at least the first three TL-moments")
   }
-
-  # # Feste Verwendung von leftrim und rightrim, auch wenn wir von lmomco kommen
-  # if (tlm$source %in% c("TLmoms", "vec2TLmoms")) {
-  #   if (!is.null(tlm$trim)) {
-  #     tlm$leftrim <- tlm$rightrim <- tlm$trim
-  #   }
-  # }
 
   UseMethod("parameters", tlm$lambdas)
 }
@@ -113,7 +117,7 @@ parameters.matrix <- function(tlm, distr, ...) {
     parameters.numeric(tmp, distr, ...)
   })
 
-  attr(out, "distribution") <- distr# paste0("evd::", distr)
+  attr(out, "distribution") <- distr
   attr(out, "source") <- attributes(tlm)$source
   attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
   attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
@@ -132,7 +136,7 @@ parameters.list <- function(tlm, distr, ...) {
     parameters.numeric(tmp, distr, ...)
   })
 
-  attr(out, "distribution") <- distr#paste0("evd::", distr)
+  attr(out, "distribution") <- distr
   attr(out, "source") <- attributes(tlm)$source
   attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
   attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
@@ -155,7 +159,7 @@ parameters.data.frame <- function(tlm, distr, ...) {
   rhs <- dimnames(attr(terms(attr(tlm, "source")$formula), "factors"))[[2]]
   out <- cbind(tlm$lambdas[rhs], as.data.frame(t(out)))
 
-  attr(out, "distribution") <- distr#paste0("evd::", distr)
+  attr(out, "distribution") <- distr
   attr(out, "source") <- attributes(tlm)$source
   attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
   attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
@@ -175,13 +179,14 @@ parameters.numeric <- function(tlm, distr, ...) {
   out <- switch(
     distr,
     gev = gev.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim),
-    gumbel = gum.est(tlm$lambdas["L1"], tlm$lambdas["L2"], leftrim, rightrim),
+    gum = gum.est(tlm$lambdas["L1"], tlm$lambdas["L2"], leftrim, rightrim),
     gpd = gpd.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim, ...),
+    ln3 = ln3.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim),
     stop("Not implemented. ")
   )
   out <- unlist(out)
 
-  attr(out, "distribution") <- distr# paste0("evd::", distr)
+  attr(out, "distribution") <- distr
   attr(out, "source") <- attributes(tlm)$source
   attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
   attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
@@ -190,7 +195,6 @@ parameters.numeric <- function(tlm, distr, ...) {
   class(out) <- c("parameters", "numeric")
   out
 }
-
 
 #' @export
 print.parameters <- function(x, ...) {
@@ -210,7 +214,6 @@ print.parameters <- function(x, ...) {
   invisible(x)
 }
 
-# Funktionen zur Parameterberechnung durch TL-Momente
 
 #### GUM ####
 gum.est <- function(l1, l2, s, t) {
@@ -223,45 +226,55 @@ gum.est <- function(l1, l2, s, t) {
 }
 # TL(0,0)=L
 gum.tl00.est <- function(l1, l2) {
-  beta <- l2 / log(2)
-  alpha <- l1 - 0.577 * beta
+  scale <- l2 / log(2)
+  loc <- l1 - 0.577 * scale
 
-  return(setNames(c(alpha, beta), c("loc", "scale")))
+  out <- setNames(c(loc, scale), c("loc", "scale"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
-# TL(0,1), TL(1,0), TL(1,1) nach Elamir, 2010: Optimal Choices for Trimming in Trimmed L-moment Method
+# TL(0,1), TL(1,0), TL(1,1) from Elamir, 2010: Optimal Choices for Trimming in Trimmed L-moment Method
 gum.tl01.est <- function(l1, l2) {
-  beta <- l2 / 0.431
-  alpha <- l1 + 0.116 * beta
+  scale <- l2 / 0.431
+  loc <- l1 + 0.116 * scale
 
-  return(setNames(c(alpha, beta), c("loc", "scale")))
+  out <- setNames(c(loc, scale), c("loc", "scale"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 gum.tl10.est <- function(l1, l2) {
-  beta <- l2 / 0.607
-  alpha <- l1 - 1.269 * beta
+  scale <- l2 / 0.607
+  loc <- l1 - 1.269 * scale
 
-  return(setNames(c(alpha, beta), c("loc", "scale")))
+  out <- setNames(c(loc, scale), c("loc", "scale"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 gum.tl11.est <- function(l1, l2) {
-  beta <- l2 / 0.353
-  alpha <- l1 - .459 * beta
+  scale <- l2 / 0.353
+  loc <- l1 - .459 * scale
 
-  return(setNames(c(alpha, beta), c("loc", "scale")))
+  out <- setNames(c(loc, scale), c("loc", "scale"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 gum.numerical.est <- function(l1, l2, s, t) {
-  warning("Warning: Calculating numerical solution. Experimental and accuracy unverified. ")
+  #warning("Calculating numerical solution. ")
 
   # scale
-  f1 <- function(scale) calcTLMom(2, s, t, getQ(as.parameters(loc = 0, scale = scale, distr = "evd::gumbel")))[2] - l2
-  i <- 0; while (sign(f1(0)) == sign(f1(10^i))) i <- i+1
-  u <- uniroot(f1, c(0, 10^i))
+  f1 <- function(scale) calcTLMom(2, s, t, qgum, loc = 0, scale = scale)[2] - l2
+  i <- 0; while (sign(f1(10^-i)) == sign(f1(10^i))) i <- i+1
+  u <- uniroot(f1, c(10^-i, 10^i))
   scale <- u$root
   # loc
-  f2 <- function(loc) calcTLMom(2, s, t, getQ(as.parameters(loc = loc, scale = scale, distr = "evd::gumbel")))[1] - l1
+  f2 <- function(loc) calcTLMom(2, s, t, qgum, loc = loc, scale = scale)[1] - l1
   i <- 0; while (sign(f2(-10^i)) == sign(f2(10^i))) i <- i+1
   u <- uniroot(f2, c(-10^i, 10^i))
   loc <- u$root
 
-  return(setNames(c(loc, scale), c("loc", "scale")))
+  out <- setNames(c(loc, scale), c("loc", "scale"))
+  attr(out, "computation.method") <- "numerical"
+  return(out)
 }
 
 
@@ -285,7 +298,9 @@ gev.tl00.est <- function(l1, l2, t3) {
   al <- l2*k/((1-2^-k)*gk)
   xi <- l1 + al*(gk-1)/k
 
-  return(setNames(c(xi, al, -k), c("loc", "scale", "shape")))
+  out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 # TL(0,1) der GEV
 gev.tl01.est <- function(l1, l2, t3) {
@@ -299,7 +314,9 @@ gev.tl01.est <- function(l1, l2, t3) {
   al <- l2 * 2/3 * 1/gk * 1/(V3 - 2*V2 + 1)
   xi <- l1 - al/k - al*gk*(V2 - 2)
 
-  return(setNames(c(xi, al, -k), c("loc", "scale", "shape")))
+  out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 # TL(0,2) der GEV
 gev.tl02.est <- function(l1, l2, t3) {
@@ -315,7 +332,9 @@ gev.tl02.est <- function(l1, l2, t3) {
   al <- l2 * 2 * 1/gk * 1/(-4*V4 + 12*V3 - 12*V2 + 4)
   xi <- l1 - al/k - al*gk*(-V3 + 3*V2 - 3)
 
-  return(setNames(c(xi, al, -k), c("loc", "scale", "shape")))
+  out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 # TL(1,0) der GEV
 gev.tl10.est <- function(l1, l2, t3) {
@@ -330,7 +349,9 @@ gev.tl10.est <- function(l1, l2, t3) {
   al <- l2 * 2 * 1/gk * 1/(3*V2 - 3*V3)
   xi <- l1 - al/k + al*gk*V2
 
-  return(setNames(c(xi, al, -k), c("loc", "scale", "shape")))
+  out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 # TL(1,1) der GEV
 gev.tl11.est <- function(l1, l2, t3) {
@@ -346,39 +367,69 @@ gev.tl11.est <- function(l1, l2, t3) {
   al <- l2 * 1/gk * 1/(3*V2 - 6*V3 + 3*V4)
   xi <- l1 - al/k - al*gk*(-3*V2 + 2*V3)
 
-  return(setNames(c(xi, al, -k), c("loc", "scale", "shape")))
+  out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 gev.numerical.est <- function(l1, l2, t3, s, t) {
-  warning("Warning: Calculating numerical solution. Experimental and accuracy unverified. ")
+  #warning("Calculating numerical solution. ")
 
   # shape
   f1 <- function(shape) {
-    a <- calcTLMom(3, s, t, getQ(as.parameters(loc = 0, scale = 1, shape = shape, distr = "evd::gev")))
+    a <- calcTLMom(3, s, t, qgev, loc = 0, scale = 1, shape = shape)
     a[3]/a[2] - t3
   }
   i <- 0; while (sign(f1(-10^i)) == sign(f1(10^i))) i <- i+1
   u <- uniroot(f1, c(-10^i, 10^i))
   shape <- u$root
   # scale
-  f2 <- function(scale) calcTLMom(2, s, t, getQ(as.parameters(loc = 0, scale = scale, shape = shape, distr = "evd::gev")))[2] - l2
-  i <- 0; while (sign(f2(0)) == sign(f2(10^i))) i <- i+1
-  u <- uniroot(f2, c(0, 10^i))
+  f2 <- function(scale) calcTLMom(2, s, t, qgev, loc = 0, scale = scale, shape = shape)[2] - l2
+  i <- 0; while (sign(f2(10^-i)) == sign(f2(10^i))) i <- i+1
+  u <- uniroot(f2, c(10^-i, 10^i))
   scale <- u$root
   # loc
-  f3 <- function(loc) calcTLMom(1, s, t, getQ(as.parameters(loc = loc, scale = scale, shape = shape, distr = "evd::gev")))[1] - l1
+  f3 <- function(loc) calcTLMom(1, s, t, qgev, loc = loc, scale = scale, shape = shape)[1] - l1
   i <- 0; while (sign(f3(-10^i)) == sign(f3(10^i))) i <- i+1
   u <- uniroot(f3, c(-10^i, 10^i))
   loc <- u$root
 
-  return(setNames(c(loc, scale, shape), c("loc", "scale", "shape")))
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "numerical"
+  return(out)
 }
 
+#### LN3 ####
+ln3.est <- function(l1, l2, t3, s, t) {
+  #warning("Calculating numerical solution. ")
+
+  # 1. step, T3 <=> shape
+  f1 <- function(shape) {
+    a <- calcTLMom(3, s, t, qln3, loc = 0, scale = 1, shape = shape)
+    a[3]/a[2] - t3
+  }
+  i <- 0; while (sign(f1(10^-i)) == sign(f1(10^i))) i <- i+1
+  u <- uniroot(f1, c(10^-i, 10^i))
+  shape <- u$root
+  # 2. step, L2 <=> scale
+  f2 <- function(scale) calcTLMom(2, s, t, qln3, loc = 0, scale = scale, shape = shape)[2] - l2
+  i <- 0; while (sign(f2(10^-i)) == sign(f2(10^i))) i <- i+1
+  u <- uniroot(f2, c(10^-i, 10^i))
+  scale <- u$root
+  # 3. step L1 <=> loc
+  f3 <- function(loc) calcTLMom(1, s, t, qln3, loc = loc, scale = scale, shape = shape)[1] - l1
+  i <- 0; while (sign(f3(-10^i)) == sign(f3(10^i))) i <- i+1
+  u <- uniroot(f3, c(-10^i, 10^i))
+  loc <- u$root
+
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "numerical"
+  return(out)
+}
 
 
 #### GPD ####
 gpd.est <- function(l1, l2, t3, s, t, ...) {
   switch(paste(s, t, sep = "-"),
-         #`0-0` = setNames(lmomco::lmom2par(lmomco::vec2lmom(c(l1,l2,t3)), "gpa", ...)$para * c(1,1,-1), c("loc", "scale", "shape")),
          `0-0` = gpd.tl00.est(l1, l2, t3, ...),
          `0-1` = gpd.tl01.est(l1, l2, t3, ...),
          `0-2` = gpd.tl02.est(l1, l2, t3, ...),
@@ -397,60 +448,66 @@ gpd.tl00.est <- function(l1, l2, t3, u = NULL) {
     loc <- l1 + scale/(shape-1)
   }
 
-  return(setNames(c(loc, scale, shape), c("loc", "scale", "shape")))
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 
 gpd.tl01.est <- function(l1, l2, t3, u = NULL) {
 
   if (!is.null(u) & is.numeric(u)) {
-    # nach Hosking, 2007.
+    # from Hosking, 2007.
     shape <- -3/2 * (l1-u)/l2 + 3
     scale <- (l1-u) * (-shape+2)
     loc <- u
   } else {
-    # nach Fischer, 2015, ueberprueft und korrekt.
+    # from Fischer, 2015.
     shape <- (36*t3 - 8)/(9*t3 + 8)
     scale <- 2/3 * l2 * (shape-2) * (shape-3)
     loc <- l1 + scale/(shape-2)
   }
 
-  return(setNames(c(loc, scale, shape), c("loc", "scale", "shape")))
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 
 gpd.tl02.est <- function(l1, l2, t3, u = NULL) {
 
   if (!is.null(u) & is.numeric(u)) {
-    # nach Hosking, 2007.
+    # from Hosking, 2007.
     shape <- -2 * (l1-u)/l2 + 4
     scale <- (l1-u) * (-shape+3)
     loc <- u
   } else {
-    # nach Fischer, 2015.
+    # from Fischer, 2015.
     shape <- (30*t3 - 5)/(6*t3 + 5)
     scale <- 1/2 * l2 * (shape-3) * (shape-4)
     loc <- l1 + scale/(shape-3)
   }
 
-  return(setNames(c(loc, scale, shape), c("loc", "scale", "shape")))
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "formula"
+  return(out)
 }
 
 gpd.numerical.est <- function(l1, l2, t3, s, t, u = NULL) {
-  warning("Warning: Calculating numerical solution. Experimental and accuracy unverified. ")
+  #warning("Calculating numerical solution. ")
 
   if (!is.null(u) & is.numeric(u)) {
 
     # shape
     f1u <- function(shape, u) {
-      a <- calcTLMom(2, s, t, getQ(as.parameters(loc = u, scale = 1, shape = shape, distr = "evd::gpd")))
+      a <- calcTLMom(2, s, t, qgpd, loc = u, scale = 1, shape = shape)
       a[2] - l2
     }
     i <- 0; while (sign(f1u(-10^i, u)) == sign(f1u(10^i, u))) i <- i+1
     ur <- uniroot(f1u, c(-10^i, 10^i), u = u)
     shape <- ur$root
     # scale
-    f2u <- function(scale, u) calcTLMom(1, s, t, getQ(as.parameters(loc = u, scale = scale, shape = shape, distr = "evd::gpd")))[1] - l1
-    i <- 0; while (sign(f2u(0, u)) == sign(f2u(10^i, u))) i <- i+1
-    ur <- uniroot(f2u, c(0, 10^i), u = u)
+    f2u <- function(scale, u) calcTLMom(1, s, t, qgpd, loc = u, scale = scale, shape = shape)[1] - l1
+    i <- 0; while (sign(f2u(10^-i, u)) == sign(f2u(10^i, u))) i <- i+1
+    ur <- uniroot(f2u, c(10^-i, 10^i), u = u)
     scale <- ur$root
     # loc
     loc <- u
@@ -459,24 +516,26 @@ gpd.numerical.est <- function(l1, l2, t3, s, t, u = NULL) {
 
     # shape
     f1 <- function(shape) {
-      a <- calcTLMom(3, s, t, getQ(as.parameters(loc = 0, scale = 1, shape = shape, distr = "evd::gpd")))
+      a <- calcTLMom(3, s, t, qgpd, loc = 0, scale = 1, shape = shape)
       a[3]/a[2] - t3
     }
     i <- 0; while (sign(f1(-10^i)) == sign(f1(10^i))) i <- i+1
     ur <- uniroot(f1, c(-10^i, 10^i))
     shape <- ur$root
     # scale
-    f2 <- function(scale) calcTLMom(2, s, t, getQ(as.parameters(loc = 0, scale = scale, shape = shape, distr = "evd::gpd")))[2] - l2
-    i <- 0; while (sign(f2(0)) == sign(f2(10^i))) i <- i+1
-    ur <- uniroot(f2, c(0, 10^i))
+    f2 <- function(scale) calcTLMom(2, s, t, qgpd, loc = 0, scale = scale, shape = shape)[2] - l2
+    i <- 0; while (sign(f2(10^-i)) == sign(f2(10^i))) i <- i+1
+    ur <- uniroot(f2, c(10^-i, 10^i))
     scale <- ur$root
     # loc
-    f3 <- function(loc) calcTLMom(1, s, t, getQ(as.parameters(loc = loc, scale = scale, shape = shape, distr = "evd::gpd")))[1] - l1
+    f3 <- function(loc) calcTLMom(1, s, t, qgpd, loc = loc, scale = scale, shape = shape)[1] - l1
     i <- 0; while (sign(f3(-10^i)) == sign(f3(10^i))) i <- i+1
     ur <- uniroot(f3, c(-10^i, 10^i))
     loc <- ur$root
 
   }
 
-  return(setNames(c(loc, scale, shape), c("loc", "scale", "shape")))
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "computation.method") <- "numerical"
+  return(out)
 }

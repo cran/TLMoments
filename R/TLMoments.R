@@ -37,6 +37,7 @@
 #' @references Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 #' @references Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 #' @references Hosking, J. R. M., & Balakrishnan, N. (2015). A uniqueness result for L-estimators, with applications to L-moments. Statistical Methodology, 24, 69-80.
+#' @seealso \code{\link{PWMs}}, \code{\link{parameters}}, \code{\link{quantiles}}, \code{\link{summary.TLMoments}}, \code{\link{as.TLMoments}}
 #' @examples
 #' # Generating data sets:
 #' xmat <- matrix(rnorm(100), nc = 4)
@@ -122,8 +123,10 @@ TLMoments.matrix <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
                              ...) {
   if (!are.integer.like(max.order))
     stop("max.order must be integer-like. ")
-  if (!are.numeric(leftrim, rightrim))
-    stop("leftrim and rightrim must be numeric. ")
+  # if (!are.numeric(leftrim, rightrim))
+  #   stop("leftrim and rightrim must be numeric. ")
+  if (!are.integer.like(leftrim, rightrim) | any(c(leftrim, rightrim) < 0))
+    stop("leftrim and rightrim must be positive integers. ")
   if (!is.logical(na.rm))
     stop("na.rm must be TRUE or FALSE. ")
   if (computation.method == "auto")

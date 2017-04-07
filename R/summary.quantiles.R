@@ -12,21 +12,24 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.quantiles}.
+#' @seealso \code{\link{quantiles}}, \code{\link{est_cov}}
 #' @examples
-#' x <- cbind(evd::rgev(100, shape = .2), evd::rgev(100, shape = .2))
+#' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
 #'
 #' q <- quantiles(parameters(TLMoments(x[, 1]), "gev"), c(.9, .95, .99))
 #' summary(q)
+#' summary(q, select = c(.9, .99))
 #'
 #' q <- quantiles(parameters(TLMoments(x[, 1], rightrim = 1), "gev"), .95)
 #' summary(q)
 #'
 #' q <- quantiles(parameters(TLMoments(x), "gev"), c(.9, .95, .99))
 #' summary(q)
+#' summary(q, select = .95)
 #'
 #' q <- quantiles(as.parameters(loc = 10, scale = 5, shape = .3, distr = "gev"), c(.9, .99))
-#' summary(q, rightrim = 0, n = 100)
-#' summary(q, rightrim = 1, n = 100)
+#' summary(q)
+#' summary(q, rightrim = 1, set.n = 250)
 #'
 #' @method summary quantiles
 #' @export
@@ -44,12 +47,13 @@ summary.quantiles.numeric <- function(object, ci.level = .9, ...) {
 
   # param ci
   cov <- est_cov(object, ...)
-  quan_ci <- object %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- paste0("q", names(object)) %in% colnames(cov)
+  quan_ci <- object[sel] %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     q = object,
     ci.level = ci.level,
-    ci = cbind(LCL = quan_ci[, 1], quantile = object, UCL = quan_ci[, 2]),
+    ci = cbind(LCL = quan_ci[, 1], quantile = object[sel], UCL = quan_ci[, 2]),
     cov = cov
   )
 
@@ -64,12 +68,13 @@ summary.quantiles.matrix <- function(object, ci.level = .9, ...) {
 
   # lambda ci
   cov <- est_cov(object, ...)
-  quan_ci <- as.vector(object) %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- paste0("q", paste(rownames(object), col(object), sep = "_")) %in% colnames(cov)
+  quan_ci <- as.vector(object[sel]) %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     q = object,
     ci.level = ci.level,
-    ci = cbind(LCL = quan_ci[, 1], quantile = as.vector(object), UCL = quan_ci[, 2]),
+    ci = cbind(LCL = quan_ci[, 1], quantile = as.vector(object[sel]), UCL = quan_ci[, 2]),
     cov = cov
   )
 
@@ -81,6 +86,10 @@ summary.quantiles.matrix <- function(object, ci.level = .9, ...) {
 print.summary.quantiles <- function(x, ...) {
   if (attr(x$q, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {
     # Theoretical data
+    cat("Confidence intervals based on assumptions: \n")
+    cat("\tTrue distribution: ", toupper(attr(x$cov, "distribution")), "\n", sep = "")
+    cat("\tTL(", paste0(attr(x$cov, "trimmings"), collapse = ","), ") estimation\n", sep = "")
+    cat("\tn = ", attr(x$cov, "n"), "\n", sep = "")
   } else {
     # Real data
     ns <- attr(x$q, "source")$n

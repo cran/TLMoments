@@ -10,34 +10,22 @@
 \usage{
 est_cov(x, ...)
 
-\method{est_cov}{PWMs}(x, order = attr(x, "order"), ...)
+\method{est_cov}{PWMs}(x, select = attr(x, "order"), ...)
 
-\method{est_cov}{TLMoments}(x, leftrim = attr(x, "leftrim"),
-  rightrim = attr(x, "rightrim"), order = attr(x, "order"), ...)
+\method{est_cov}{TLMoments}(x, select = attr(x, "order"), ...)
 
-\method{est_cov}{parameters}(x, distr = attr(x, "distribution"),
-  leftrim = attr(x, "source")$trimmings[1], rightrim = attr(x,
-  "source")$trimmings[2], ...)
+\method{est_cov}{parameters}(x, select = c("loc", "scale", "shape"), ...)
 
-\method{est_cov}{quantiles}(x, distr = attr(x, "distribution"), p = attr(x,
-  "p"), leftrim = attr(x, "source")$trimmings[1], rightrim = attr(x,
-  "source")$trimmings[2], ...)
+\method{est_cov}{quantiles}(x, select = attr(x, "p"), ...)
 }
 \arguments{
 \item{x}{object of \code{PWMs}, \code{TLMoments}, \code{parameters},
 or \code{quantiles} constructed using the same-named functions.}
 
-\item{...}{additional arguments given to the sub-functions. Normally not necessary.}
+\item{...}{additional arguments given to the sub-functions: \code{distr} and \code{np.cov}.}
 
-\item{order}{numeric vector giving the orders of PWMs or TLMoments, if \code{est_cov} is calculated from
-\code{PWMs} or \code{TLMoments}.}
-
-\item{leftrim, rightrim}{lower and upper trimming parameter, if \code{est_cov} is calculated from \code{TLMoments}.}
-
-\item{distr}{character giving the distribution, if \code{est_cov} is calculated with parametric assumption.}
-
-\item{p}{numeric vector giving the quantile estimates from which the covariance should be calculated, if \code{est_cov}
-is calculated from \code{quantiles}.}
+\item{select}{numeric oder character vector specifying a subset of the covariance matrix. If
+not specified the full covariance matrix is returned.}
 }
 \value{
 a numeric matrix (if \code{x} is of class \code{PWMs}, \code{parameters}, or
@@ -50,82 +38,116 @@ description not done yet
 \examples{
 ### 1: PWMs:
 
-x <- evd::rgev(100, shape = .1)
+xvec <- rgev(100, shape = .1)
+xmat <- cbind(rgev(100, shape = .1), rgev(100, shape = .3))
 
-est_cov(PWMs(x))
-est_cov(PWMs(x), order = 1:2)
+# Covariance estimation of PWMs normally without parametric assumption:
+est_cov(PWMs(xvec))
+est_cov(PWMs(xvec), select = 0:1)
+est_cov(PWMs(xmat))
+est_cov(PWMs(xmat), select = 3)
+est_cov(PWMs(xmat[, 1, drop = FALSE]), select = 2:3)
 
-est_cov(PWMs(x), distr = "gev") # parametric with gev assumption
+# Parametric assumptions (only GEV by now) can be used:
+est_cov(PWMs(xvec), distr = "gev")
+est_cov(PWMs(xvec), distr = "gev", select = c(1, 3))
 
-x <- cbind(evd::rgev(100, shape = .1), evd::rgev(100, shape = .3))
-est_cov(PWMs(x))
-est_cov(PWMs(x), order = 0:1)
-#cov(t(replicate(100000,
-# as.vector(PWMs(cbind(evd::rgev(100, shape = .1), evd::rgev(100, shape = .3)), 1)))
-#))
+
+# cov(t(replicate(100000,
+#  as.vector(PWMs(cbind(rgev(100, shape = .1), rgev(100, shape = .3)), 1)))
+# ))
+
 
 ### 2. TLMoments:
 
-x <- evd::rgev(100, shape = .1)
+xvec <- rgev(100, shape = .1)
+xmat <- cbind(rgev(100, shape = .1), rgev(100, shape = .3))
 
-est_cov(TLMoments(x))
-est_cov(TLMoments(x, rightrim = 1))
-est_cov(TLMoments(x), order = 1:2)
+# Covariance estimation of TLMoments normally without parametric assumption:
+est_cov(TLMoments(xvec))
+est_cov(TLMoments(xvec, rightrim = 1))
+est_cov(TLMoments(xvec), select = 3:4)
 
-est_cov(TLMoments(x), distr = "gev") # parametric with gev assumption
+# Parametric assumptions (only GEV by now) can be used:
+est_cov(TLMoments(xvec), distr = "gev")
 
-x <- cbind(evd::rgev(100, shape = .1), evd::rgev(100, shape = .3))
-est_cov(TLMoments(x))
+# Matrix inputs
+est_cov(TLMoments(xmat))
+est_cov(TLMoments(xmat), select = 3:4)
+est_cov(TLMoments(xmat[, 1, drop = FALSE]), select = 3:4)
 
-para <- as.parameters(loc = 10, scale = 5, shape = .2, distr = "gev")
-est_cov(TLMoments(para, rightrim = 0), distr = "gev", set.n = 100)
-est_cov(TLMoments(para, rightrim = 1), distr = "gev", set.n = 100)
+# Covariance of theoretical TLMoments only with parametric assumption:
+est_cov(as.TLMoments(c(14, 4, 1)), distr = "gev", set.n = 100)
+est_cov(as.TLMoments(c(14, 4, 1), rightrim = 1), distr = "gev", set.n = 100)
+
+# Regionalized TLMoments
+est_cov(regionalize(TLMoments(xmat), c(.75, .25)))
+est_cov(regionalize(TLMoments(xmat), c(.75, .25)), distr = "gev", select = 3:4)
+
 
 ### 3. Parameters:
 
-x <- evd::rgev(100, shape = .1)
+xvec <- rgev(100, shape = .1)
+xmat <- cbind(rgev(100, shape = .1), rgev(100, shape = .3))
 
-est_cov(parameters(TLMoments(x), "gev")) # default parametric
-est_cov(parameters(TLMoments(x, rightrim = 1), "gev"))
+# Covariance estimation of parameters normally with parametric assumption:
+est_cov(parameters(TLMoments(xvec), "gev"))
+est_cov(parameters(TLMoments(xvec, rightrim = 1), "gev"))
+est_cov(parameters(TLMoments(xvec, rightrim = 1), "gev"), select = c("scale", "shape"))
 
-est_cov(parameters(TLMoments(x), "gev"), np.cov = TRUE) # explicit non-parametric
-est_cov(parameters(TLMoments(x, rightrim = 1), "gev"), np.cov = TRUE)
+# A nonparametric estimation can be enforced with np.cov:
+est_cov(parameters(TLMoments(xvec), "gev"), np.cov = TRUE)
+est_cov(parameters(TLMoments(xvec, rightrim = 1), "gev"), np.cov = TRUE)
 
-x <- cbind(evd::rgev(100, shape = .1), evd::rgev(100, shape = .3))
-est_cov(parameters(TLMoments(x), "gev"))
+# Matrix inputs
+est_cov(parameters(TLMoments(xmat), "gev"))
+est_cov(parameters(TLMoments(xmat), "gev"), select = "shape")
+est_cov(parameters(TLMoments(xmat[, 1]), "gev"), select = "shape")
 
+# Theoretical values (leftrim and/or rightrim have to be specified)
 para <- as.parameters(loc = 10, scale = 5, shape = .2, distr = "gev")
 est_cov(para, set.n = 100)
 est_cov(para, rightrim = 1, set.n = 100)
 
-# var(replicate(1000, parameters(TLMoments(evd::rgev(100, 10, 5, .2)), "gev")[1]))
-# var(replicate(1000, parameters(TLMoments(evd::rgev(100, 10, 5, .2), rightrim = 1), "gev")[1]))
+# var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2)), "gev"))))
+# var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2), rightrim = 1), "gev"))))
+
+# Parameter estimates from regionalized TLMoments:
+est_cov(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"))
+
 
 ### 4. Quantiles:
 
-library(evd)
-x <- evd::rgev(100, shape = .2)
+xvec <- rgev(100, shape = .2)
+xmat <- cbind(rgev(100, shape = .1), rgev(100, shape = .3))
 
-q <- quantiles(parameters(TLMoments(x), "gev"), c(.9, .95, .99))
-est_cov(q) # default parametric
-est_cov(q, np.cov = TRUE) # explicit non-parametric
-
-q <- quantiles(parameters(TLMoments(c(rep(NA, 1000), x), na.rm = TRUE), "gev"), c(.9, .95, .99))
+# Covariance estimation of parameters normally with parametric assumption:
+q <- quantiles(parameters(TLMoments(xvec), "gev"), c(.9, .95, .99))
 est_cov(q)
+est_cov(q, select = c("0.9", "0.99"))
+est_cov(q, select = .95)
 
-q <- quantiles(parameters(TLMoments(x, rightrim = 1), "gev"), c(.9, .95, .99))
-est_cov(q) # default parametric
-est_cov(q, np.cov = TRUE) # explicit non-parametric
+# A nonparametric estimation can be enforced with np.cov:
+est_cov(q, np.cov = TRUE)
 
-x <- evd::rgev(1000, shape = .1)
-q <- quantiles(parameters(TLMoments(x), "gev"), c(.9, .95, .99))
-est_cov(q) # default parametric
-est_cov(q, np.cov = TRUE) # explicit non-parametric
+# Matrix inputs
+q <- quantiles(parameters(TLMoments(xmat, 0, 1), "gev"), c(.9, .95, .99))
+est_cov(q)
+est_cov(q, select = .99)
+q <- quantiles(parameters(TLMoments(xmat[, 1, drop = FALSE], 0, 1), "gev"), c(.9, .95, .99))
+est_cov(q, select = .99)
 
+# Theoretical values
 q <- quantiles(as.parameters(loc = 10, scale = 5, shape = .3, distr = "gev"), c(.9, .99))
 est_cov(q)
 est_cov(q, leftrim = 0, rightrim = 1)
 est_cov(q, leftrim = 0, rightrim = 1, set.n = 100)
 
-}
+# Quantile estimates from regionalized TLMoments:
+est_cov(quantiles(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"), c(.9, .99)))
 
+
+}
+\seealso{
+\code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{parameters}}, \code{\link{quantiles}}
+}

@@ -6,6 +6,7 @@
 #' @param order integer, order of probability weighted moment, can be a set of \{0,1,...\}
 #' @param na.rm logical, indicates if NAs should be removed
 #' @return double, the PWM of orders \code{order} of \code{x}
+#' @seealso \code{\link{PWMs}}
 #' @examples
 #' PWM(rnorm(25))
 #' PWM(rnorm(25), order = 2)

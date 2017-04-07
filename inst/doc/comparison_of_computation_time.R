@@ -5,7 +5,7 @@ library(TLMoments)
 ## ------------------------------------------------------------------------
 n <- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
 sapply(n, function(nn) {
-  x <- evd::rgev(nn)
+  x <- rgev(nn)
   check <- lmomco::lmoms(x, 4)$lambdas
   sapply(c("direct", "pwm", "recursive"), function(comp) {
     isTRUE(all.equal(TLMoment(x, order = 1:4, computation.method = comp), check, check.attributes = FALSE))
@@ -22,7 +22,7 @@ possib <- list(
 )
 
 # n = 50
-datalist <- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist <- replicate(200, rgev(50), simplify = FALSE)
 
 do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -45,14 +45,14 @@ possib <- list(
 )
 
 # n = 50
-datalist <- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist <- replicate(200, rgev(50), simplify = FALSE)
 
 do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 
 # n = 1000
-datalist <- replicate(200, evd::rgev(1000), simplify = FALSE)
+datalist <- replicate(200, rgev(1000), simplify = FALSE)
 
 do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
@@ -60,18 +60,21 @@ do.call("rbind", lapply(possib, function(f) {
 
 ## ------------------------------------------------------------------------
 n <- c(25, 50, 100, 150, 200, 500, 1000, 10000)
+names(n) <- paste("n", n, sep = "=")
 sapply(n, function(nn) {
-  x <- evd::rgev(nn)
+  x <- rgev(nn)
   check <- lmomco::TLmoms(x, 4, leftrim = 0, rightrim = 1)$lambdas
   sapply(c("direct", "pwm", "recursive", "recurrence"), function(comp) {
-    isTRUE(all.equal(TLMoment(x, order = 1:4, rightrim = 1, computation.method = comp), check, check.attributes = FALSE))
+    tlm <- suppressWarnings(TLMoments(x, rightrim = 1, computation.method = comp)$lambdas)
+    isTRUE(all.equal(tlm, check, check.attributes = FALSE))
   })
 })
 sapply(n, function(nn) {
-  x <- evd::rgev(nn)
+  x <- rgev(nn)
   check <- lmomco::TLmoms(x, 4, leftrim = 2, rightrim = 4)$lambdas
   sapply(c("direct", "pwm", "recursive", "recurrence"), function(comp) {
-    isTRUE(all.equal(TLMoment(x, order = 1:4, leftrim = 2, rightrim = 4, computation.method = comp), check, check.attributes = FALSE))
+    tlm <- suppressWarnings(TLMoments(x, leftrim = 2, rightrim = 4, computation.method = comp)$lambdas)
+    isTRUE(all.equal(tlm, check, check.attributes = FALSE))
   })
 })
 
@@ -84,14 +87,14 @@ possib <- list(
 )
 
 # n = 50
-datalist <- replicate(200, evd::rgev(50), simplify = FALSE)
+datalist <- replicate(200, rgev(50), simplify = FALSE)
 
 do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 
 # n = 1000
-datalist <- replicate(200, evd::rgev(1000), simplify = FALSE)
+datalist <- replicate(200, rgev(1000), simplify = FALSE)
 
 do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]

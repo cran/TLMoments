@@ -12,27 +12,30 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.parameters}.
+#' @seealso \code{\link{parameters}}, \code{\link{est_cov}}
 #' @examples
-#' x <- cbind(evd::rgev(100, shape = .2), evd::rgev(100, shape = .2))
+#' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
 #'
 #' p <- parameters(TLMoments(x[, 1]), "gev")
 #' summary(p)
+#' summary(p, select = c("scale", "shape"))
 #'
 #' p <- parameters(TLMoments(x[, 1], rightrim = 1), "gev")
 #' summary(p)
 #'
 #' p <- parameters(TLMoments(x), "gev")
 #' summary(p)
+#' summary(p, select = "shape")
 #'
 #' p <- as.parameters(loc = 10, scale = 5, shape = .3, distr = "gev")
-#' summary(p, rightrim = 0, n = 100)
-#' summary(p, rightrim = 1, n = 100)
+#' summary(p)
+#' summary(p, rightrim = 1, set.n = 250)
 #'
 #' @method summary parameters
 #' @export
 summary.parameters <- function(object, ci.level = .9, ...) {
   if (length(ci.level) != 1 | !is.numeric(ci.level)) stop("ci must be a numeric vector of length 1. ")
-  if (!("parameters" %in% class(object))) stop("First argument has to be of class parameters ")
+  if (!("parameters" %in% class(object))) stop("First argument has to be an object of class parameters. ")
 
   UseMethod("summary.parameters")
 }
@@ -44,12 +47,13 @@ summary.parameters.numeric <- function(object, ci.level = .9, ...) {
 
   # param ci
   cov <- est_cov(object, ...)
-  param_ci <- object %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- names(object) %in% colnames(cov)
+  param_ci <- object[sel] %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     param = object,
     ci.level = ci.level,
-    ci = cbind(LCL = param_ci[, 1], param = object, UCL = param_ci[, 2]),
+    ci = cbind(LCL = param_ci[, 1], param = object[sel], UCL = param_ci[, 2]),
     cov = cov
   )
 
@@ -64,12 +68,13 @@ summary.parameters.matrix <- function(object, ci.level = .9, ...) {
 
   # lambda ci
   cov <- est_cov(object, ...)
-  param_ci <- as.vector(object) %-+% (u * sqrt(diag(as.matrix(cov))))
+  sel <- paste(rownames(object), col(object), sep = "_") %in% colnames(cov)
+  param_ci <- as.vector(object[sel]) %-+% (u * sqrt(diag(as.matrix(cov))))
 
   out <- list(
     param = object,
     ci.level = ci.level,
-    ci = cbind(LCL = param_ci[, 1], param = as.vector(object), UCL = param_ci[, 2]),
+    ci = cbind(LCL = param_ci[, 1], param = as.vector(object[sel]), UCL = param_ci[, 2]),
     cov = cov
   )
 
@@ -79,18 +84,21 @@ summary.parameters.matrix <- function(object, ci.level = .9, ...) {
 
 #' @export
 print.summary.parameters <- function(x, ...) {
+  # summary prints an overview of the data and what was done and ci of the parameters
+
   if (attr(x$param, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {
     # Theoretical data
+    cat("Distribution: ", toupper(attr(x$cov, "distribution")), "(", paste(names(x$param), x$param, sep = "=", collapse = ", "), ")\n", sep = "")
+    cat("Confidence intervals based on assumptions: \n")
+    cat("\tTL(", paste0(attr(x$cov, "trimmings"), collapse = ","), ")\n", sep = "")
+    cat("\tn = ", attr(x$cov, "n"), "\n", sep = "")
   } else {
     # Real data
     ns <- attr(x$param, "source")$n
     cat(length(ns), " data row(s) with n = ", paste0(ns, collapse = ", "), ".\n", sep = "")
-    cat("TL(", paste0(attr(x$param, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$param, "distr")), " parameters. \n", sep = "")
+    cat("TL(", paste0(attr(x$param, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$param, "distribution")), " parameters. \n", sep = "")
   }
   cat("\n")
   cat("Approximate ", x$ci.level, "% confidence interval of parameters: \n", sep = "")
   print(x$ci)
-  #cat("\n")
-  #cat("Covariance matrix of parameters estimates: \n", sep = "")
-  #print(x$cov)
 }

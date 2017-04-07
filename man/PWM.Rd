@@ -24,4 +24,6 @@ PWM(rnorm(25))
 PWM(rnorm(25), order = 2)
 PWM(rnorm(25), order = c(0, 2, 4))
 }
-
+\seealso{
+\code{\link{PWMs}}
+}

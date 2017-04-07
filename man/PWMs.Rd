@@ -2,11 +2,11 @@
 % Please edit documentation in R/PWMs.R
 \name{PWMs}
 \alias{PWMs}
-\alias{PWMs.TLMoments}
-\alias{PWMs.data.frame}
-\alias{PWMs.list}
-\alias{PWMs.matrix}
 \alias{PWMs.numeric}
+\alias{PWMs.matrix}
+\alias{PWMs.list}
+\alias{PWMs.data.frame}
+\alias{PWMs.TLMoments}
 \title{Probability weighted moments}
 \usage{
 PWMs(x, ...)
@@ -79,4 +79,3 @@ PWMs(TLMoments(xdat, . ~ station + season))
 \references{
 Greenwood, J. A., Landwehr, J. M., Matalas, N. C., & Wallis, J. R. (1979). Probability weighted moments: definition and relation to parameters of several distributions expressable in inverse form. Water Resources Research, 15(5), 1049-1054.
 }
-

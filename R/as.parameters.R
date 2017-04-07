@@ -1,16 +1,15 @@
 #' @title
-#' as.parameters - converting parameter-vectors to a parameters-objects
+#' Converting parameter-vectors to a parameters-objects
 #' @description
-#' Converting parameter-vectors to parameters-objects
+#' description not done yet.
 #' @param ... parameters of distribution
 #' @param x numeric vector, matrix, list, or data.frame of parameters.
 #' @param formula if \code{x} is data.frame a formula has to be given.
 #' @param distr character giving the distribution. Function of name
 #' q\"distr\" has to be available.
-#' @return Named vector of parameters of class parameters. Distribution and
-#' q-function are given as attributes.
+#' @return Named vector of parameters of class parameters.
+#' @seealso \code{\link{parameters}}
 #' @examples
-#' library(evd)
 #' as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 #' as.parameters(c(loc = 3, scale = 2, shape = .4), distr = "gev")
 #'
@@ -28,15 +27,15 @@
 #'
 #' quantiles(as.parameters(xdat, cbind(mean, sd) ~ ., distr = "norm"), c(.99))
 #'
-#' # Quantilberechnung
-#' p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "evd::gev")
+#' # quantile estimation
+#' p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 #' quantiles(p, c(.9, .95))
-#' p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "evd::gev")
+#' p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "gev")
 #' quantiles(p, c(.9, .95))
 #' p <- as.parameters(list(list(mean = 2, sd = 1), list(mean = 0, sd = 1)), distr = "norm")
 #' quantiles(p, c(.95, .975))
 #'
-#' # Mit magrittr
+#' # With magrittr
 #' library(magrittr)
 #' as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev") %>% quantiles(c(.9, .99))
 #' @rdname as.parameters
@@ -47,7 +46,7 @@ as.parameters <- function(..., distr = NULL) {
   # q <- try(get(paste0("q", distr), mode = "function"), silent = TRUE)
   # if (!is.function(q)) stop(paste0("Found no q-function for ", distr))
   if (grepl("::", x = distr)) { # Falls pkg::func
-    f <- sub("^([a-zA-Z0-9]*)::([a-zA-Z0-9]*)$", "\\1::q\\2", x = "evd::gev")
+    f <- sub("^([a-zA-Z0-9]*)::([a-zA-Z0-9]*)$", "\\1::q\\2", x = distr)
     q <- eval(parse(text = paste0("match.fun(", f,")")))
   } else { # falls nur func
     q <- eval(parse(text = paste0("match.fun(q", distr, ")")))
@@ -64,6 +63,7 @@ as.parameters.numeric <- function(..., distr) {
   out <- unlist(list(...))
 
   attr(out, "distribution") <- distr
+  attr(out, "computation.method") <- "input"
   attr(out, "source") <- list(
     func = "as.parameters",
     trimmings = c(NA, NA),
@@ -87,6 +87,7 @@ as.parameters.matrix <- function(x, distr, ...) {
   }
 
   attr(x, "distribution") <- distr
+  attr(x, "computation.method") <- "input"
   attr(x, "source") <- list(
     func = "as.parameters",
     trimmings = c(NA, NA),
@@ -113,6 +114,7 @@ as.parameters.list <- function(x, distr, ...) {
   }
   # ...and add global attributes
   attr(out, "distribution") <- distr
+  attr(out, "computation.method") <- "input"
   attr(out, "source") <- list(
     func = "as.parameters",
     trimmings = c(NA, NA),
@@ -133,6 +135,7 @@ as.parameters.data.frame <- function(x, formula, distr, ...) {
   out <- cbind(x[nam$rhs], x[nam$lhs])
 
   attr(out, "distribution") <- distr
+  attr(out, "computation.method") <- "input"
   attr(out, "source") <- list(
     func = "as.parameters",
     trimmings = c(NA, NA),

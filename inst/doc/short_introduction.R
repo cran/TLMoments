@@ -2,7 +2,7 @@
 library(TLMoments)
 
 ## ------------------------------------------------------------------------
-xvec <- evd::rgev(100, loc = 10, scale = 5, shape = .2)
+xvec <- rgev(100, loc = 10, scale = 5, shape = .2)
 
 ## ------------------------------------------------------------------------
 TLMoments(xvec)
@@ -23,7 +23,7 @@ tlm <- TLMoments(xvec, rightrim = 1)
 quantiles(parameters(tlm, distr = "gev"), c(.9, .99, .999))
 
 ## ------------------------------------------------------------------------
-xmat <- matrix(evd::rgev(100), nc = 4)
+xmat <- matrix(rgev(100), nc = 4)
 xvec <- xmat[, 3]
 xlist <- lapply(1L:ncol(xmat), function(i) xmat[, i])
 xdat <- data.frame(station = rep(1:4, each = 25), hq = as.vector(xmat))
@@ -62,6 +62,16 @@ quantiles(parameters(tlm, distr = "gev"), c(.9, .99, .999))
 quantiles(param, c(.9, .99, .999))
 TLMoments(param)
 TLMoments(param, rightrim = 1)
+
+## ------------------------------------------------------------------------
+tlm <- TLMoments(rgev(100), leftrim = 0, rightrim = 1)
+
+summary(tlm)
+summary(tlm, ci.level = .95, select = 3:4)
+
+summary(parameters(tlm, "gev"))
+
+summary(quantiles(parameters(tlm, "gev"), .99))
 
 ## ------------------------------------------------------------------------
 library(magrittr)

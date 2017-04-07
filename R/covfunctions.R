@@ -45,6 +45,7 @@ v <- function(r, delta, scale, shape) {
   Re(out)
 }
 
+# @return Symmetric Matrix of dimensions determined by \code{betas}.
 PWMCov_GEV <- function(betas = 0:3, scale, shape) {
   if (shape == 0) shape <- 1e-6
   mirs <- min(betas)
@@ -59,12 +60,8 @@ PWMCov_GEV <- function(betas = 0:3, scale, shape) {
   }
   out <- out[betas+1, betas+1, drop = FALSE]
 
-  if (all(dim(out) == c(1, 1))) {
-    setNames(as.numeric(out), paste0("beta", betas))
-  } else {
-    colnames(out) <- rownames(out) <- paste0("beta", betas)
-    out
-  }
+  colnames(out) <- rownames(out) <- paste0("beta", betas)
+  out
 }
 
 parametricPWMCov <- function(distribution, order = 0:3, ...) {

@@ -44,25 +44,25 @@ xdat <- data.frame(
 tlm <- TLMoments(xvec, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, "gev"), c(.9, .99))
 tlm <- TLMoments(xmat, leftrim = 1, rightrim = 1)
-quantiles(parameters(tlm, "gumbel"), c(.9, .95, .999))
+quantiles(parameters(tlm, "gum"), c(.9, .95, .999))
 tlm <- TLMoments(xlist)
 quantiles(parameters(tlm, "gpd"), .999)
-tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 2)
+tlm <- TLMoments(xdat, hq ~ station, leftrim = 2, rightrim = 3)
 quantiles(parameters(tlm, "gev"), seq(.1, .9, .1))
 tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
-quantiles(parameters(tlm, "gev"), seq(.1, .9, .1))
+quantiles(parameters(tlm, "gum"), seq(.1, .9, .1))
 
 # Distribution can be overwritten (but parameters have to fit)
 tlm <- TLMoments(xvec, leftrim = 0, rightrim = 1)
 params <- parameters(tlm, "gev")
 quantiles(params, c(.9, .99))
-quantiles(params[1:2], c(.9, .99), distr = "evd::gumbel")
+quantiles(params[1:2], c(.9, .99), distr = "gum")
 evd::qgumbel(c(.9, .99), loc = params[1], scale = params[2])
 
 
 # Using magrittr
 library(magrittr)
-evd::rgev(50, shape = .3) \%>\%
+rgev(50, shape = .3) \%>\%
   TLMoments(leftrim = 0, rightrim = 1) \%>\%
   parameters("gev") \%>\%
   quantiles(c(.99, .999))
@@ -70,13 +70,11 @@ evd::rgev(50, shape = .3) \%>\%
 # Calculating quantiles to given parameters for arbitrary functions
 quantiles(c(mean = 10, sd = 3), c(.95, .99), "norm")
 qnorm(c(.95, .99), mean = 10, sd = 3)
-quantiles(c(loc = 10, scale = 5, shape = .3), c(.95, .99), "evd::gev")
-evd::qgev(c(.95, .99), loc = 10, scale = 5, shape = .3)
-quantiles(c(loc = 10, scale = 5, shape = .3), c(.95, .99), "evd::gpd")
-evd::qgpd(c(.95, .99), loc = 10, scale = 5, shape = .3)
 
 # These give errors:
 #quantiles(c(loc = 10, scale = 5, shape = .3), c(.95, .99), "notexistingdistribution")
-#quantiles(c(loc = 10, scale = 5, shpe = .3), c(.95, .99), "evd::gev") # wrong arguments
+#quantiles(c(loc = 10, scale = 5, shpe = .3), c(.95, .99), "gev") # wrong arguments
 }
-
+\seealso{
+\code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{parameters}}, \code{\link{summary.quantiles}}
+}

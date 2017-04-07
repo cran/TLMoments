@@ -2,11 +2,11 @@
 % Please edit documentation in R/as.parameters.R
 \name{as.parameters}
 \alias{as.parameters}
-\alias{as.parameters.data.frame}
-\alias{as.parameters.list}
-\alias{as.parameters.matrix}
 \alias{as.parameters.numeric}
-\title{as.parameters - converting parameter-vectors to a parameters-objects}
+\alias{as.parameters.matrix}
+\alias{as.parameters.list}
+\alias{as.parameters.data.frame}
+\title{Converting parameter-vectors to a parameters-objects}
 \usage{
 as.parameters(..., distr = NULL)
 
@@ -29,11 +29,10 @@ q\"distr\" has to be available.}
 \item{formula}{if \code{x} is data.frame a formula has to be given.}
 }
 \value{
-Named vector of parameters of class parameters. Distribution and
-q-function are given as attributes.
+Named vector of parameters of class parameters.
 }
 \description{
-Converting parameter-vectors to parameters-objects
+description not done yet.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -45,8 +44,8 @@ Converting parameter-vectors to parameters-objects
 
 \item \code{data.frame}: as.parameters for numeric data.frames
 }}
+
 \examples{
-library(evd)
 as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 as.parameters(c(loc = 3, scale = 2, shape = .4), distr = "gev")
 
@@ -64,16 +63,18 @@ as.parameters(xdat, cbind(mean, sd) ~ ., distr = "norm")
 
 quantiles(as.parameters(xdat, cbind(mean, sd) ~ ., distr = "norm"), c(.99))
 
-# Quantilberechnung
-p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "evd::gev")
+# quantile estimation
+p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 quantiles(p, c(.9, .95))
-p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "evd::gev")
+p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "gev")
 quantiles(p, c(.9, .95))
 p <- as.parameters(list(list(mean = 2, sd = 1), list(mean = 0, sd = 1)), distr = "norm")
 quantiles(p, c(.95, .975))
 
-# Mit magrittr
+# With magrittr
 library(magrittr)
 as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev") \%>\% quantiles(c(.9, .99))
 }
-
+\seealso{
+\code{\link{parameters}}
+}

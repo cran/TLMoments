@@ -16,6 +16,7 @@
 #' @param leftrim,rightrim integer, order of trimmed L-moments
 #' @param ... additional arguments
 #' @return an object with class TLMoments, ready to commit to other TLMoments-functions
+#' @seealso \code{\link{TLMoments}}
 #' @examples
 #' ### Vector or matrix as input
 #' xmat <- cbind(c(1, .2, .05), c(1, .2, .04), c(1.3, .3, .1))

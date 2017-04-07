@@ -1,7 +1,7 @@
 #' @title
 #' Estimate the covariance matrix of PWM estimations
 #' @description
-#' description not done yet
+#' Internal function. Use \link{est_cov}. Description not done yet.
 #' @param x numeric vector or matrix of data
 #' @param order numeric vector giving the orders that are returned.
 #' @param distr character of length 1 which indicates a distribution if a
@@ -11,12 +11,12 @@
 #' @return numeric matrix
 #' @examples
 #' ### Numeric vectors
-#' x <- evd::rgev(500, shape = .2)
+#' x <- rgev(500, shape = .2)
 #' est_pwmcov(x)
 #' est_pwmcov(x, distr = "gev")
 #'
 #' ### Numeric matrices
-#' x <- matrix(evd::rgev(600, shape = .2), nc = 3)
+#' x <- matrix(rgev(600, shape = .2), nc = 3)
 #' est_pwmcov(x, order = 0:2)
 #' est_pwmcov(x, order = 0:2, distr = "gev")
 #'
@@ -44,7 +44,7 @@ est_pwmcov.numeric <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0
 
   if (is.null(distr)) {
     # nonparametric estimation
-    r <- cov(pseudo(x, order))
+    r <- stats::cov(pseudo(x, order))
   } else {
     # parametric estimation
     # scale and shape are estimated using L-moments.
@@ -58,8 +58,10 @@ est_pwmcov.numeric <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0
     }
   }
 
-  rownames(r) <- colnames(r) <- paste0("beta_", order)
-  r / sum(!is.na(x))
+  rownames(r) <- colnames(r) <- buildNames("beta", order)
+  out <- r / sum(!is.na(x))
+  attr(out, "distribution") <- distr
+  out
 }
 
 #' @rdname est_pwmcov
@@ -71,8 +73,8 @@ est_pwmcov.matrix <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0)
   # Berechnung von Pseudobeobachtungen fuer jede Dimension
   pseudos <- lapply(1L:J, function(i) pseudo(x[, i], order))
   # Berechnung der Sigma-Matrix (ohne Korrekturvorfaktor)
-  sigma <- cov(do.call("cbind", pseudos), use = "pairwise.complete.obs")
-  rownames(sigma) <- colnames(sigma) <- paste0(rep(paste0("beta", order), J), "_", rep(1:J, each = length(order)))
+  sigma <- stats::cov(do.call("cbind", pseudos), use = "pairwise.complete.obs")
+  rownames(sigma) <- colnames(sigma) <- buildNames("beta", order, 1:J)
 
   if (!is.null(distr)) {
     # parametric estimation, overwrites non-diagonal block matrices
@@ -85,7 +87,7 @@ est_pwmcov.matrix <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0)
     sigma <- blockdiag_list(r, sigma)
   }
 
-  # Berechnung des Korrekturvorfaktors
+  # Calculation correction factor
   rs <- apply(x, 2, function(y) sum(!is.na(y))/length(y))
   vorf <- do.call(rbind, lapply(1:J, function(i) {
     do.call(cbind, lapply(1:J, function(j) {
@@ -94,6 +96,8 @@ est_pwmcov.matrix <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0)
   }))
 
   # Ausgeben
-  vorf*sigma / max(apply(x, 2, function(y) sum(!is.na(y))))
+  out <- vorf*sigma / max(apply(x, 2, function(y) sum(!is.na(y))))
+  attr(out, "distribution") <- distr
+  out
 }
 
