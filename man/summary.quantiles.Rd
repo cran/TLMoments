@@ -7,7 +7,7 @@
 \method{summary}{quantiles}(object, ci.level = 0.9, ...)
 }
 \arguments{
-\item{object}{object of quantiles}
+\item{object}{object of quantiles.}
 
 \item{ci.level}{numeric vector of length 1 giving the confidence level (default is 0.9).}
 

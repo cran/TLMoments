@@ -2,6 +2,7 @@
 #' Estimate the covariance matrix of TL-moments estimations
 #' @description
 #' Internal function. Use \link{est_cov}. Description not done yet.
+#'
 #' @param x numeric vector or matrix containing data OR an object of TLMoments.
 #' @param leftrim,rightrim integer indicating lower and upper trimming parameters, have to be non-negative integers.
 #' @param order numeric vector giving the orders that are returned (default is first three L-moments).
@@ -10,8 +11,10 @@
 #' @param lambda.cov boolean, if TRUE (default) TL-moment estimation covariance matrix is calculated.
 #' @param ratio.cov boolean, if TRUE (default) TL-moment-ratio estimation covariance matrix is calculated.
 #' @param reg.weights numeric vector of weights for regionalized TLMoments.
-#' @param ... additional arguments, ignored.
+#' @param ... additional arguments.
+#'
 #' @return a list of numeric matrices (if \code{lambda.cov} and \code{ratio.cov} are TRUE (default)), or a single matrix.
+#'
 #' @examples
 #' ### Numeric vectors
 #' x <- rgev(500, loc = 10, scale = 5, shape = .1)
@@ -19,8 +22,12 @@
 #' est_tlmcov(x)
 #' est_tlmcov(x, order = 2:3)
 #' est_tlmcov(x, rightrim = 1, order = 4:5)
-#' # cov(t(replicate(10000, TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$lambdas)))
-#' # cov(t(replicate(10000, TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$ratios)))
+#' # cov(t(replicate(10000,
+#' #   TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$lambdas)
+#' # ))
+#' # cov(t(replicate(10000,
+#' #   TLMoments(rgev(500, loc = 10, scale = 5, shape = .1))$ratios)
+#' # ))
 #'
 #' est_tlmcov(x, ratio.cov = FALSE)
 #' est_tlmcov(x, lambda.cov = FALSE)
@@ -40,15 +47,23 @@
 #'
 #' est_tlmcov(x)
 #' est_tlmcov(x, order = 3:4)
-#' # cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[3:4, ]))))
-#' # cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[3:4, ]))))
+#' # cov(t(replicate(10000,
+#' #   as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[3:4, ])
+#' # )))
+#' # cov(t(replicate(10000,
+#' #   as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[3:4, ])
+#' # )))
 #'
 #' est_tlmcov(x, ratio.cov = FALSE)
 #' est_tlmcov(x, lambda.cov = FALSE)
 #'
 #' TLMoments:::est_tlmcov(x, order = 2:3, distr = "gev")
-#' # cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[2:3, ]))))
-#' # cov(t(replicate(10000, as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[2:3, ]))))
+#' # cov(t(replicate(10000,
+#' #   as.vector(TLMoments(matrix(rgev(600), nc = 3))$lambdas[2:3, ])
+#' # )))
+#' # cov(t(replicate(10000,
+#' #   as.vector(TLMoments(matrix(rgev(600), nc = 3))$ratios[2:3, ])
+#' # )))
 #'
 #' ### TLMoments-object (theoretical calculation)
 #' tlm <- TLMoments(as.parameters(loc = 10, scale = 5, shape = .1, distr = "gev"), 0, 1)
@@ -93,7 +108,7 @@ est_tlmcov.numeric <- function(x,
   pwmcov <- est_pwmcov(x, 0:(maxk-1), distr = distr, distr.trim = c(leftrim, rightrim))
 
   Z <- sapply(0:(maxk-1), function(k) sapply(0:(max(order)-1), function(r) {
-    .Call('TLMoments_z_C', PACKAGE = 'TLMoments', r, k, leftrim, rightrim)
+    z_C(r, k, leftrim, rightrim)
   }))
   lambdacov <- (Z %*% pwmcov %*% t(Z))
   rownames(lambdacov) <- colnames(lambdacov) <- buildNames("L", 1L:max(order))
@@ -143,7 +158,7 @@ est_tlmcov.matrix <- function(x,
   pwmcov <- est_pwmcov(x, 0:(maxk-1), distr = distr, distr.trim = c(leftrim, rightrim))
 
   z <- sapply(0:(maxk-1), function(k) sapply(0:(max(order)-1), function(r) {
-    .Call('TLMoments_z_C', PACKAGE = 'TLMoments', r, k, leftrim, rightrim)
+    z_C(r, k, leftrim, rightrim)
   }))
 
   Z <- blockdiag(z, ncol(x))
@@ -210,11 +225,14 @@ est_tlmcov.TLMoments <- function(x,
 
   if (!("numeric" %in% class(x$lambdas)))
     stop("x must be a numeric TLMoments-object. ")
-  if (!(attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
+
+  if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("est_tlmcov.TLMoments only for theoretical values. ")
+
   if (is.null(distr))
     distr <- attr(attr(x, "source")$data, "distribution")
     if (is.null(distr)) stop("distr argument must be given.")
+
   if (is.na(set.n) | !is.numeric(set.n)) {
     #warning("Missing or invalid set.n argument. Giving results for n = 100. ")
     n <- 100
@@ -226,7 +244,7 @@ est_tlmcov.TLMoments <- function(x,
   pwmcov <- r / n
 
   Z <- sapply(0:(maxk-1), function(k) sapply(0:(max(order)-1), function(r) {
-    .Call('TLMoments_z_C', PACKAGE = 'TLMoments', r, k, leftrim, rightrim)
+    z_C(r, k, leftrim, rightrim)
   }))
   lambdacov <- (Z %*% pwmcov %*% t(Z))
   rownames(lambdacov) <- colnames(lambdacov) <- paste0("L", 1:max(order))

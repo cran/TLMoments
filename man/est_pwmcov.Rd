@@ -15,7 +15,7 @@ est_pwmcov(x, order = 0:3, distr = NULL, distr.trim = c(0, 0))
   distr.trim = c(0, 0))
 }
 \arguments{
-\item{x}{numeric vector or matrix of data}
+\item{x}{numeric vector or matrix of data.}
 
 \item{order}{numeric vector giving the orders that are returned.}
 

@@ -19,21 +19,19 @@ as.PWMs(x, ..., order = NULL)
 \method{as.PWMs}{data.frame}(x, formula, order = NULL, ...)
 }
 \arguments{
-\item{x}{vector or matrix of PWMs}
+\item{x}{vector or matrix of PWMs.}
 
 \item{...}{additional arguments.}
 
-\item{order}{integer, corresponding order to given PWMs. If NULL, order is
-set to 0:(length(x)-1).}
+\item{order}{integer, corresponding order to given PWMs. If NULL, order is set to 0:(length(x)-1).}
 
 \item{formula}{if \code{x} is data.frame. See examples.}
 }
 \value{
-a PWMs-object, see PWMs-help
+object of class PWMs, see PWMs help page.
 }
 \description{
-Convert vector, matrix, list, or data.frame to a PWMs-object. Note that there is no
-calculation of PWMs here. If PWMs should be calculated from data, use PWMs.
+Convert vector, matrix, list, or data.frame to PWMs-objects.
 }
 \section{Methods (by class)}{
 \itemize{

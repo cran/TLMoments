@@ -2,14 +2,17 @@
 #' Estimate the covariance matrix of parameter estimations
 #' @description
 #' Internal function. Use \link{est_cov}. Description not done yet.
+#'
 #' @param x numeric vector or matrix containing data OR an object of parameters.
 #' @param distr character indicating the distribution from which the parameters are calculated. If x is parameters-object, distr does not need to be specified.
 #' @param leftrim,rightrim lower and upper trimming parameter used for parameter calculation, have to be non-negative integers.
 #' @param np.cov boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).
 #' @param reg.weights numeric vector of weights for regionalized TLMoments.
 #' @param set.n hypothetical data length n if theoretical values are given.
-#' @param ... additional arguments, ignored.
+#' @param ... additional arguments.
+#'
 #' @return numeric matrix
+#'
 #' @examples
 #' ### Numeric vectors
 #' x <- rgev(500, shape = .2)
@@ -20,11 +23,15 @@
 #'
 #' parameters(TLMoments(x, rightrim = 1), "gev")
 #' est_paramcov(x, "gev", 0, 1)
-#' #cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev"))))
+#' #cov(t(replicate(10000,
+#' #   parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev")
+#' #)))
 #'
 #' parameters(TLMoments(x, rightrim = 2), "gev")
 #' est_paramcov(x, "gev", 0, 2)
-#' #cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 2), "gev"))))
+#' #cov(t(replicate(10000,
+#' #  parameters(TLMoments(rgev(500, shape = .2), rightrim = 2), "gev")
+#' #)))
 #'
 #' ### Numeric matrices
 #' x <- matrix(rgev(600, shape = .2), nc = 3)
@@ -45,14 +52,14 @@
 #' @rdname est_paramcov
 #' @export
 est_paramcov <- function(x,
-                         distr,
+                         distr = "",
                          leftrim = 0L,
                          rightrim = 0L,
                          ...) {
 
   if ("parameters" %in% class(x)) {
     distr <- attr(x, "distribution")
-    if (!any(is.na(attr(x, "source")$trimming))) {
+    if (!any(is.null(attr(x, "source")$trimming))) {
       leftrim <- attr(x, "source")$trimming[1]
       rightrim <- attr(x, "source")$trimming[2]
     }
@@ -147,16 +154,16 @@ est_paramcov.parameters <- function(x,
                                     ...) {
   if (!("numeric" %in% class(x)))
     stop("x must be a numeric parameters-object. ")
-  if (!(attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
+  if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("est_paramcov.parameters only for theoretical values. ")
 
-  if (are.integer.like(leftrim) && is.na(rightrim)) {
+  if (are.integer.like(leftrim) && is.null(rightrim)) {
     rightrim <- 0
   }
-  if (are.integer.like(rightrim) && is.na(leftrim)) {
+  if (are.integer.like(rightrim) && is.null(leftrim)) {
     leftrim <- 0
   }
-  if (any(is.na(c(leftrim, rightrim)))) {
+  if (any(is.null(c(leftrim, rightrim)))) {
     #warning("No trimmings found, set to leftrim = 0, rightrim = 0. ")
     leftrim <- rightrim <- 0
   }

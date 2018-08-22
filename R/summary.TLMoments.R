@@ -2,7 +2,8 @@
 #' Summary TLMoments
 #' @description
 #' Calculating and printing of summary statistics to a given TLMoments-object.
-#' @param object object of TLMoments
+#'
+#' @param object object of TLMoments.
 #' @param ci.level numeric vector of length 1 giving the confidence level (default is 0.9).
 #' @param ... additional arguments submitted to \code{est_cov}.
 #' @return A \code{summary.TLMoments}-object, a list with dimensions \itemize{
@@ -14,6 +15,7 @@
 #'  \item \code{ratio.cov}
 #' }
 #' It is printed with \code{print.summary.TLMoments}.
+#'
 #' @seealso \code{\link{TLMoments}}, \code{\link{est_cov}}
 #' @examples
 #' tlm <- TLMoments(rgev(100, shape = .2))
@@ -109,14 +111,14 @@ summary.TLMoments.matrix <- function(object, ci.level = .9, ...) {
 
 #' @export
 print.summary.TLMoments <- function(x, ...) {
-  if (attr(x$tlm, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {
+  if (any(attr(x$tlm, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {
     # Theoretical data
     cat("TL(", attr(x$tlm, "leftrim"), ",", attr(x$tlm, "rightrim"), ") given.  \n", sep = "")
     cat("Confidence intervals based on assumptions: \n")
     cat("\tTrue distribution: ", toupper(attr(x$cov, "distribution")), "\n", sep = "")
     cat("\tn = ", attr(x$cov, "n"), "\n", sep = "")
   } else {
-    # Real data
+    # Empirical data
     ns <- attr(x$tlm, "source")$n
     cat(length(ns), " data row(s) with n = ", paste0(ns, collapse = ", "), ".\n", sep = "")
     cat("TL(", attr(x$tlm, "leftrim"), ",", attr(x$tlm, "rightrim"), ") calculated. \n", sep = "")

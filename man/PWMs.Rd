@@ -17,23 +17,24 @@ PWMs(x, ...)
 
 \method{PWMs}{list}(x, max.order = 4L, na.rm = FALSE, ...)
 
-\method{PWMs}{data.frame}(x, formula, max.order = 4L, na.rm = FALSE, ...)
+\method{PWMs}{data.frame}(x, formula, max.order = 4L, na.rm = FALSE,
+  ...)
 
 \method{PWMs}{TLMoments}(x, ...)
 }
 \arguments{
-\item{x}{numeric vector or matrix, list, or data.frame of data OR an object of TLMoments}
+\item{x}{numeric vector or matrix, list, or data.frame of data OR an object of TLMoments.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments.}
 
-\item{max.order}{integer, maximal order of PWMs}
+\item{max.order}{integer, maximal order of PWMs.}
 
-\item{na.rm}{logical, indicates if NAs should be removed}
+\item{na.rm}{logical, indicates if NAs should be removed.}
 
-\item{formula}{if x is of type data.frame a formula has to be submitted}
+\item{formula}{if x is of type data.frame a formula has to be submitted.}
 }
 \value{
-a numeric vector, matrix, list, or data.frame consisting of the PWMs and
+numeric vector, matrix, list, or data.frame consisting of the PWMs and
 with class \code{PWMs}.
 The object contains the following attributes: \itemize{
  \item \code{order}: a integer vector with corresponding PWM orders
@@ -74,6 +75,13 @@ PWMs(TLMoments(xdat, hq ~ station))
 PWMs(TLMoments(xdat, hq ~ season))
 PWMs(TLMoments(xdat, hq ~ .))
 PWMs(TLMoments(xdat, . ~ station + season))
+
+# In data.frame-mode invalid names are preceded by "."
+xdat <- data.frame(
+ beta0 = rep(letters[1:2], each = 50),
+ beta1 = as.vector(xmat)
+)
+PWMs(xdat, formula = beta1 ~ beta0)
 
 }
 \references{

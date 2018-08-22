@@ -1,15 +1,16 @@
 #' @title
 #' Convert to PWMs-object
 #' @description
-#' Convert vector, matrix, list, or data.frame to a PWMs-object. Note that there is no
-#' calculation of PWMs here. If PWMs should be calculated from data, use PWMs.
-#' @param x vector or matrix of PWMs
+#' Convert vector, matrix, list, or data.frame to PWMs-objects.
+#'
+#' @param x vector or matrix of PWMs.
 #' @param formula if \code{x} is data.frame. See examples.
-#' @param order integer, corresponding order to given PWMs. If NULL, order is
-#' set to 0:(length(x)-1).
+#' @param order integer, corresponding order to given PWMs. If NULL, order is set to 0:(length(x)-1).
 #' @param ... additional arguments.
-#' @return a PWMs-object, see PWMs-help
+#'
+#' @return object of class PWMs, see PWMs help page.
 #' @seealso \code{\link{PWMs}}
+#'
 #' @examples
 #' xmat <- cbind(c(0.12, .41, .38, .33), c(.05, 0.28, .25, .22))
 #' xvec <- xmat[, 1]
@@ -57,6 +58,7 @@ as.PWMs <- function(x, ..., order = NULL) {
   UseMethod("as.PWMs")
 }
 
+
 #' @describeIn as.PWMs as.PWMs for numeric data vectors
 #' @method as.PWMs numeric
 #' @export
@@ -64,13 +66,7 @@ as.PWMs.numeric <- function(x, order = seq_along(x)-1, ...) {
   if (length(x) != length(order)) stop("length of order has to equal the length of x")
 
   out <- setNames(x, paste0("beta", order))
-  attr(out, "order") <- order
-  attr(out, "source") <- list(func = "as.PWMs",
-                              data = x,
-                              n = NA,
-                              formula = NA)
-  class(out) <- c("PWMs", "numeric")
-  out
+  returnPWMs(out, order, input = x, func = "as.PWMs")
 }
 
 #' @describeIn as.PWMs as.PWMs for numeric data matrices
@@ -81,13 +77,7 @@ as.PWMs.matrix <- function(x, order = row(x)[, 1]-1, ...) {
 
   out <- x
   rownames(out) <- paste0("beta", order)
-  attr(out, "order") <- order
-  attr(out, "source") <- list(func = "as.PWMs",
-                              data = x,
-                              n = NA,
-                              formula = NA)
-  class(out) <- c("PWMs", "matrix")
-  out
+  returnPWMs(out, order, input = x, func = "as.PWMs")
 }
 
 #' @describeIn as.PWMs as.PWMs for numeric data lists
@@ -99,13 +89,7 @@ as.PWMs.list <- function(x, order = seq_along(x[[1]])-1, ...) {
   out <- x
   for (i in 1L:length(out)) names(out[[i]]) <- paste0("beta", order)
 
-  attr(out, "order") <- order
-  attr(out, "source") <- list(func = "as.PWMs",
-                              data = x,
-                              n = NA,
-                              formula = NA)
-  class(out) <- c("PWMs", "matrix")
-  out
+  returnPWMs(out, order, input = x, func = "as.PWMs")
 }
 
 #' @describeIn as.PWMs as.PWMs for numeric data.frames
@@ -123,11 +107,5 @@ as.PWMs.data.frame <- function(x, formula, order = NULL, ...) {
     as.data.frame(t(apply(x[nam$lhs], 1, as.PWMs, order = order)))
   )
 
-  attr(out, "order") <- order
-  attr(out, "source") <- list(func = "as.PWMs",
-                              data = x,
-                              n = NA,
-                              formula = formula)
-  class(out) <- c("PWMs", "data.frame")
-  out
+  returnPWMs(out, order, input = x, formula = formula, func = "as.PWMs")
 }

@@ -1,6 +1,12 @@
 ## ----echo=FALSE, message=FALSE-------------------------------------------
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+## ------------------------------------------------------------------------
 library(TLMoments)
+library(lmomco)
+library(Lmoments)
+library(lmom)
+sessionInfo()
 
 ## ------------------------------------------------------------------------
 n <- c(25, 50, 100, 200, 500, 1000, 10000, 50000)

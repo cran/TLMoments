@@ -2,9 +2,11 @@
 #' Summary quantiles
 #' @description
 #' Calculating and printing of summary statistics to a given quantiles-object.
-#' @param object object of quantiles
+#'
+#' @param object object of quantiles.
 #' @param ci.level numeric vector of length 1 giving the confidence level (default is 0.9).
 #' @param ... additional arguments submitted to \code{est_cov}.
+#'
 #' @return A \code{summary.quantiles}-object, a list with dimensions \itemize{
 #'  \item \code{q}
 #'  \item \code{ci.level}
@@ -12,6 +14,7 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.quantiles}.
+#'
 #' @seealso \code{\link{quantiles}}, \code{\link{est_cov}}
 #' @examples
 #' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
@@ -84,14 +87,14 @@ summary.quantiles.matrix <- function(object, ci.level = .9, ...) {
 
 #' @export
 print.summary.quantiles <- function(x, ...) {
-  if (attr(x$q, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {
+  if (any(attr(x$q, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {
     # Theoretical data
     cat("Confidence intervals based on assumptions: \n")
     cat("\tTrue distribution: ", toupper(attr(x$cov, "distribution")), "\n", sep = "")
     cat("\tTL(", paste0(attr(x$cov, "trimmings"), collapse = ","), ") estimation\n", sep = "")
     cat("\tn = ", attr(x$cov, "n"), "\n", sep = "")
   } else {
-    # Real data
+    # Empirical data
     ns <- attr(x$q, "source")$n
     cat(length(ns), " data row(s) with n = ", paste0(ns, collapse = ", "), ".\n", sep = "")
     cat("TL(", paste0(attr(x$q, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$q, "distr")), " parameters to calculate ", paste0(attr(x$q, "p"), collapse = ", "), " quantile estimates. \n", sep = "")

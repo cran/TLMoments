@@ -16,7 +16,7 @@ you have to specify the \code{distr}-argument.}
 "gev", "gum" and "gpd". You do not need to set this, if \code{x} is from parameters.}
 }
 \value{
-a numeric vector, matrix, list, or data.frame of the quantiles and with class
+numeric vector, matrix, list, or data.frame of the quantiles and with class
 \code{quantiles}. The object contains the following attributes: \itemize{
  \item \code{distribution}: a character indicating the used distribution
  \item \code{p}: a vector with the calculated quantiles

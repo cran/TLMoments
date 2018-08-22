@@ -15,25 +15,26 @@ TLMoments(x, ...)
 \method{TLMoments}{numeric}(x, leftrim = 0L, rightrim = 0L,
   max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
 
-\method{TLMoments}{matrix}(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
-  na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{matrix}(x, leftrim = 0L, rightrim = 0L,
+  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
 
-\method{TLMoments}{list}(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
-  na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{list}(x, leftrim = 0L, rightrim = 0L,
+  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
 
-\method{TLMoments}{data.frame}(x, formula, leftrim = 0L, max.order = 4L,
-  rightrim = 0L, na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{data.frame}(x, formula, leftrim = 0L, rightrim = 0L,
+  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
 
 \method{TLMoments}{PWMs}(x, leftrim = 0L, rightrim = 0L, ...)
 
-\method{TLMoments}{parameters}(x, leftrim = attr(x, "source")$trimmings[1],
-  rightrim = attr(x, "source")$trimmings[2], max.order = 4L, ...)
+\method{TLMoments}{parameters}(x, leftrim = attr(x,
+  "source")$trimmings[1], rightrim = attr(x, "source")$trimmings[2],
+  max.order = 4L, ...)
 }
 \arguments{
 \item{x}{numeric data in form of vector, matrix, list, or data.frame OR an object
 of class parameters or PWMs.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments.}
 
 \item{leftrim}{integer indicating lower trimming parameter, has to be greater than 0.}
 
@@ -53,15 +54,14 @@ Possible values are \code{auto} (default, automatically choose appropriate metho
 \item{formula}{if \code{x} is data.frame. See examples.}
 }
 \value{
-a list of two dimensions: \code{lambdas}/\code{ratios} are a numeric vector, matrix,
+list of two dimensions: \code{lambdas}/\code{ratios} are a numeric vector, matrix,
 list, or data.frame consisting of the TL-moments/TL-moment-ratios. The list has the class
 \code{TLMoments}.
 The object contains the following attributes: \itemize{
  \item \code{leftrim}: a numeric giving the used leftrim-argument
  \item \code{rightrim}: a numeric giving the used rightrim-argument
  \item \code{order}: a integer vector with corresponding TL-moment orders
- \item \code{computation.method} a character giving the used computation method
- \item \code{source}: a list with background information (used function, data, n, formula;
+ \item \code{source}: a list with background information (used function, data, n, formula, computation method;
  mainly for internal purposes)
 }
 The attributes are hidden in the print-function for a clearer presentation.
@@ -103,7 +103,7 @@ xdat <- data.frame(
 # Calculating TL-moments from data:
 TLMoments(xvec, leftrim = 0, rightrim = 1)
 TLMoments(xmat, leftrim = 1, rightrim = 1)
-TLMoments(xlist)
+TLMoments(xlist, max.order = 7)
 TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 2)
 TLMoments(xdat, hq ~ season, leftrim = 0, rightrim = 2)
 TLMoments(xdat, hq ~ ., leftrim = 0, rightrim = 2)
@@ -114,20 +114,27 @@ TLMoments(PWMs(xmat), rightrim = 1)
 TLMoments(PWMs(xlist), leftrim = 1, rightrim = 1)
 TLMoments(PWMs(xdat, hq ~ station), leftrim = 0, rightrim = 2)
 TLMoments(PWMs(xdat, hq ~ station + season), leftrim = 0, rightrim = 2)
+TLMoments(as.PWMs(cbind(c(0.12, .41, .38, .33), c(.05, 0.28, .25, .22))), 0, 1)
 
 # Calculating TL-moments from parameters:
 (tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1))
 TLMoments(parameters(tlm, "gev"))
 
+(tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 2))
+TLMoments(parameters(tlm, "gev"))
+
 p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 TLMoments(p, rightrim = 1)
+
 p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "gev")
 TLMoments(p, max.order = 6)
+
 p <- as.parameters(list(
  list(loc = 3, scale = 2, shape = .4),
  list(loc = 3, scale = 2, shape = .2)
 ), distr = "gev")
 TLMoments(p)
+
 p <- as.parameters(data.frame(
  station = letters[1:2],
  loc = c(2, 3),

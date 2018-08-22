@@ -4,18 +4,18 @@
 \alias{parameters}
 \title{Converting TL-moments to distribution parameters}
 \usage{
-parameters(tlm, distr, ...)
+parameters(x, distr, ...)
 }
 \arguments{
-\item{tlm}{object returned by TLMoments}
+\item{x}{object returned by TLMoments.}
 
 \item{distr}{character object defining the distribution. Supported types are
-"gev", "gum", "gpd", and "ln3"}
+"gev", "gum", "gpd", and "ln3".}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments.}
 }
 \value{
-Numeric vector, matrix, list, or data.frame of parameter estimates with
+numeric vector, matrix, list, or data.frame of parameter estimates with
 class \code{parameters}. The object contains the following attributes: \itemize{
  \item \code{distribution}: a character indicating the used distribution
  \item \code{source}: a list with background information (used function, data, n, formula, trimmings; mainly for internal purposes)
@@ -69,13 +69,14 @@ tlm <- TLMoments(rln3(200, loc = 3, scale = 1.5, shape = 2), leftrim = 0, rightr
 parameters(tlm, "ln3")
 
 # It's A LOT slower:
-# system.time(replicate(500,
-#   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
-# ))[3]
-# system.time(replicate(500,
-#   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
-# ))[3]
-
+\dontrun{
+system.time(replicate(500,
+  parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
+))[3]
+system.time(replicate(500,
+  parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
+))[3]
+}
 
 # Using magrittr
 library(magrittr)

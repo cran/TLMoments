@@ -5,21 +5,25 @@
 #' are available. Important trimming options are calculated through known formulas (see references for
 #' some of them), other options are calculated through a numerical optimization. In this case there's a
 #' warning informing about the experimental nature of this feature.
-#' @param tlm object returned by TLMoments
+#'
+#' @param x object returned by TLMoments.
 #' @param distr character object defining the distribution. Supported types are
-#' "gev", "gum", "gpd", and "ln3"
-#' @param ... additional arguments
-#' @return Numeric vector, matrix, list, or data.frame of parameter estimates with
+#' "gev", "gum", "gpd", and "ln3".
+#' @param ... additional arguments.
+#'
+#' @return numeric vector, matrix, list, or data.frame of parameter estimates with
 #' class \code{parameters}. The object contains the following attributes: \itemize{
 #'  \item \code{distribution}: a character indicating the used distribution
 #'  \item \code{source}: a list with background information (used function, data, n, formula, trimmings; mainly for internal purposes)
 #' }
 #' The attributes are hidden in the print-function for a clearer presentation.
+#'
 #' @references Elamir, E. A. H. (2010). Optimal choices for trimming in trimmed L-moment method. Applied Mathematical Sciences, 4(58), 2881-2890.
 #' @references Fischer, S., Fried, R., & Schumann, A. (2015). Examination for robustness of parametric estimators for flood statistics in the context of extraordinary extreme events. Hydrology and Earth System Sciences Discussions, 12, 8553-8576.
 #' @references Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 #' @references Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 #' @seealso \code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{quantiles}}, \code{\link{summary.parameters}}, \code{\link{as.parameters}}. Built-in distributions: \code{\link{pgev}}, \code{\link{pgum}}, \code{\link{pgpd}}, \code{\link{pln3}}.
+#'
 #' @examples
 #' xmat <- matrix(rgev(100, shape = .2), nc = 4)
 #' xvec <- xmat[, 3]
@@ -61,13 +65,14 @@
 #' parameters(tlm, "ln3")
 #'
 #' # It's A LOT slower:
-#' # system.time(replicate(500,
-#' #   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
-#' # ))[3]
-#' # system.time(replicate(500,
-#' #   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
-#' # ))[3]
-#'
+#' \dontrun{
+#' system.time(replicate(500,
+#'   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
+#' ))[3]
+#' system.time(replicate(500,
+#'   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 2), "gum")
+#' ))[3]
+#' }
 #'
 #' # Using magrittr
 #' library(magrittr)
@@ -85,8 +90,8 @@
 #'  parameters("gpd")
 #'
 #' @export
-parameters <- function(tlm, distr, ...) {
-  if (!("TLMoments" %in% class(tlm))) stop("tlm has to be of class TLMoments")
+parameters <- function(x, distr, ...) {
+  if (!("TLMoments" %in% class(x))) stop("tlm has to be of class TLMoments")
 
   valid.distr <- c("gev", "gum", "gpd", "ln3")
   if (!(distr %in% valid.distr))
@@ -94,106 +99,154 @@ parameters <- function(tlm, distr, ...) {
 
   # Check for sufficient data:
   if (distr == "gev") {
-    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gev\" needs at least the first three TL-moments")
+    if (!all(c(1, 2, 3) %in% attr(x, "order"))) stop("Parameter calculation of \"gev\" needs at least the first three TL-moments")
   } else if (distr == "gum") {
-    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gum\" needs at least the first two TL-moments")
-  } else if (distr == "gpd" & "u" %in% names(list(...))) {
-    if (!all(c(1, 2) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first two TL-moments")
+    if (!all(c(1, 2) %in% attr(x, "order"))) stop("Parameter calculation of \"gum\" needs at least the first two TL-moments")
+  } else if (distr == "gpd" && "u" %in% names(list(...))) {
+    if (!all(c(1, 2) %in% attr(x, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first two TL-moments")
   } else if (distr == "gpd") {
-    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first three TL-moments")
+    if (!all(c(1, 2, 3) %in% attr(x, "order"))) stop("Parameter calculation of \"gpd\" needs at least the first three TL-moments or a specified threshold value (u = ...)")
   } else if (distr == "ln3") {
-    if (!all(c(1, 2, 3) %in% attr(tlm, "order"))) stop("Parameter calculation of \"ln3\" needs at least the first three TL-moments")
+    if (!all(c(1, 2, 3) %in% attr(x, "order"))) stop("Parameter calculation of \"ln3\" needs at least the first three TL-moments")
   }
 
-  UseMethod("parameters", tlm$lambdas)
+  UseMethod("parameters", x$lambdas)
 }
 
-#' @method parameters matrix
-#' @export
-parameters.matrix <- function(tlm, distr, ...) {
-  out <- sapply(1L:ncol(tlm$lambdas), function(i) {
-    tmp <- list(lambdas = tlm$lambdas[, i], ratios = tlm$ratios[, i])
-    attributes(tmp) <- attributes(tlm)
-    parameters.numeric(tmp, distr, ...)
-  })
+#' @title returnParameters
+#' @description Sets attributions to parameters objects and returns them. This function is for internal use.
+#' @param out -
+#' @param distribution -
+#' @param ... -
+#' @return An object of class parameters.
+returnParameters <- function(out, distribution, ...) {
 
-  attr(out, "distribution") <- distr
-  attr(out, "source") <- attributes(tlm)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
-  attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
-  attr(out, "source")$lambdas <- tlm$lambdas
-  attr(out, "source")$max.order <- max(attr(tlm, "order"))
-  class(out) <- c("parameters", "matrix")
-  out
-}
+  class <- class(out)
+  args <- list(...)
 
-#' @method parameters list
-#' @export
-parameters.list <- function(tlm, distr, ...) {
-  out <- lapply(1L:length(tlm$lambdas), function(i) {
-    tmp <- list(lambdas = tlm$lambdas[[i]], ratios = tlm$ratios[[i]])
-    attributes(tmp) <- attributes(tlm)
-    parameters.numeric(tmp, distr, ...)
-  })
+  # If no func attribute is set, set to
+  if (!exists("func", args)) args$func <- "parameters"
 
-  attr(out, "distribution") <- distr
-  attr(out, "source") <- attributes(tlm)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
-  attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
-  attr(out, "source")$lambdas <- tlm$lambdas
-  attr(out, "source")$max.order <- max(attr(tlm, "order"))
-  class(out) <- c("parameters", "list")
-  out
-}
+  # If more than one func attributes are given, concatenate them
+  if (sum(names(args) == "func") >= 2) {
+    newfunc <- as.vector(unlist(args[names(args) == "func"]))
+    args$func <- NULL
+    args$func <- newfunc
+  }
 
-#' @method parameters data.frame
-#' @export
-parameters.data.frame <- function(tlm, distr, ...) {
+  # Attributes of parameters
+  # distribution
+  # source: func
+  #         data (if calculated)
+  #         input (if not calculated)
+  #         n (if calculated)
+  #         formula (if data is data.frame)
+  #         trimmings (if coming from TLMoments)
+  #         lambdas (if coming from TLMoments)
+  #         tl.order (if coming from TLMoments)
+  # class: "parameters", class
 
-  out <- sapply(1L:nrow(tlm$lambdas), function(i) {
-    tmp <- list(lambdas = unlist(tlm$lambdas[i, grep("L[0-9]*", names(tlm$lambdas))]),
-                ratios = unlist(tlm$ratios[i, grep("T[0-9]*", names(tlm$ratios))]))
-    attributes(tmp)[c("class", "order", "leftrim", "rightrim")] <- attributes(tlm)[c("class", "order", "leftrim", "rightrim")]
-    parameters(tmp, distr, ...)
-  })
-  rhs <- dimnames(attr(terms(attr(tlm, "source")$formula), "factors"))[[2]]
-  out <- cbind(tlm$lambdas[rhs], as.data.frame(t(out)))
+  attr(out, "distribution") <- distribution
+  attr(out, "source") <- args
+  class(out) <- c("parameters", class)
 
-  attr(out, "distribution") <- distr
-  attr(out, "source") <- attributes(tlm)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
-  attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
-  attr(out, "source")$lambdas <- tlm$lambdas
-  attr(out, "source")$max.order <- max(attr(tlm, "order"))
-  class(out) <- c("parameters", "data.frame")
   out
 }
 
 #' @method parameters numeric
 #' @export
-parameters.numeric <- function(tlm, distr, ...) {
+parameters.numeric <- function(x, distr, ...) {
+  leftrim <- attr(x, "leftrim")
+  rightrim <- attr(x, "rightrim")
 
-  leftrim <- attr(tlm, "leftrim")
-  rightrim <- attr(tlm, "rightrim")
+  out <- param.est(x$lambdas, leftrim, rightrim, distr, ...)
+  param.computation.method <- attr(out, "param.computation.method")
+  attr(out, "param.computation.method") <- NULL
 
-  out <- switch(
-    distr,
-    gev = gev.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim),
-    gum = gum.est(tlm$lambdas["L1"], tlm$lambdas["L2"], leftrim, rightrim),
-    gpd = gpd.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim, ...),
-    ln3 = ln3.est(tlm$lambdas["L1"], tlm$lambdas["L2"], tlm$ratios["T3"], leftrim, rightrim),
-    stop("Not implemented. ")
-  )
-  out <- unlist(out)
+  do.call(returnParameters, c(
+    list(out = out, distribution = distr),
+    func = "parameters",
+    lambdas = list(x$lambdas),
+    trimmings = list(c(attr(x, "leftrim"), attr(x, "rightrim"))),
+    tl.order = list(attr(x, "order")),
+    param.computation.method = param.computation.method,
+    attr(x, "source")
+  ))
+}
 
-  attr(out, "distribution") <- distr
-  attr(out, "source") <- attributes(tlm)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "parameters")
-  attr(out, "source")$trimmings <- c(attr(tlm, "leftrim"), attr(tlm, "rightrim"))
-  attr(out, "source")$lambdas <- tlm$lambdas
-  attr(out, "source")$max.order <- max(attr(tlm, "order"))
-  class(out) <- c("parameters", "numeric")
-  out
+#' @method parameters matrix
+#' @export
+parameters.matrix <- function(x, distr, ...) {
+  leftrim <- attr(x, "leftrim")
+  rightrim <- attr(x, "rightrim")
+
+  out <- lapply(1L:ncol(x$lambdas), function(i) {
+    param.est(x$lambdas[, i], leftrim, rightrim, distr, ...)
+  })
+  param.computation.method <- attr(out[[1]], "param.computation.method")
+  out <- simplify2array(out)
+
+  do.call(returnParameters, c(
+    list(out = out, distribution = distr),
+    func = "parameters",
+    lambdas = list(x$lambdas),
+    trimmings = list(c(attr(x, "leftrim"), attr(x, "rightrim"))),
+    tl.order = list(attr(x, "order")),
+    param.computation.method = param.computation.method,
+    attr(x, "source")
+  ))
+}
+
+#' @method parameters list
+#' @export
+parameters.list <- function(x, distr, ...) {
+  leftrim <- attr(x, "leftrim")
+  rightrim <- attr(x, "rightrim")
+
+  out <- lapply(seq_along(x$lambdas), function(i) {
+    param.est(x$lambdas[[i]], leftrim, rightrim, distr, ...)
+  })
+  param.computation.method <- attr(out[[1]], "param.computation.method")
+  # Delete attributes...
+  for (i in seq_along(out)) {
+    attr(out[[i]], "param.computation.method") <- NULL
+  }
+
+  do.call(returnParameters, c(
+    list(out = out, distribution = distr),
+    func = "parameters",
+    lambdas = list(x$lambdas),
+    trimmings = list(c(attr(x, "leftrim"), attr(x, "rightrim"))),
+    tl.order = list(attr(x, "order")),
+    param.computation.method = param.computation.method,
+    attr(x, "source")
+  ))
+}
+
+#' @method parameters data.frame
+#' @export
+parameters.data.frame <- function(x, distr, ...) {
+  leftrim <- attr(x, "leftrim")
+  rightrim <- attr(x, "rightrim")
+
+  nam <- getFormulaSides(attr(x, "source")$formula)
+  lambdas <- t(x$lambdas[!(names(x$lambdas) %in% nam$rhs)])
+  out <- lapply(1L:ncol(lambdas), function(i) {
+    param.est(lambdas[, i], leftrim, rightrim, distr, ...)
+  })
+  param.computation.method <- attr(out[[1]], "param.computation.method")
+  out <- simplify2array(out)
+  out <- cbind(x$lambdas[nam$rhs], as.data.frame(t(out)))
+
+  do.call(returnParameters, c(
+    list(out = out, distribution = distr),
+    func = "parameters",
+    lambdas = list(x$lambdas),
+    trimmings = list(c(attr(x, "leftrim"), attr(x, "rightrim"))),
+    tl.order = list(attr(x, "order")),
+    param.computation.method = param.computation.method,
+    attr(x, "source")
+  ))
 }
 
 #' @export
@@ -215,6 +268,26 @@ print.parameters <- function(x, ...) {
 }
 
 
+param.est <- function(lambdas, leftrim, rightrim, distr, ...) {
+  if (length(lambdas) < 2 && distr == "gpd" && "u" %in% names(list(...)))
+    stop("Insufficient L-moments to calculate parameters. ")
+  if (length(lambdas) < 3 && distr == "gpd" && !("u" %in% names(list(...))))
+    stop("Insufficient L-moments to calculate parameters. ")
+  if (length(lambdas) < 3 && distr %in% c("gev", "ln3"))
+    stop("Insufficient L-moments to calculate parameters. ")
+  if (length(lambdas) < 2 && distr == "gum")
+    stop("Insufficient L-moments to calculate parameters. ")
+
+  switch(
+    distr,
+    gev = gev.est(lambdas[1], lambdas[2], lambdas[3]/lambdas[2], leftrim, rightrim),
+    gum = gum.est(lambdas[1], lambdas[2], leftrim, rightrim),
+    gpd = gpd.est(lambdas[1], lambdas[2], lambdas[3]/lambdas[2], leftrim, rightrim, ...),
+    ln3 = ln3.est(lambdas[1], lambdas[2], lambdas[3]/lambdas[2], leftrim, rightrim),
+    stop("Not implemented. ")
+  )
+}
+
 #### GUM ####
 gum.est <- function(l1, l2, s, t) {
   switch(paste(s, t, sep = "-"),
@@ -230,7 +303,7 @@ gum.tl00.est <- function(l1, l2) {
   loc <- l1 - 0.577 * scale
 
   out <- setNames(c(loc, scale), c("loc", "scale"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 # TL(0,1), TL(1,0), TL(1,1) from Elamir, 2010: Optimal Choices for Trimming in Trimmed L-moment Method
@@ -239,7 +312,7 @@ gum.tl01.est <- function(l1, l2) {
   loc <- l1 + 0.116 * scale
 
   out <- setNames(c(loc, scale), c("loc", "scale"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 gum.tl10.est <- function(l1, l2) {
@@ -247,7 +320,7 @@ gum.tl10.est <- function(l1, l2) {
   loc <- l1 - 1.269 * scale
 
   out <- setNames(c(loc, scale), c("loc", "scale"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 gum.tl11.est <- function(l1, l2) {
@@ -255,7 +328,7 @@ gum.tl11.est <- function(l1, l2) {
   loc <- l1 - .459 * scale
 
   out <- setNames(c(loc, scale), c("loc", "scale"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 gum.numerical.est <- function(l1, l2, s, t) {
@@ -273,7 +346,7 @@ gum.numerical.est <- function(l1, l2, s, t) {
   loc <- u$root
 
   out <- setNames(c(loc, scale), c("loc", "scale"))
-  attr(out, "computation.method") <- "numerical"
+  attr(out, "param.computation.method") <- "numerical"
   return(out)
 }
 
@@ -299,7 +372,7 @@ gev.tl00.est <- function(l1, l2, t3) {
   xi <- l1 + al*(gk-1)/k
 
   out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 # TL(0,1) der GEV
@@ -315,7 +388,7 @@ gev.tl01.est <- function(l1, l2, t3) {
   xi <- l1 - al/k - al*gk*(V2 - 2)
 
   out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 # TL(0,2) der GEV
@@ -333,7 +406,7 @@ gev.tl02.est <- function(l1, l2, t3) {
   xi <- l1 - al/k - al*gk*(-V3 + 3*V2 - 3)
 
   out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 # TL(1,0) der GEV
@@ -350,7 +423,7 @@ gev.tl10.est <- function(l1, l2, t3) {
   xi <- l1 - al/k + al*gk*V2
 
   out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 # TL(1,1) der GEV
@@ -368,7 +441,7 @@ gev.tl11.est <- function(l1, l2, t3) {
   xi <- l1 - al/k - al*gk*(-3*V2 + 2*V3)
 
   out <- setNames(c(xi, al, -k), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 gev.numerical.est <- function(l1, l2, t3, s, t) {
@@ -382,7 +455,7 @@ gev.numerical.est <- function(l1, l2, t3, s, t) {
   i <- 0; while (sign(f1(-10^i)) == sign(f1(10^i))) i <- i+1
   u <- uniroot(f1, c(-10^i, 10^i))
   shape <- u$root
-  # scale
+  # scale (positiv)
   f2 <- function(scale) calcTLMom(2, s, t, qgev, loc = 0, scale = scale, shape = shape)[2] - l2
   i <- 0; while (sign(f2(10^-i)) == sign(f2(10^i))) i <- i+1
   u <- uniroot(f2, c(10^-i, 10^i))
@@ -394,26 +467,51 @@ gev.numerical.est <- function(l1, l2, t3, s, t) {
   loc <- u$root
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "numerical"
+  attr(out, "param.computation.method") <- "numerical"
   return(out)
 }
 
+
 #### LN3 ####
 ln3.est <- function(l1, l2, t3, s, t) {
+  switch(paste(s, t, sep = "-"),
+         `0-0` = ln3.tl00.est(l1, l2, t3),
+         ln3.numerical.est(l1, l2, t3, s, t))
+}
+
+ln3.tl00.est <- function(l1, l2, t3) {
+  erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
+
+  # 1. step, T3 <=> shape (positiv)
+  f1 <- function(s) 6/sqrt(pi) * 1/erf(s/2) * integrate(function(x) erf(x/sqrt(3) * exp(-x^2)), 0, s/2)$val - t3
+  i <- 1; while (sign(f1(10^-i)) == sign(f1(sqrt(exp(i))))) i <- i+1
+  u <- uniroot(f1, c(10^-i, sqrt(exp(i))), tol = .Machine$double.eps^0.5, check.conv = TRUE)
+  shape <- u$root
+
+  # 2. scale and loc
+  scale <- log(l2 / erf(shape/2)) - shape^2/2
+  loc <- l1 - exp(scale + shape^2/2)
+
+  out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
+  attr(out, "param.computation.method") <- "analytical"
+  return(out)
+}
+
+ln3.numerical.est <- function(l1, l2, t3, s, t) {
   #warning("Calculating numerical solution. ")
 
-  # 1. step, T3 <=> shape
+  # 1. step, T3 <=> shape (positiv)
   f1 <- function(shape) {
     a <- calcTLMom(3, s, t, qln3, loc = 0, scale = 1, shape = shape)
     a[3]/a[2] - t3
   }
-  i <- 0; while (sign(f1(10^-i)) == sign(f1(10^i))) i <- i+1
-  u <- uniroot(f1, c(10^-i, 10^i))
+  i <- 1; while (sign(f1(10^-i)) == sign(f1(sqrt(exp(i))))) i <- i+1
+  u <- uniroot(f1, c(10^-i, sqrt(exp(i))))
   shape <- u$root
   # 2. step, L2 <=> scale
   f2 <- function(scale) calcTLMom(2, s, t, qln3, loc = 0, scale = scale, shape = shape)[2] - l2
-  i <- 0; while (sign(f2(10^-i)) == sign(f2(10^i))) i <- i+1
-  u <- uniroot(f2, c(10^-i, 10^i))
+  i <- 0; while (sign(f2(-10^i)) == sign(f2(10^i))) i <- i+1
+  u <- uniroot(f2, c(-10^i, 10^i))
   scale <- u$root
   # 3. step L1 <=> loc
   f3 <- function(loc) calcTLMom(1, s, t, qln3, loc = loc, scale = scale, shape = shape)[1] - l1
@@ -422,7 +520,7 @@ ln3.est <- function(l1, l2, t3, s, t) {
   loc <- u$root
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "numerical"
+  attr(out, "param.computation.method") <- "numerical"
   return(out)
 }
 
@@ -449,7 +547,7 @@ gpd.tl00.est <- function(l1, l2, t3, u = NULL) {
   }
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 
@@ -468,7 +566,7 @@ gpd.tl01.est <- function(l1, l2, t3, u = NULL) {
   }
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 
@@ -487,7 +585,7 @@ gpd.tl02.est <- function(l1, l2, t3, u = NULL) {
   }
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "formula"
+  attr(out, "param.computation.method") <- "analytical"
   return(out)
 }
 
@@ -536,6 +634,6 @@ gpd.numerical.est <- function(l1, l2, t3, s, t, u = NULL) {
   }
 
   out <- setNames(c(loc, scale, shape), c("loc", "scale", "shape"))
-  attr(out, "computation.method") <- "numerical"
+  attr(out, "param.computation.method") <- "numerical"
   return(out)
 }

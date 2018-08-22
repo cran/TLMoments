@@ -2,7 +2,7 @@
 % Please edit documentation in R/regionalize.R
 \name{regionalize}
 \alias{regionalize}
-\title{regionalize - Calculating regionalized TL-moments}
+\title{Calculation of regionalized TL-moments}
 \usage{
 regionalize(x, w = rep(1, ncol(x$lambdas)), reg.lambdas = TRUE)
 }
@@ -14,18 +14,17 @@ TLMoments.data.frame are not supported by now.}
 that it adds up to 1.}
 
 \item{reg.lambdas}{logical, if TRUE (default) regionalization is
-based upon TL-moments. If false it's based on TL-moment-ratios}
+based upon TL-moments. If false it's based on TL-moment-ratios.}
 }
 \value{
-a list of two dimensions: \code{lambdas}/\code{ratios} are a matrix
+list of two dimensions: \code{lambdas}/\code{ratios} are a matrix
 consisting of the regionalized TL-moments/TL-moment-ratios. The list has
 the class \code{TLMoments}. The object contains the following attributes: \itemize{
  \item \code{leftrim}: a numeric giving the used leftrim-argument
  \item \code{rightrim}: a numeric giving the used rightrim-argument
  \item \code{order}: a integer vector with corresponding TL-moment orders
- \item \code{computation.method} a character giving the used computation method
  \item \code{source}: a list with background information (used function, data,
- n, formula; mainly for internal purposes)
+ n, formula, computation.method; mainly for internal purposes)
 }
 }
 \description{
@@ -36,10 +35,16 @@ of TL-moments and TL-moment ratios.
 tlm <- TLMoments(
   matrix(rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
   leftrim = 0, rightrim = 1)
+
 regionalize(tlm)
+regionalize(tlm, reg.lambdas = FALSE)
+
 parameters(regionalize(tlm), "gev")
+parameters(regionalize(tlm, reg.lambdas = FALSE), "gev")
+
 quantiles(parameters(regionalize(tlm), "gev"), c(.99, .999))
 quantiles(parameters(regionalize(tlm, reg.lambdas = FALSE), "gev"), c(.99, .999))
+
 
 # With magrittr
 library(magrittr)

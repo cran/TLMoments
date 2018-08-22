@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // pseudo_C
 NumericMatrix pseudo_C(NumericVector x, NumericVector k);
-RcppExport SEXP TLMoments_pseudo_C(SEXP xSEXP, SEXP kSEXP) {
+RcppExport SEXP _TLMoments_pseudo_C(SEXP xSEXP, SEXP kSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -19,7 +19,7 @@ END_RCPP
 }
 // pwm_C
 double pwm_C(NumericVector x, int r);
-RcppExport SEXP TLMoments_pwm_C(SEXP xSEXP, SEXP rSEXP) {
+RcppExport SEXP _TLMoments_pwm_C(SEXP xSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,7 +31,7 @@ END_RCPP
 }
 // z_C
 double z_C(int r, int k, int s, int t);
-RcppExport SEXP TLMoments_z_C(SEXP rSEXP, SEXP kSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_z_C(SEXP rSEXP, SEXP kSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,7 +45,7 @@ END_RCPP
 }
 // Z_C
 NumericMatrix Z_C(int maxr, int s, int t);
-RcppExport SEXP TLMoments_Z_C(SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_Z_C(SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,7 +58,7 @@ END_RCPP
 }
 // TLMoment_PWM
 double TLMoment_PWM(NumericVector x, int r, int s, int t);
-RcppExport SEXP TLMoments_TLMoment_PWM(SEXP xSEXP, SEXP rSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_TLMoment_PWM(SEXP xSEXP, SEXP rSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -72,7 +72,7 @@ END_RCPP
 }
 // PWM_to_TLMoments
 NumericVector PWM_to_TLMoments(NumericVector pwm, int s, int t);
-RcppExport SEXP TLMoments_PWM_to_TLMoments(SEXP pwmSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_PWM_to_TLMoments(SEXP pwmSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -85,7 +85,7 @@ END_RCPP
 }
 // TLMoment_direct
 double TLMoment_direct(NumericVector x, int r, double s, double t);
-RcppExport SEXP TLMoments_TLMoment_direct(SEXP xSEXP, SEXP rSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_TLMoment_direct(SEXP xSEXP, SEXP rSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -99,7 +99,7 @@ END_RCPP
 }
 // TLMoments_recursive
 NumericVector TLMoments_recursive(NumericVector x, int maxr, double s, double t);
-RcppExport SEXP TLMoments_TLMoments_recursive(SEXP xSEXP, SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_TLMoments_recursive(SEXP xSEXP, SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -113,7 +113,7 @@ END_RCPP
 }
 // TLMoments_recurrence
 NumericVector TLMoments_recurrence(NumericVector x, int maxr, double s, double t);
-RcppExport SEXP TLMoments_TLMoments_recurrence(SEXP xSEXP, SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
+RcppExport SEXP _TLMoments_TLMoments_recurrence(SEXP xSEXP, SEXP maxrSEXP, SEXP sSEXP, SEXP tSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -124,4 +124,22 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(TLMoments_recurrence(x, maxr, s, t));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_TLMoments_pseudo_C", (DL_FUNC) &_TLMoments_pseudo_C, 2},
+    {"_TLMoments_pwm_C", (DL_FUNC) &_TLMoments_pwm_C, 2},
+    {"_TLMoments_z_C", (DL_FUNC) &_TLMoments_z_C, 4},
+    {"_TLMoments_Z_C", (DL_FUNC) &_TLMoments_Z_C, 3},
+    {"_TLMoments_TLMoment_PWM", (DL_FUNC) &_TLMoments_TLMoment_PWM, 4},
+    {"_TLMoments_PWM_to_TLMoments", (DL_FUNC) &_TLMoments_PWM_to_TLMoments, 3},
+    {"_TLMoments_TLMoment_direct", (DL_FUNC) &_TLMoments_TLMoment_direct, 4},
+    {"_TLMoments_TLMoments_recursive", (DL_FUNC) &_TLMoments_TLMoments_recursive, 4},
+    {"_TLMoments_TLMoments_recurrence", (DL_FUNC) &_TLMoments_TLMoments_recurrence, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_TLMoments(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

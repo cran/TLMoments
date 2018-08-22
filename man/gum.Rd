@@ -18,9 +18,9 @@ rgum(n, loc = 0, scale = 1)
 \arguments{
 \item{loc, scale}{location and scale parameter of the Gumbel distribution. All must be of length one.}
 
-\item{x, q, p}{numeric vector of values, quantiles, or probabilites}
+\item{x, q, p}{numeric vector of values, quantiles, or probabilites.}
 
-\item{n}{numeric, number of random variates}
+\item{n}{numeric, number of random variates.}
 }
 \description{
 Cumulative distribution function, density function, quantile function and

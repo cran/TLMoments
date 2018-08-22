@@ -2,6 +2,7 @@
 #' Estimate the covariance matrix of quantile estimations
 #' @description
 #' Internal function. Use \link{est_cov}. Description not done yet.
+#'
 #' @param x numeric vector or matrix containing data.
 #' @param distr character of length 1 giving the distribution if parametric assumption should be used.
 #' @param p quantile levels from which the covariance should be calculated.
@@ -9,8 +10,10 @@
 #' @param np.cov boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).
 #' @param reg.weights numeric vector of weights for regionalized TLMoments.
 #' @param set.n hypothetical data length n if theoretical values are given.
-#' @param ... additional arguments, ignored.
+#' @param ... additional arguments.
+#'
 #' @return numeric matrix
+#'
 #' @examples
 #' ### Numeric vectors
 #' x <- rgev(500, shape = .2)
@@ -61,7 +64,7 @@ est_quancov <- function(x,
   if ("quantiles" %in% class(x)) {
     distr <- attr(x, "distribution")
     p <- attr(x, "p")
-    if (!any(is.na(attr(x, "source")$trimming))) {
+    if (!any(is.null(attr(x, "source")$trimming))) {
       leftrim <- attr(x, "source")$trimming[1]
       rightrim <- attr(x, "source")$trimming[2]
     }
@@ -162,16 +165,16 @@ est_quancov.quantiles <- function(x,
                                   ...) {
   if (!("numeric" %in% class(x)))
     stop("x must be a numeric quantiles-object. ")
-  if (!(attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
+  if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("est_quancov.quantiles only for theoretical values. ")
 
-  if (are.integer.like(leftrim) && is.na(rightrim)) {
+  if (are.integer.like(leftrim) && is.null(rightrim)) {
     rightrim <- 0
   }
-  if (are.integer.like(rightrim) && is.na(leftrim)) {
+  if (are.integer.like(rightrim) && is.null(leftrim)) {
     leftrim <- 0
   }
-  if (any(is.na(c(leftrim, rightrim)))) {
+  if (any(is.null(c(leftrim, rightrim)))) {
     #warning("No trimmings found, set to leftrim = 0, rightrim = 0. ")
     leftrim <- rightrim <- 0
   }

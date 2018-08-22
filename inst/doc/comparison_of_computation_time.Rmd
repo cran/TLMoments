@@ -1,22 +1,23 @@
 ---
 title: "Comparison of computation time"
 date: "`r Sys.Date()`"
-output:
-  md_document:
-    variant: markdown_github
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Comparison of computation time}
-  %\VignetteEngine{knitr::knitr}
-  %\VignetteDepends{TLMoments}
-  %\VignettePackage{TLMoments}
-  \usepackage[utf8]{inputenc}	
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
-
-# Comparison of computation times
 
 ```{r echo=FALSE, message=FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r}
 library(TLMoments)
+library(lmomco)
+library(Lmoments)
+library(lmom)
+sessionInfo()
 ```
 
 This document shows a comparison of computation time of TL-moments between different packages available, as well as between the different approaches built-in in this package. 

@@ -7,7 +7,7 @@
 \alias{est_paramcov.parameters}
 \title{Estimate the covariance matrix of parameter estimations}
 \usage{
-est_paramcov(x, distr, leftrim = 0L, rightrim = 0L, ...)
+est_paramcov(x, distr = "", leftrim = 0L, rightrim = 0L, ...)
 
 \method{est_paramcov}{numeric}(x, distr, leftrim = 0L, rightrim = 0L,
   np.cov = FALSE, ...)
@@ -26,7 +26,7 @@ est_paramcov(x, distr, leftrim = 0L, rightrim = 0L, ...)
 
 \item{leftrim, rightrim}{lower and upper trimming parameter used for parameter calculation, have to be non-negative integers.}
 
-\item{...}{additional arguments, ignored.}
+\item{...}{additional arguments.}
 
 \item{np.cov}{boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).}
 
@@ -50,11 +50,15 @@ est_paramcov(x, "gev", 0, 0)
 
 parameters(TLMoments(x, rightrim = 1), "gev")
 est_paramcov(x, "gev", 0, 1)
-#cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev"))))
+#cov(t(replicate(10000,
+#   parameters(TLMoments(rgev(500, shape = .2), rightrim = 1), "gev")
+#)))
 
 parameters(TLMoments(x, rightrim = 2), "gev")
 est_paramcov(x, "gev", 0, 2)
-#cov(t(replicate(10000, parameters(TLMoments(rgev(500, shape = .2), rightrim = 2), "gev"))))
+#cov(t(replicate(10000,
+#  parameters(TLMoments(rgev(500, shape = .2), rightrim = 2), "gev")
+#)))
 
 ### Numeric matrices
 x <- matrix(rgev(600, shape = .2), nc = 3)

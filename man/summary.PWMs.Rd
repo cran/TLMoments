@@ -7,7 +7,7 @@
 \method{summary}{PWMs}(object, ci.level = 0.9, ...)
 }
 \arguments{
-\item{object}{object of PWMs}
+\item{object}{object of PWMs.}
 
 \item{ci.level}{numeric vector of length 1 giving the confidence level (default is 0.9).}
 
@@ -35,6 +35,9 @@ summary(PWMs(x[, 1]), distr = "gev", select = 1:2)
 summary(PWMs(x))
 summary(PWMs(x), select = 1:2)
 
+\dontrun{
+summary(as.PWMs(c(15, 4, .5)))
+}
 }
 \seealso{
 \code{\link{PWMs}}, \code{\link{est_cov}}

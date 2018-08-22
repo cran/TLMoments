@@ -18,9 +18,9 @@ rgev(n, loc = 0, scale = 1, shape = 0)
 \arguments{
 \item{loc, scale, shape}{location, scale, and shape parameter of the generalized extreme value distribution. All must be of length one.}
 
-\item{x, q, p}{numeric vector of values, quantiles, or probabilites}
+\item{x, q, p}{numeric vector of values, quantiles, or probabilites.}
 
-\item{n}{numeric, number of random variates}
+\item{n}{numeric, number of random variates.}
 }
 \description{
 Cumulative distribution function, density function, quantile function and

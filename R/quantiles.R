@@ -3,12 +3,14 @@
 #' @description
 #' Calculates quantiles from distribution parameters received by parameters or
 #' from a named vector.
+#'
 #' @param x object returned by parameters or a named vector. In the latter
 #' you have to specify the \code{distr}-argument.
 #' @param p numeric vector giving the quantiles to calculate.
 #' @param distr character object defining the distribution. Supported types are
 #' "gev", "gum" and "gpd". You do not need to set this, if \code{x} is from parameters.
-#' @return a numeric vector, matrix, list, or data.frame of the quantiles and with class
+#'
+#' @return numeric vector, matrix, list, or data.frame of the quantiles and with class
 #' \code{quantiles}. The object contains the following attributes: \itemize{
 #'  \item \code{distribution}: a character indicating the used distribution
 #'  \item \code{p}: a vector with the calculated quantiles
@@ -16,7 +18,9 @@
 #'  formula, trimmings; mainly for internal purposes)
 #' }
 #' The attributes are hidden in the print-function for a clearer presentation.
+#'
 #' @seealso \code{\link{PWMs}}, \code{\link{TLMoments}}, \code{\link{parameters}}, \code{\link{summary.quantiles}}
+#'
 #' @examples
 #' # Generating data sets:
 #' xmat <- matrix(rnorm(100), nc = 4)
@@ -67,7 +71,54 @@ quantiles <- function(x, p, distr = attr(x, "distribution")) {
   if (min(p, na.rm = TRUE) <= 0 || max(p, na.rm = TRUE) >= 1)
     stop("`p' must contain probabilities in (0,1)")
 
+#   if (attr(x, "distribution") != distr)
+#     warning("It seems that `x' is not of the same distribution as specified by `distr'. ")
+
   UseMethod("quantiles")
+}
+
+#' @title returnQuantiles
+#' @description Sets attributions to quantiles objects and returns them. This function is for internal use.
+#' @param out -
+#' @param distribution -
+#' @param p -
+#' @param ... -
+#' @return An object of class quantiles.
+returnQuantiles <- function(out, distribution, p, ...) {
+
+  class <- class(out)
+  args <- list(...)
+
+  # If no func attribute is set, set to
+  if (!exists("func", args)) args$func <- "quantiles"
+
+  # If more than one func attributes are given, concatenate them
+  if (sum(names(args) == "func") >= 2) {
+    newfunc <- as.vector(unlist(args[names(args) == "func"]))
+    args$func <- NULL
+    args$func <- newfunc
+  }
+
+  # Attributes of parameters
+  # distribution
+  # p
+  # source: func
+  #         data (if calculated)
+  #         input (if not calculated)
+  #         n (if calculated)
+  #         formula (if data is data.frame)
+  #         parameters (if coming from parameters)
+  #         trimmings (if coming from TLMoments)
+  #         lambdas (if coming from TLMoments)
+  #         max.order (if coming from TLMoments)
+  # class: "quantiles", class
+
+  attr(out, "distribution") <- distribution
+  attr(out, "p") <- p
+  attr(out, "source") <- args
+  class(out) <- c("quantiles", class)
+
+  out
 }
 
 #' @method quantiles matrix
@@ -76,13 +127,12 @@ quantiles.matrix <- function(x, p,
                              distr = attr(x, "distribution")) {
   out <- apply(x, 2, quantiles.numeric, p = p, distr = distr)
 
-  class(out) <- c("quantiles", "matrix")
-  attr(out, "distribution") <- distr
-  attr(out, "p") <- p
-  attr(out, "source") <- attr(x, "source")
-  attr(out, "source")$func <- c(attr(x, "source")$func, "quantiles")
-  attr(out, "source")$parameters <- removeAttributes(x)
-  out
+  do.call(returnQuantiles, c(
+    list(out = out, distribution = distr, p = p),
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method quantiles list
@@ -96,15 +146,15 @@ quantiles.list <- function(x, p,
     attr(out[[i]], "source") <- NULL
     attr(out[[i]], "distribution") <- NULL
     attr(out[[i]], "p") <- NULL
+    attr(out[[i]], "class") <- NULL
   }
-  # ...and add global attributes
-  class(out) <- c("quantiles", "list")
-  attr(out, "distribution") <- distr
-  attr(out, "p") <- p
-  attr(out, "source") <- attr(x, "source")
-  attr(out, "source")$func <- c(attr(x, "source")$func, "quantiles")
-  attr(out, "source")$parameters <- removeAttributes(x)
-  out
+
+  do.call(returnQuantiles, c(
+    list(out = out, distribution = distr, p = p),
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method quantiles data.frame
@@ -114,8 +164,7 @@ quantiles.data.frame <- function(x, p,
 
   formula <- attr(x, "source")$formula
   nam <- getFormulaSides(formula, names(x))
-
-  out <- apply(x[!(names(x) %in% nam$rhs)], 1, quantiles, p = p, distr = distr)
+  out <- apply(as.matrix(x[!(names(x) %in% nam$rhs)]), 1, quantiles.numeric, p = p, distr = distr)
 
   if (length(dim(out)) == 2) {
     out <- cbind(x[nam$rhs], as.data.frame(t(out)))
@@ -124,13 +173,12 @@ quantiles.data.frame <- function(x, p,
     names(out)[-seq_along(nam$rhs)] <- as.character(p)
   }
 
-  class(out) <- c("quantiles", "data.frame")
-  attr(out, "distribution") <- distr
-  attr(out, "p") <- p
-  attr(out, "source") <- attr(x, "source")
-  attr(out, "source")$func <- c(attr(x, "source")$func, "quantiles")
-  attr(out, "source")$parameters <- removeAttributes(x)
-  out
+  do.call(returnQuantiles, c(
+    list(out = out, distribution = distr, p = p),
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method quantiles numeric
@@ -145,13 +193,14 @@ quantiles.numeric <- function(x, p,
 
   q <- do.call(getQ, c(x = distr, as.list(x)))
   out <- setNames(q(p), p)
-  class(out) <- c("quantiles", "numeric")
-  attr(out, "distribution") <- distr
-  attr(out, "p") <- p
-  attr(out, "source") <- attr(x, "source")
-  attr(out, "source")$func <- c(attr(x, "source")$func, "quantiles")
-  attr(out, "source")$parameters <- removeAttributes(x)
-  out
+
+  do.call(returnQuantiles, c(
+    list(out = out, distribution = distr, p = p),
+    func = "quantiles",
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 

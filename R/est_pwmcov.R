@@ -2,13 +2,16 @@
 #' Estimate the covariance matrix of PWM estimations
 #' @description
 #' Internal function. Use \link{est_cov}. Description not done yet.
-#' @param x numeric vector or matrix of data
+#'
+#' @param x numeric vector or matrix of data.
 #' @param order numeric vector giving the orders that are returned.
 #' @param distr character of length 1 which indicates a distribution if a
 #' parametric assumption should be used.
 #' @param distr.trim integer vector of length 2 indicating the trimming used
 #' to calculate parameters if a parametric assumption is used (i.e. \code{distr} is set).
+#'
 #' @return numeric matrix
+#'
 #' @examples
 #' ### Numeric vectors
 #' x <- rgev(500, shape = .2)

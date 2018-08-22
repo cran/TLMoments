@@ -1,13 +1,23 @@
 #' @title
-#' Calculation of the covariance matrix of estimations of PWMs, TLMoments, parameters, or quantiles
+#' Covariance matrix of PWMs, TLMoments, parameters, or quantiles
 #' @description
-#' description not done yet
+#' Calculation of the empirical or theoretical covariance matrix of objects
+#' of the classes \code{PWMs}, \code{TLMoments}, \code{parameters}, or \code{quantiles}.
+#'
 #' @param x object of \code{PWMs}, \code{TLMoments}, \code{parameters},
-#'        or \code{quantiles} constructed using the same-named functions.
+#' or \code{quantiles} constructed using the same-named functions.
 #' @param select numeric oder character vector specifying a subset of the covariance matrix. If
 #' not specified the full covariance matrix is returned.
-#' @param ... additional arguments given to the sub-functions: \code{distr} and \code{np.cov}.
-#' @return a numeric matrix (if \code{x} is of class \code{PWMs}, \code{parameters}, or
+#' @param ... additional arguments given to the sub-functions: \code{distr} and \code{np.cov} (see details).
+#'
+#' @details
+#' Covariance matrices of \code{PWMs} and \code{TLMoments} are calculated without parametric
+#' assumption by default. Covariance matrices of \code{parameters} and \code{quantiles} use
+#' parametric assumption based on their stored distribution attribute (only GEV at the moment).
+#' Parametric (GEV) calculation can be enforced by specifying \code{distr=\"gev\"}, non-parametric
+#' calculation by using \code{np.cov=TRUE}.
+#'
+#' @return numeric matrix (if \code{x} is of class \code{PWMs}, \code{parameters}, or
 #'          \code{quantiles}) or a list of two matrices (\code{lambdas} and \code{ratios}, if
 #'          \code{x} is of class \code{TLMoments}).
 #'
@@ -29,10 +39,11 @@
 #' est_cov(PWMs(xvec), distr = "gev")
 #' est_cov(PWMs(xvec), distr = "gev", select = c(1, 3))
 #'
-#'
-#' # cov(t(replicate(100000,
-#' #  as.vector(PWMs(cbind(rgev(100, shape = .1), rgev(100, shape = .3)), 1)))
-#' # ))
+#' \dontrun{
+#' cov(t(replicate(100000,
+#'   as.vector(PWMs(cbind(rgev(100, shape = .1), rgev(100, shape = .3)), max.order = 1)))
+#' ))
+#' }
 #'
 #'
 #' ### 2. TLMoments:
@@ -86,8 +97,12 @@
 #' est_cov(para, set.n = 100)
 #' est_cov(para, rightrim = 1, set.n = 100)
 #'
-#' # var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2)), "gev"))))
-#' # var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2), rightrim = 1), "gev"))))
+#' \dontrun{
+#' var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2)), "gev"))))
+#' }
+#' \dontrun{
+#' var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2), rightrim = 1), "gev"))))
+#' }
 #'
 #' # Parameter estimates from regionalized TLMoments:
 #' est_cov(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"))
@@ -108,10 +123,12 @@
 #' est_cov(q, np.cov = TRUE)
 #'
 #' # Matrix inputs
-#' q <- quantiles(parameters(TLMoments(xmat, 0, 1), "gev"), c(.9, .95, .99))
+#' param <- parameters(TLMoments(xmat, 0, 1), "gev")
+#' q <- quantiles(param, c(.9, .95, .99))
 #' est_cov(q)
 #' est_cov(q, select = .99)
-#' q <- quantiles(parameters(TLMoments(xmat[, 1, drop = FALSE], 0, 1), "gev"), c(.9, .95, .99))
+#' param <- parameters(TLMoments(xmat[, 1, drop = FALSE], 0, 1), "gev")
+#' q <- quantiles(param, c(.9, .95, .99))
 #' est_cov(q, select = .99)
 #'
 #' # Theoretical values
@@ -121,7 +138,8 @@
 #' est_cov(q, leftrim = 0, rightrim = 1, set.n = 100)
 #'
 #' # Quantile estimates from regionalized TLMoments:
-#' est_cov(quantiles(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"), c(.9, .99)))
+#' param <- parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev")
+#' est_cov(quantiles(param, c(.9, .99)))
 #'
 #'
 #' @rdname est_cov
@@ -166,7 +184,7 @@ est_cov.TLMoments <- function(x,
   if (!any(c("numeric", "matrix") %in% class(x$lambdas)))
     stop("To date, only numeric and matrix types of TLMoments are supported. ")
 
-  if (attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) { # theoretical values
+  if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) { # theoretical values
     ret <- est_tlmcov(x, ...)
   } else { # empirical values
     ret <- est_tlmcov(attr(x, "source")$data,
@@ -205,7 +223,7 @@ est_cov.parameters <- function(x,
   if (!any(c("numeric", "matrix") %in% class(x)))
     stop("To date, only numeric and matrix types of parameters are supported. ")
 
-  if (attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {  # theoretical values
+  if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {  # theoretical values
     # if (!are.integer.like(attr(x, "source")$trimmings)) {
     #   attr(x, "source")$trimmings <- c(leftrim, rightrim)
     #   #warning("Calculation based on TL(0,0)-moments. Overwrite with \"leftrim\" and \"rightrim\". ")
@@ -240,7 +258,7 @@ est_cov.quantiles <- function(x,
   if (!any(c("numeric", "matrix") %in% class(x)))
     stop("To date, only numeric and matrix types of quantiles are supported. ")
 
-  if (attr(x, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {  # theoretical values
+  if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {  # theoretical values
     # if (!are.integer.like(attr(x, "source")$trimmings)) {
     #   attr(x, "source")$trimmings <- c(leftrim, rightrim)
     #   #warning("Calculation based on TL(0,0)-moments. Overwrite with \"leftrim\" and \"rightrim\". ")

@@ -2,22 +2,22 @@
 % Please edit documentation in R/PWM.R
 \name{PWM}
 \alias{PWM}
-\title{Probability weighted moment.}
+\title{Probability weighted moments}
 \usage{
 PWM(x, order = 0, na.rm = FALSE)
 }
 \arguments{
-\item{x}{vector of data}
+\item{x}{numeric vector of data.}
 
-\item{order}{integer, order of probability weighted moment, can be a set of \{0,1,...\}}
+\item{order}{integer, order of probability weighted moment, can be a set of \{0,1,...\}.}
 
-\item{na.rm}{logical, indicates if NAs should be removed}
+\item{na.rm}{logical, indicates if NAs should be removed.}
 }
 \value{
-double, the PWM of orders \code{order} of \code{x}
+numeric vector, empirical PWM of orders \code{order} of \code{x}.
 }
 \description{
-Calculates probability weighted moments of specific order(s).
+Calculates empirical probability weighted moments of specific order(s).
 }
 \examples{
 PWM(rnorm(25))

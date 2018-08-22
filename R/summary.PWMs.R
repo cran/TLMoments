@@ -2,9 +2,11 @@
 #' Summary PWMs
 #' @description
 #' Calculating and printing of summary statistics to a given PWMs-object.
-#' @param object object of PWMs
+#'
+#' @param object object of PWMs.
 #' @param ci.level numeric vector of length 1 giving the confidence level (default is 0.9).
 #' @param ... additional arguments submitted to \code{est_cov}.
+#'
 #' @return A \code{summary.PWMs}-object, a list with dimensions \itemize{
 #'  \item \code{pwm}
 #'  \item \code{ci.level}
@@ -12,6 +14,7 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.PWMs}.
+#'
 #' @seealso \code{\link{PWMs}}, \code{\link{est_cov}}
 #' @examples
 #' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
@@ -23,11 +26,18 @@
 #' summary(PWMs(x))
 #' summary(PWMs(x), select = 1:2)
 #'
+#' \dontrun{
+#' summary(as.PWMs(c(15, 4, .5)))
+#' }
 #' @method summary PWMs
 #' @export
 summary.PWMs <- function(object, ci.level = .9, ...) {
-  if (length(ci.level) != 1 | !is.numeric(ci.level)) stop("ci must be a numeric vector of length 1. ")
-  if (!("PWMs" %in% class(object))) stop("First argument has to be of class parameters ")
+  if (length(ci.level) != 1 | !is.numeric(ci.level))
+    stop("ci must be a numeric vector of length 1. ")
+  if (!("PWMs" %in% class(object)))
+    stop("First argument has to be of class parameters ")
+  if (any(attr(object, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
+    stop("No summary for theoretical PWMs available. ")
 
   UseMethod("summary.PWMs")
 }

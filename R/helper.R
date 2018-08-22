@@ -16,7 +16,7 @@ select_computation <- function(leftrim, rightrim) {
 
 # calculate pseudo observations
 pseudo <- function(x, k) {
-  as.matrix(.Call('TLMoments_pseudo_C', PACKAGE = 'TLMoments', sort(stats::na.omit(x)), k)[rank(x, na.last = "keep"), ])
+  as.matrix(pseudo_C(sort(stats::na.omit(x)), k)[rank(x, na.last = "keep"), ])
 }
 
 # Functions for general error catching
@@ -27,8 +27,111 @@ are.numeric <- function(...) {
   all(vapply(list(...), function(a) is.numeric(a), logical(1)))
 }
 
+`%in.equal%` <- function(a, b) {
+  r <- vapply(a, function(.a) vapply(b, function(.b) { isTRUE(all.equal(.a, .b)) }, logical(1)), logical(length(b)))
+  if (is.null(dim(r))) {
+    r
+  } else {
+    apply(r, 2, any)
+  }
+}
+
 # infix for intervals
 `%-+%` <- function(a, b) { cbind(a - b, a + b) }
+
+# @description Calculates TL-Moments for every distribution in distr for the specified trim.
+# Used by plot.TLMoments
+# @return data.frame
+# @examples
+# getTLMomsByDistr(c("gev", "gpd", "gum", "norm"), c(2, 1))
+getTLMomsByDistr <- function(distr, trim) {
+  # "Lines" & "Points"
+  .lines <- function(distr, shapes, trim) {
+    sapply(shapes, function(shape) {
+      r <- tryCatch(
+        calcTLMom(4, trim[1], trim[2], qfunc = getQ.character(distr, loc = 0, scale = 1, shape = shape)),
+        error = function(e) rep(NA, 4)
+      )
+      setNames(r, paste0("L", 1:4))
+    })
+  }
+  .points  <- function(distr, trim) tryCatch(calcTLMom(4, trim[1], trim[2], qfunc = getQ.character(distr)), error = function(e) rep(NA, 4))
+
+  if ("gum" %in% distr) {
+    gum <- data.frame(
+      distr = "gum",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      shape = NA,
+      data.frame(t(setNames(.points("gum", trim), paste0("L", 1:4))))
+    )
+  } else gum <- NULL
+
+  if ("exp" %in% distr) {
+    exp <- data.frame(
+      distr = "exp",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      shape = NA,
+      data.frame(t(setNames(.points("exp", trim), paste0("L", 1:4))))
+    )
+  } else exp <- NULL
+
+  if ("norm" %in% distr) {
+    norm <- data.frame(
+      distr = "norm",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      shape = NA,
+      data.frame(t(setNames(.points("norm", trim), paste0("L", 1:4))))
+    )
+  } else norm <- NULL
+
+  if ("gev" %in% distr) {
+    shapes <- seq(-.99, .99, .01)
+    gev <- data.frame(
+      distr = "gev",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      cbind(
+        shape = shapes,
+        t(.lines("gev", shapes, trim))
+      )
+    )
+  } else gev <- NULL
+
+  if ("gpd" %in% distr) {
+    shapes <- seq(-.99, .99, .01)
+    gpd <- data.frame(
+      distr = "gpd",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      cbind(
+        shape = shapes,
+        t(.lines("gpd", shapes, trim))
+      )
+    )
+  } else gpd <- NULL
+
+  if ("ln3" %in% distr) {
+    shapes <- seq(-.99, .99, .01)
+    ln3 <- data.frame(
+      distr = "ln3",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      cbind(
+        shape = shapes,
+        t(.lines("ln3", shapes, trim))
+      )
+    )
+  } else ln3 <- NULL
+
+  dat <- rbind(gum, exp, norm, gev, gpd, ln3)
+  dat$T3 <- dat$L3 / dat$L2
+  dat$T4 <- dat$L4 / dat$L2
+  dat <- dat[!(is.na(dat$T3) | is.na(dat$T4)), ]
+  dat
+}
 
 
 # @description calculates the first maxr TL-moments of order s, t given a quantile function qfunc
@@ -60,6 +163,25 @@ calcTLMom <- function(maxr, s, t, qfunc, ...) {
   }, numeric(1))
 }
 
+# @param args vector of characters giving the argument names to check
+# @param distr character
+checkParameterNames <- function(args, distr) {
+  stopifnot(length(distr) == 1)
+  stopifnot(is.character(args))
+
+  if (grepl("::", x = distr)) { # if pkg::func
+    f <- sub("^([a-zA-Z0-9]*)::([a-zA-Z0-9]*)$", "\\1::q\\2", x = distr)
+    q <- eval(parse(text = paste0("match.fun(", f,")")))
+  } else { # falls nur func
+    q <- eval(parse(text = paste0("match.fun(q", distr, ")")))
+  }
+  .args <- names(formals(q))[sapply(formals(q), is.numeric)]
+
+  args <- .args[pmatch(args, .args, nomatch = NA)]
+  if (any(is.na(args))) stop("Names do not match distribution arguments or are ambiguous. ")
+
+  args
+}
 
 # @description extracts the quantile function of a parameters-object or a character string (like evd::gev)
 # @examples
@@ -88,7 +210,7 @@ getQ.character <- function(x, ...) {
   q
 }
 getQ.parameters <- function(x) {
-  if (!("numeric" %in% class(x))) stop("ATM only for parameters, numeric!")
+  if (!("numeric" %in% class(x))) stop("By now only for parameters, numeric!")
 
   distr <- attr(x, "distribution")
   args <- as.list(x)
@@ -96,6 +218,60 @@ getQ.parameters <- function(x) {
   do.call(getQ.character, c(x = distr, args))
 }
 
+correctNames <- function(x, forbidden_pattern, preceding) {
+
+  if (class(x) == "data.frame") {
+    forbids <- grepl(forbidden_pattern, names(x))
+    if (any(forbids)) {
+      forbidden_names <- names(x)[forbids]
+      new_names <- paste0(preceding, forbidden_names)
+      names(x)[forbids] <- new_names
+      warning("Renamed variables due to invalid names. ")
+    }
+
+  } else if (class(x) == "formula") {
+    forbids <- grepl(forbidden_pattern, all.vars(x))
+    if (any(forbids)) {
+      forbidden_names <- all.vars(x)[forbids]
+      strformula <- deparse(x)
+      for (i in seq_along(forbidden_names)) {
+        strformula <- sub(forbidden_names[i], paste0(preceding, forbidden_names[i]), strformula)
+      }
+      x <- as.formula(strformula)
+      warning("Renamed variables due to invalid names. ")
+    }
+
+  }
+
+  x
+}
+
+calcRatios <- function(lambdas) {
+  if (length(lambdas) > 2L) {
+    out <- c(NA, lambdas[2]/lambdas[1], lambdas[3:length(lambdas)]/lambdas[2])
+  } else if (length(lambdas) == 2L) {
+    out <- c(NA, lambdas[2]/lambdas[1])
+  } else {
+    out <- NA
+  }
+  setNames(out, paste0("T", seq_along(out)))
+}
+
+calcLambdas <- function(ratios, L1) {
+  if (is.na(L1)) {
+    L1 <- 1
+    warning("L1 is assumed to be 1. ")
+  }
+
+  if (length(ratios) > 1L) {
+    out <- c(L1, ratios[1]*L1, ratios[2:length(ratios)]*(ratios[1]*L1))
+  } else if (length(ratios) == 1L) {
+    out <- c(L1, ratios[1]*L1)
+  } else {
+    out <- L1
+  }
+  setNames(out, paste0("L", seq_along(out)))
+}
 
 getFormulaSides <- function(formula, names = NULL) {
 

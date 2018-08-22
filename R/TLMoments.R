@@ -20,24 +20,26 @@
 #' PWMs, direct, recursive, or recurrence (see References Hosking & Balakrishnan, 2015).
 #' Possible values are \code{auto} (default, automatically choose appropriate method), \code{pwm},
 #' \code{direct}, \code{recursive}, or \code{recurrence}. Only if empirical moments are calculated.
-#' @param ... additional arguments
-#' @return a list of two dimensions: \code{lambdas}/\code{ratios} are a numeric vector, matrix,
+#' @param ... additional arguments.
+#'
+#' @return list of two dimensions: \code{lambdas}/\code{ratios} are a numeric vector, matrix,
 #' list, or data.frame consisting of the TL-moments/TL-moment-ratios. The list has the class
 #' \code{TLMoments}.
 #' The object contains the following attributes: \itemize{
 #'  \item \code{leftrim}: a numeric giving the used leftrim-argument
 #'  \item \code{rightrim}: a numeric giving the used rightrim-argument
 #'  \item \code{order}: a integer vector with corresponding TL-moment orders
-#'  \item \code{computation.method} a character giving the used computation method
-#'  \item \code{source}: a list with background information (used function, data, n, formula;
+#'  \item \code{source}: a list with background information (used function, data, n, formula, computation method;
 #'  mainly for internal purposes)
 #' }
 #' The attributes are hidden in the print-function for a clearer presentation.
+#'
 #' @references Elamir, E. A., & Seheult, A. H. (2003). Trimmed L-moments. Computational Statistics & Data Analysis, 43(3), 299-314.
 #' @references Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 #' @references Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 #' @references Hosking, J. R. M., & Balakrishnan, N. (2015). A uniqueness result for L-estimators, with applications to L-moments. Statistical Methodology, 24, 69-80.
 #' @seealso \code{\link{PWMs}}, \code{\link{parameters}}, \code{\link{quantiles}}, \code{\link{summary.TLMoments}}, \code{\link{as.TLMoments}}
+#'
 #' @examples
 #' # Generating data sets:
 #' xmat <- matrix(rnorm(100), nc = 4)
@@ -52,7 +54,7 @@
 #' # Calculating TL-moments from data:
 #' TLMoments(xvec, leftrim = 0, rightrim = 1)
 #' TLMoments(xmat, leftrim = 1, rightrim = 1)
-#' TLMoments(xlist)
+#' TLMoments(xlist, max.order = 7)
 #' TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 2)
 #' TLMoments(xdat, hq ~ season, leftrim = 0, rightrim = 2)
 #' TLMoments(xdat, hq ~ ., leftrim = 0, rightrim = 2)
@@ -63,20 +65,27 @@
 #' TLMoments(PWMs(xlist), leftrim = 1, rightrim = 1)
 #' TLMoments(PWMs(xdat, hq ~ station), leftrim = 0, rightrim = 2)
 #' TLMoments(PWMs(xdat, hq ~ station + season), leftrim = 0, rightrim = 2)
+#' TLMoments(as.PWMs(cbind(c(0.12, .41, .38, .33), c(.05, 0.28, .25, .22))), 0, 1)
 #'
 #' # Calculating TL-moments from parameters:
 #' (tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1))
 #' TLMoments(parameters(tlm, "gev"))
 #'
+#' (tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 2))
+#' TLMoments(parameters(tlm, "gev"))
+#'
 #' p <- as.parameters(loc = 3, scale = 2, shape = .4, distr = "gev")
 #' TLMoments(p, rightrim = 1)
+#'
 #' p <- as.parameters(cbind(loc = 10, scale = 4, shape = seq(0, .4, .1)), distr = "gev")
 #' TLMoments(p, max.order = 6)
+#'
 #' p <- as.parameters(list(
 #'  list(loc = 3, scale = 2, shape = .4),
 #'  list(loc = 3, scale = 2, shape = .2)
 #' ), distr = "gev")
 #' TLMoments(p)
+#'
 #' p <- as.parameters(data.frame(
 #'  station = letters[1:2],
 #'  loc = c(2, 3),
@@ -85,7 +94,75 @@
 #' ), .~station, distr = "gev")
 #' TLMoments(p)
 #' @export
-TLMoments <- function(x, ...) UseMethod("TLMoments")
+TLMoments <- function(x, ...) {
+
+  args <- list(...)
+  # if (exists("leftrim", args) && exists("rightrim", args))
+  #  if (!are.integer.like(args$leftrim, args$rightrim) | any(c(args$leftrim, args$rightrim) < 0))
+  #   stop("leftrim and rightrim must be positive integers. ")
+  if ("max.order" %in% names(args) && !are.integer.like(args$max.order))
+    stop("max.order must be integer-like. ")
+  if ("na.rm" %in% names(args) && !is.logical(args$na.rm))
+    stop("na.rm must be TRUE or FALSE. ")
+
+  UseMethod("TLMoments")
+}
+
+
+#' @title returnTLMoments
+#' @description Sets attributions to TLMoments objects and returns them. This function is for internal use.
+#' @param out -
+#' @param leftrim -
+#' @param rightrim -
+#' @param order -
+#' @param ... -
+#' @return An object of class TLMoments.
+returnTLMoments <- function(out, leftrim, rightrim, order, ...) {
+
+  class <- class(out$lambdas)
+  args <- list(...)
+
+  # If no func attribute is set, set to
+  if (!exists("func", args)) args$func <- "TLMoments"
+
+  # If more than one func attributes are given, concatenate them
+  if (sum(names(args) == "func") >= 2) {
+    newfunc <- as.vector(unlist(args[names(args) == "func"]))
+    args$func <- NULL
+    args$func <- newfunc
+  }
+
+  # Calculate n if not available and data exists.
+  if (!exists("n", args) && exists("data", args)) {
+    args$n <- switch(class,
+                     numeric = sum(!is.na(args$data)),
+                     matrix = apply(args$data, 2, function(y) sum(!is.na(y))),
+                     list = vapply(args$data, length, numeric(1)),
+                     data.frame = aggregate(args$formula, args$data, length)[[2]])
+  }
+
+  # Attributes of TLMoments
+  # leftrim
+  # rightrim
+  # order
+  # source: func
+  #         computation.method (if calculated)
+  #         data (if calculated)
+  #         input (if not calculated)
+  #         n (if calculated)
+  #         formula (if data is data.frame)
+  #         pwms (if coming from PWMs)
+  # class: "TLMoments", "list"
+
+  attr(out, "leftrim") <- leftrim
+  attr(out, "rightrim") <- rightrim
+  attr(out, "order") <- order
+  attr(out, "source") <- args
+  class(out) <- c("TLMoments", "list")
+
+  out
+}
+
 
 #' @describeIn TLMoments TLMoments for numeric vector of data
 #' @method TLMoments numeric
@@ -93,26 +170,17 @@ TLMoments <- function(x, ...) UseMethod("TLMoments")
 TLMoments.numeric <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
                               na.rm = FALSE, computation.method = "auto",
                               ...) {
-  if (!are.integer.like(max.order))
-    stop("max.order must be integer-like. ")
-  if (!are.integer.like(leftrim, rightrim) | any(c(leftrim, rightrim) < 0))
-    stop("leftrim and rightrim must be positive integers. ")
-  if (!is.logical(na.rm))
-    stop("na.rm must be TRUE or FALSE. ")
   if (computation.method == "auto")
     computation.method <- select_computation(leftrim, rightrim)
 
   ls <- TLMoment(x, order = 1L:max.order, leftrim = leftrim, rightrim = rightrim, na.rm = na.rm, computation.method = computation.method)
-
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
-  attr(out, "computation.method") <- computation.method
-  attr(out, "source") <- list(
-    func = "TLMoments",
-    data = x,
-    n = sum(!is.na(x)),
-    formula = NA
+  out <- list(
+    lambdas = ls,
+    ratios = calcRatios(ls)
   )
-  out
+
+  returnTLMoments(out, leftrim, rightrim, 1L:max.order,
+                  tl.computation.method = computation.method, data = x)
 }
 
 #' @describeIn TLMoments TLMoments for numeric matrix of data
@@ -121,14 +189,6 @@ TLMoments.numeric <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
 TLMoments.matrix <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
                              na.rm = FALSE, computation.method = "auto",
                              ...) {
-  if (!are.integer.like(max.order))
-    stop("max.order must be integer-like. ")
-  # if (!are.numeric(leftrim, rightrim))
-  #   stop("leftrim and rightrim must be numeric. ")
-  if (!are.integer.like(leftrim, rightrim) | any(c(leftrim, rightrim) < 0))
-    stop("leftrim and rightrim must be positive integers. ")
-  if (!is.logical(na.rm))
-    stop("na.rm must be TRUE or FALSE. ")
   if (computation.method == "auto")
     computation.method <- select_computation(leftrim, rightrim)
 
@@ -136,16 +196,13 @@ TLMoments.matrix <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
   if (max.order == 1) {
     dim(ls) <- c(1, ncol(x))
   }
-
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
-  attr(out, "computation.method") <- computation.method
-  attr(out, "source") <- list(
-    func = "TLMoments",
-    data = x,
-    n = apply(x, 2, function(y) sum(!is.na(y))),
-    formula = NA
+  out <- list(
+    lambdas = ls,
+    ratios = apply(ls, 2, calcRatios)
   )
-  out
+
+  returnTLMoments(out, leftrim, rightrim, 1L:max.order,
+                  tl.computation.method = computation.method, data = x)
 }
 
 #' @describeIn TLMoments TLMoments for numeric list of data
@@ -154,57 +211,41 @@ TLMoments.matrix <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L,
 TLMoments.list <- function(x, leftrim = 0L, rightrim = 0L, max.order = 4L, na.rm = FALSE,
                            computation.method = "auto",
                            ...) {
-  if (!are.integer.like(max.order))
-    stop("max.order must be integer-like. ")
-  if (!are.numeric(leftrim, rightrim))
-    stop("leftrim and rightrim must be numeric. ")
-  if (!is.logical(na.rm))
-    stop("na.rm must be TRUE or FALSE. ")
   if (computation.method == "auto")
     computation.method <- select_computation(leftrim, rightrim)
 
   ls <- lapply(x, TLMoment, order = 1L:max.order, leftrim = leftrim, rightrim = rightrim, na.rm = na.rm, computation.method = computation.method)
-
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
-  attr(out, "computation.method") <- computation.method
-  attr(out, "source") <- list(
-    func = "TLMoments",
-    data = x,
-    n = vapply(x, function(y) sum(!is.na(y)), numeric(1)),
-    formula = NA
+  out <- list(
+    lambdas = ls,
+    ratios = lapply(ls, calcRatios)
   )
-  out
+
+  returnTLMoments(out, leftrim, rightrim, 1L:max.order,
+                  tl.computation.method = computation.method, data = x)
 }
 
 #' @describeIn TLMoments TLMoments for numeric data.frame of data
 #' @method TLMoments data.frame
 #' @export
-TLMoments.data.frame <- function(x, formula, leftrim = 0L, max.order = 4L, rightrim = 0L,
+TLMoments.data.frame <- function(x, formula, leftrim = 0L, rightrim = 0L, max.order = 4L,
                                  na.rm = FALSE, computation.method = "auto",
                                  ...) {
-  if (!are.integer.like(max.order))
-    stop("max.order must be integer-like. ")
-  if (!are.numeric(leftrim, rightrim))
-    stop("leftrim and rightrim must be numeric. ")
-  if (!is.logical(na.rm))
-    stop("na.rm must be TRUE or FALSE. ")
   if (computation.method == "auto")
     computation.method <- select_computation(leftrim, rightrim)
 
+  # Check for and repair invalid variables named [L|T][0-9]
+  x <- correctNames(x, "[L|T][0-9]*", ".")
+  formula <- correctNames(formula, "[L|T][0-9]*", ".")
+
   nam <- getFormulaSides(formula, names(x))
   agg <- aggregate(nam$new.formula, data = x, FUN = TLMoment, order = 1L:max.order, leftrim = leftrim, rightrim = rightrim, na.rm = na.rm, computation.method = computation.method)
-  ls <- cbind(agg[-length(agg)], as.data.frame(agg[[length(agg)]]))
-
-  out <- as.TLMoments(ls, as.formula(paste0(". ~ ", paste0(nam$rhs, collapse = "+"))), leftrim = leftrim, rightrim = rightrim)
-
-  attr(out, "computation.method") <- computation.method
-  attr(out, "source") <- list(
-    func = "TLMoments",
-    data = x,
-    n = aggregate(nam$new.formula, x, function(y) sum(!is.na(y)))$y,
-    formula = nam$new.formula
+  out <- list(
+    lambdas = cbind(agg[-length(agg)], as.data.frame(agg[[length(agg)]])),
+    ratios = cbind(agg[-length(agg)], as.data.frame(t(apply(agg[[length(agg)]], 1, calcRatios)[-1, ])))
   )
-  out
+
+  returnTLMoments(out, leftrim, rightrim, 1L:max.order,
+                  tl.computation.method = computation.method, data = x, formula = nam$new.formula)
 }
 
 
@@ -213,8 +254,6 @@ TLMoments.data.frame <- function(x, formula, leftrim = 0L, max.order = 4L, right
 #' @method TLMoments PWMs
 #' @export
 TLMoments.PWMs <- function(x, leftrim = 0L, rightrim = 0L, ...) {
-  if (!are.integer.like(leftrim, rightrim))
-    stop("leftrim and rightrim must be integers")
   if (any(diff(attr(x, "order")) != 1))
     stop("PWM order must not have gaps")
 
@@ -224,44 +263,58 @@ TLMoments.PWMs <- function(x, leftrim = 0L, rightrim = 0L, ...) {
 #' @method TLMoments.PWMs numeric
 #' @export
 TLMoments.PWMs.numeric <- function(x, leftrim = 0L, rightrim = 0L, ...) {
-  ls <- .Call('TLMoments_PWM_to_TLMoments', PACKAGE = 'TLMoments', x, leftrim, rightrim)
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
+  ls <- PWM_to_TLMoments(x, leftrim, rightrim)
+  out <- list(
+    lambdas = setNames(ls, paste0("L", seq_along(ls))),
+    ratios = calcRatios(ls)
+  )
 
-  attr(out, "computation.method") <- "pwms"
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.PWMs")
-  attr(out, "source")$pwms <- removeAttributes(x)
-  out
+  do.call(returnTLMoments, c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = seq_along(ls)),
+    func = "TLMoments.PWMs",
+    pwms = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.PWMs matrix
 #' @export
 TLMoments.PWMs.matrix <- function(x, leftrim = 0L, rightrim = 0L, ...) {
   ls <- apply(x, 2, function(xx) {
-    .Call('TLMoments_PWM_to_TLMoments', PACKAGE = 'TLMoments', xx, leftrim, rightrim)
+    PWM_to_TLMoments(xx, leftrim, rightrim)
   })
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
+  rownames(ls) <- paste0("L", seq_along(ls[, 1]))
+  out <- list(
+    lambdas = ls,
+    ratios = apply(ls, 2, calcRatios)
+  )
 
-  attr(out, "computation.method") <- "pwms"
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.PWMs")
-  attr(out, "source")$pwms <- removeAttributes(x)
-  out
+  do.call(returnTLMoments, c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = seq_along(ls[, 1])),
+    func = "TLMoments.PWMs",
+    pwms = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.PWMs list
 #' @export
 TLMoments.PWMs.list <- function(x, leftrim = 0L, rightrim = 0L, ...) {
   ls <- lapply(x, function(xx) {
-    .Call('TLMoments_PWM_to_TLMoments', PACKAGE = 'TLMoments', xx, leftrim, rightrim)
+    PWM_to_TLMoments(xx, leftrim, rightrim)
   })
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
+  ls <- lapply(ls, function(l) setNames(l, paste0("L", seq_along(l))))
+  out <- list(
+    lambdas = ls,
+    ratios = lapply(ls, calcRatios)
+  )
 
-  attr(out, "computation.method") <- "pwms"
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.PWMs")
-  attr(out, "source")$pwms <- removeAttributes(x)
-  out
+  do.call(returnTLMoments, c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = seq_along(ls[[1]])),
+    func = "TLMoments.PWMs",
+    pwms = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.PWMs data.frame
@@ -270,19 +323,24 @@ TLMoments.PWMs.data.frame <- function(x, leftrim = 0L, rightrim = 0L, ...) {
   pwms <- x[, grep("beta[0-9]*", names(x)), drop = FALSE]
   fac <- x[, !grepl("beta[0-9]*", names(x)), drop = FALSE]
   ls <- apply(pwms, 1, function(xx) {
-    .Call('TLMoments_PWM_to_TLMoments', PACKAGE = 'TLMoments', xx, leftrim, rightrim)
+    PWM_to_TLMoments(xx, leftrim, rightrim)
   })
-  ls <- as.data.frame(t(ls))
-  names(ls) <- paste0("L", 1:ncol(ls))
+  ratios <- apply(ls, 2, calcRatios)
+  ratios <- as.data.frame(t(ratios))
+  lambdas <- as.data.frame(t(ls))
+  names(lambdas) <- paste0("L", 1L:ncol(lambdas))
 
-  rhs <- dimnames(attr(terms(attr(x, "source")$formula), "factors"))[[2]]
-  out <- as.TLMoments(cbind(fac, ls), as.formula(paste0(". ~ ", paste0(rhs, collapse = "+"))), leftrim = leftrim, rightrim = rightrim)
+  out <- list(
+    lambdas = cbind(fac, lambdas),
+    ratios = cbind(fac, ratios)
+  )
 
-  attr(out, "computation.method") <- "pwms"
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.PWMs")
-  attr(out, "source")$pwms <- removeAttributes(x)
-  out
+  do.call(returnTLMoments, c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = 1L:ncol(lambdas)),
+    func = "TLMoments.PWMs",
+    pwms = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 
@@ -296,14 +354,14 @@ TLMoments.parameters <- function(x,
                                  max.order = 4L,
                                  ...) {
 
-  if (is.na(leftrim)) leftrim <- 0L
-  if (is.na(rightrim)) rightrim <- 0L
-  if (is.null(max.order) | max.order == 0) max.order <- 4L
-
-  if (!are.integer.like(max.order))
+  if (!is.null(max.order) && !are.integer.like(max.order))
     stop("max.order must be integer-like. ")
-  if (!are.numeric(leftrim, rightrim))
-    stop("leftrim and rightrim must be numeric. ")
+  if (!is.null(max.order) && max.order <= 0)
+    stop("max.order must be positive. ")
+  if ((!is.null(leftrim) && !are.integer.like(leftrim)) || (!is.null(rightrim) && !are.integer.like(rightrim)))
+    stop("leftrim and rightrim must be integer-like. ")
+  if ((!is.null(leftrim) && leftrim < 0) || (!is.null(rightrim) && rightrim < 0))
+    stop("leftrim and rightrim must be non-negative. ")
 
   UseMethod("TLMoments.parameters")
 }
@@ -313,27 +371,33 @@ TLMoments.parameters <- function(x,
 TLMoments.parameters.numeric <- function(x,
                                          leftrim = attr(x, "source")$trimmings[1],
                                          rightrim = attr(x, "source")$trimmings[2],
-                                         max.order = attr(x, "source")$max.order,
+                                         max.order = 4L,
                                          ...) {
 
-  if (is.na(leftrim)) leftrim <- 0L
-  if (is.na(rightrim)) rightrim <- 0L
-  if (is.null(max.order) || max.order == 0) max.order <- 4L
+  if (is.null(leftrim)) leftrim <- 0L
+  if (is.null(rightrim)) rightrim <- 0L
 
   if (is.null(attr(x, "source")$lambdas) ||
       !identical(attr(x, "source")$trimmings, c(leftrim, rightrim)) ||
-      attr(x, "source")$max.order != max.order) { # calculate new
+      (!is.null(attr(x, "source")$tl.order) && max(attr(x, "source")$tl.order) != max.order)) { # calculate new
 
     ls <- calcTLMom(max.order, leftrim, rightrim, qfunc = getQ(x))
   } else { # or use old calculations
     ls <- attr(x, "source")$lambdas
   }
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
 
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.parameters")
-  #attr(out, "source")$trimmings <- NULL
-  out
+  out <- list(
+    lambdas = setNames(ls, paste0("L", seq_along(ls))),
+    ratios = calcRatios(ls)
+  )
+
+  do.call(returnTLMoments,c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = 1L:max.order),
+    func = "TLMoments.parameters",
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.parameters matrix
@@ -341,16 +405,15 @@ TLMoments.parameters.numeric <- function(x,
 TLMoments.parameters.matrix <- function(x,
                                         leftrim = attr(x, "source")$trimmings[1],
                                         rightrim = attr(x, "source")$trimmings[2],
-                                        max.order = attr(x, "source")$max.order,
+                                        max.order = 4L,
                                         ...) {
 
-  if (is.na(leftrim)) leftrim <- 0L
-  if (is.na(rightrim)) rightrim <- 0L
-  if (is.null(max.order) || max.order == 0) max.order <- 4L
+  if (is.null(leftrim)) leftrim <- 0L
+  if (is.null(rightrim)) rightrim <- 0L
 
   if (is.null(attr(x, "source")$lambdas) ||
       !identical(attr(x, "source")$trimmings, c(leftrim, rightrim)) ||
-      attr(x, "source")$max.order != max.order) { # calculate new
+      (!is.null(attr(x, "source")$tl.order) && max(attr(x, "source")$tl.order) != max.order)) { # calculate new
 
     ls <- apply(x, 2, function(xx) {
       calcTLMom(max.order, leftrim, rightrim,
@@ -359,12 +422,20 @@ TLMoments.parameters.matrix <- function(x,
   } else { # or use old calculations
     ls <- attr(x, "source")$lambdas
   }
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
 
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.parameters")
-  #attr(out, "source")$trimmings <- NULL
-  out
+  rownames(ls) <- paste0("L", seq_along(ls[, 1]))
+  out <- list(
+    lambdas = ls,
+    ratios = apply(ls, 2, calcRatios)
+  )
+
+  do.call(returnTLMoments,c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = 1L:max.order),
+    func = "TLMoments.parameters",
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.parameters list
@@ -372,16 +443,15 @@ TLMoments.parameters.matrix <- function(x,
 TLMoments.parameters.list <- function(x,
                                       leftrim = attr(x, "source")$trimmings[1],
                                       rightrim = attr(x, "source")$trimmings[2],
-                                      max.order = attr(x, "source")$max.order,
+                                      max.order = 4L,
                                       ...) {
 
-  if (is.na(leftrim)) leftrim <- 0L
-  if (is.na(rightrim)) rightrim <- 0L
-  if (is.null(max.order) || max.order == 0) max.order <- 4L
+  if (is.null(leftrim)) leftrim <- 0L
+  if (is.null(rightrim)) rightrim <- 0L
 
   if (is.null(attr(x, "source")$lambdas) ||
       !identical(attr(x, "source")$trimmings, c(leftrim, rightrim)) ||
-      attr(x, "source")$max.order != max.order) { # calculate new
+      (!is.null(attr(x, "source")$tl.order) && max(attr(x, "source")$tl.order) != max.order)) { # calculate new
 
     ls <- lapply(x, function(xx) {
       calcTLMom(max.order, leftrim, rightrim,
@@ -390,12 +460,20 @@ TLMoments.parameters.list <- function(x,
   } else { # or use old calculations
     ls <- attr(x, "source")$lambdas
   }
-  out <- as.TLMoments(ls, leftrim = leftrim, rightrim = rightrim)
 
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.parameters")
-  #attr(out, "source")$trimmings <- NULL
-  out
+  ls <- lapply(ls, function(l) setNames(l, paste0("L", seq_along(l))))
+  out <- list(
+    lambdas = ls,
+    ratios = lapply(ls, calcRatios)
+  )
+
+  do.call(returnTLMoments,c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = 1L:max.order),
+    func = "TLMoments.parameters",
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 #' @method TLMoments.parameters data.frame
@@ -403,36 +481,52 @@ TLMoments.parameters.list <- function(x,
 TLMoments.parameters.data.frame <- function(x,
                                             leftrim = attr(x, "source")$trimmings[1],
                                             rightrim = attr(x, "source")$trimmings[2],
-                                            max.order = attr(x, "source")$max.order,
+                                            max.order = 4L,
                                             ...) {
 
-  if (is.na(leftrim)) leftrim <- 0L
-  if (is.na(rightrim)) rightrim <- 0L
-  if (is.null(max.order) || max.order == 0) max.order <- 4L
+  if (is.null(leftrim)) leftrim <- 0L
+  if (is.null(rightrim)) rightrim <- 0L
 
   nam <- getFormulaSides(attr(x, "source")$formula)
   if (is.null(attr(x, "source")$lambdas) ||
       !identical(attr(x, "source")$trimmings, c(leftrim, rightrim)) ||
-      attr(x, "source")$max.order != max.order) { # calculate new
+      (!is.null(attr(x, "source")$tl.order) && max(attr(x, "source")$tl.order) != max.order)) { # calculate new
 
     ls <- apply(x[!(names(x) %in% nam$rhs)], 1, function(xx) {
       calcTLMom(max.order, leftrim, rightrim,
                 qfunc = do.call(getQ, c(x = attr(x, "distribution"), as.list(xx))))
     })
+    if (max.order == 1) {
+      ls <- rbind(ls, deparse.level = 0)
+    }
     ls <- as.data.frame(t(ls))
     names(ls) <- paste0("L", 1:max.order)
-    ls <- cbind(x[nam$rhs], ls)
+    fac <- x[nam$rhs]
 
   } else { # or use old calculations
-    ls <- attr(x, "source")$lambdas
+    dat <- attr(x, "source")$lambdas
+    fac <- dat[nam$rhs]
+    ls <- dat[!(names(dat) %in% nam$rhs)]
   }
 
-  out <- as.TLMoments(ls, as.formula(paste0(".~", paste0(nam$rhs, collapse = "+"))), leftrim = leftrim, rightrim = rightrim)
+  if (max.order > 1) {
+    ratios <- t(apply(ls, 1, calcRatios))[, -1, drop = FALSE]
+  } else {
+    ratios <-  matrix(NA, nrow = nrow(ls), ncol = 0)
+  }
 
-  attr(out, "source") <- attributes(x)$source
-  attr(out, "source")$func <- c(attr(out, "source")$func, "TLMoments.parameters")
-  #attr(out, "source")$trimmings <- NULL
-  out
+  out <- list(
+    lambdas = cbind(fac, as.data.frame(ls)),
+    ratios = cbind(fac, as.data.frame(ratios))
+  )
+
+  do.call(returnTLMoments,c(
+    list(out = out, leftrim = leftrim, rightrim = rightrim, order = 1L:max.order),
+    func = "TLMoments.parameters",
+    distr = attr(x, "distribution"),
+    parameters = list(removeAttributes(x)),
+    attr(x, "source")
+  ))
 }
 
 

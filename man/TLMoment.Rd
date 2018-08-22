@@ -2,19 +2,19 @@
 % Please edit documentation in R/TLMoment.R
 \name{TLMoment}
 \alias{TLMoment}
-\title{Trimmed L Moment.}
+\title{Trimmed L Moments}
 \usage{
 TLMoment(x, order = 1L, leftrim = 0L, rightrim = 0L, na.rm = FALSE,
   computation.method = "auto")
 }
 \arguments{
-\item{x}{vector of data}
+\item{x}{numeric vector of data.}
 
-\item{order}{integer, order of Trimmed Moment, has to be greater than 1}
+\item{order}{integer, order of Trimmed Moment, has to be greater than 1.}
 
-\item{leftrim, rightrim}{integer indicating trimming parameters, have to be greater than 0}
+\item{leftrim, rightrim}{integer indicating trimming parameters, have to be greater than 0.}
 
-\item{na.rm}{logical, indicates if NAs should be removed}
+\item{na.rm}{logical, indicates if NAs should be removed.}
 
 \item{computation.method}{character, indicating if the computation is performed via
 PWMs, direct, recursive, or recurrence (see References Hosking & Balakrishnan, 2015).
@@ -22,10 +22,10 @@ Possible values are \code{auto} (default, automatically choose appropriate metho
 \code{direct}, \code{recursive}, or \code{recurrence}. Only if empirical moments are calculated.}
 }
 \value{
-numeric, the TL(\code{leftrim},\code{rightrim})-moments of orders \code{order} of \code{x}
+numeric vector, empirical TL(\code{leftrim},\code{rightrim})-moments of orders \code{order} of \code{x}
 }
 \description{
-Calculates Trimmed L-moments of specific order(s) and trimming.
+Calculates empirical Trimmed L-moments of specific order(s) and trimming.
 }
 \examples{
 x <- rnorm(100)

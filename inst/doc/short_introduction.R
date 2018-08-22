@@ -1,5 +1,6 @@
-## ----echo=FALSE, message=FALSE-------------------------------------------
+## ------------------------------------------------------------------------
 library(TLMoments)
+sessionInfo()$otherPkgs$TLMoments$Version
 
 ## ------------------------------------------------------------------------
 xvec <- rgev(100, loc = 10, scale = 5, shape = .2)
@@ -52,6 +53,11 @@ tlm <- TLMoments(xlist, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, "gev"), c(.99, .999))
 tlm <- TLMoments(xdat, hq ~ station, leftrim = 0, rightrim = 1)
 quantiles(parameters(tlm, "gev"), c(.99, .999))
+
+## ------------------------------------------------------------------------
+tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1)
+plot(tlm)
+plot(tlm, distr = c("gev", "gpd", "exp", "gum"))
 
 ## ------------------------------------------------------------------------
 (tlm <- as.TLMoments(c(14.1, 4.3, 1.32)))

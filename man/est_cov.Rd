@@ -6,7 +6,7 @@
 \alias{est_cov.TLMoments}
 \alias{est_cov.parameters}
 \alias{est_cov.quantiles}
-\title{Calculation of the covariance matrix of estimations of PWMs, TLMoments, parameters, or quantiles}
+\title{Covariance matrix of PWMs, TLMoments, parameters, or quantiles}
 \usage{
 est_cov(x, ...)
 
@@ -22,18 +22,26 @@ est_cov(x, ...)
 \item{x}{object of \code{PWMs}, \code{TLMoments}, \code{parameters},
 or \code{quantiles} constructed using the same-named functions.}
 
-\item{...}{additional arguments given to the sub-functions: \code{distr} and \code{np.cov}.}
+\item{...}{additional arguments given to the sub-functions: \code{distr} and \code{np.cov} (see details).}
 
 \item{select}{numeric oder character vector specifying a subset of the covariance matrix. If
 not specified the full covariance matrix is returned.}
 }
 \value{
-a numeric matrix (if \code{x} is of class \code{PWMs}, \code{parameters}, or
+numeric matrix (if \code{x} is of class \code{PWMs}, \code{parameters}, or
          \code{quantiles}) or a list of two matrices (\code{lambdas} and \code{ratios}, if
          \code{x} is of class \code{TLMoments}).
 }
 \description{
-description not done yet
+Calculation of the empirical or theoretical covariance matrix of objects
+of the classes \code{PWMs}, \code{TLMoments}, \code{parameters}, or \code{quantiles}.
+}
+\details{
+Covariance matrices of \code{PWMs} and \code{TLMoments} are calculated without parametric
+assumption by default. Covariance matrices of \code{parameters} and \code{quantiles} use
+parametric assumption based on their stored distribution attribute (only GEV at the moment).
+Parametric (GEV) calculation can be enforced by specifying \code{distr=\"gev\"}, non-parametric
+calculation by using \code{np.cov=TRUE}.
 }
 \examples{
 ### 1: PWMs:
@@ -52,10 +60,11 @@ est_cov(PWMs(xmat[, 1, drop = FALSE]), select = 2:3)
 est_cov(PWMs(xvec), distr = "gev")
 est_cov(PWMs(xvec), distr = "gev", select = c(1, 3))
 
-
-# cov(t(replicate(100000,
-#  as.vector(PWMs(cbind(rgev(100, shape = .1), rgev(100, shape = .3)), 1)))
-# ))
+\dontrun{
+cov(t(replicate(100000,
+  as.vector(PWMs(cbind(rgev(100, shape = .1), rgev(100, shape = .3)), max.order = 1)))
+))
+}
 
 
 ### 2. TLMoments:
@@ -109,8 +118,12 @@ para <- as.parameters(loc = 10, scale = 5, shape = .2, distr = "gev")
 est_cov(para, set.n = 100)
 est_cov(para, rightrim = 1, set.n = 100)
 
-# var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2)), "gev"))))
-# var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2), rightrim = 1), "gev"))))
+\dontrun{
+var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2)), "gev"))))
+}
+\dontrun{
+var(t(replicate(10000, parameters(TLMoments(rgev(100, 10, 5, .2), rightrim = 1), "gev"))))
+}
 
 # Parameter estimates from regionalized TLMoments:
 est_cov(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"))
@@ -131,10 +144,12 @@ est_cov(q, select = .95)
 est_cov(q, np.cov = TRUE)
 
 # Matrix inputs
-q <- quantiles(parameters(TLMoments(xmat, 0, 1), "gev"), c(.9, .95, .99))
+param <- parameters(TLMoments(xmat, 0, 1), "gev")
+q <- quantiles(param, c(.9, .95, .99))
 est_cov(q)
 est_cov(q, select = .99)
-q <- quantiles(parameters(TLMoments(xmat[, 1, drop = FALSE], 0, 1), "gev"), c(.9, .95, .99))
+param <- parameters(TLMoments(xmat[, 1, drop = FALSE], 0, 1), "gev")
+q <- quantiles(param, c(.9, .95, .99))
 est_cov(q, select = .99)
 
 # Theoretical values
@@ -144,7 +159,8 @@ est_cov(q, leftrim = 0, rightrim = 1)
 est_cov(q, leftrim = 0, rightrim = 1, set.n = 100)
 
 # Quantile estimates from regionalized TLMoments:
-est_cov(quantiles(parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev"), c(.9, .99)))
+param <- parameters(regionalize(TLMoments(xmat), c(.75, .25)), "gev")
+est_cov(quantiles(param, c(.9, .99)))
 
 
 }

@@ -2,6 +2,7 @@
 #' Summary parameters
 #' @description
 #' Calculating and printing of summary statistics to a given parameters-object.
+#'
 #' @param object object of parameters.
 #' @param ci.level numeric vector of length 1 giving the confidence level (default is 0.9).
 #' @param ... additional arguments submitted to \code{est_cov}.
@@ -12,6 +13,7 @@
 #'  \item \code{cov}
 #' }
 #' It is printed with \code{print.summary.parameters}.
+#'
 #' @seealso \code{\link{parameters}}, \code{\link{est_cov}}
 #' @examples
 #' x <- cbind(rgev(100, shape = .2), rgev(100, shape = .2))
@@ -86,14 +88,14 @@ summary.parameters.matrix <- function(object, ci.level = .9, ...) {
 print.summary.parameters <- function(x, ...) {
   # summary prints an overview of the data and what was done and ci of the parameters
 
-  if (attr(x$param, "source")$func[1] %in% c("as.PWMs", "as.TLMoments", "as.parameters")) {
+  if (any(attr(x$param, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {
     # Theoretical data
-    cat("Distribution: ", toupper(attr(x$cov, "distribution")), "(", paste(names(x$param), x$param, sep = "=", collapse = ", "), ")\n", sep = "")
+    cat("Distribution: ", toupper(attr(x$cov, "distribution")), "(", paste(names(x$param), round(x$param, 4), sep = "=", collapse = ", "), ")\n", sep = "")
     cat("Confidence intervals based on assumptions: \n")
     cat("\tTL(", paste0(attr(x$cov, "trimmings"), collapse = ","), ")\n", sep = "")
     cat("\tn = ", attr(x$cov, "n"), "\n", sep = "")
   } else {
-    # Real data
+    # Empirical data
     ns <- attr(x$param, "source")$n
     cat(length(ns), " data row(s) with n = ", paste0(ns, collapse = ", "), ".\n", sep = "")
     cat("TL(", paste0(attr(x$param, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$param, "distribution")), " parameters. \n", sep = "")

@@ -7,7 +7,7 @@
 \method{summary}{TLMoments}(object, ci.level = 0.9, ...)
 }
 \arguments{
-\item{object}{object of TLMoments}
+\item{object}{object of TLMoments.}
 
 \item{ci.level}{numeric vector of length 1 giving the confidence level (default is 0.9).}
 

@@ -1,23 +1,18 @@
 ---
 title: "Short introduction"
 date: "`r Sys.Date()`"
-output:
-  md_document:
-    variant: markdown_github
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Short introduction}
-  %\VignetteEngine{knitr::knitr}
-  %\VignetteDepends{TLMoments}
-  %\VignettePackage{TLMoments}
-  \usepackage[utf8]{inputenc}	
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
-
-# Short Introduction
 
 `TLMoments` is a set of functions whose main functionality is the calculation of Trimmed L-moments and their parameter and quantile estimates. One of the goals is to reduce computation time compared to existing implementations (in packages like `lmomco`, `Lmoments`, `Lmom`), therefore the core functions are written in C++ (see vignette "comparison of computation time" for speed comparisons). Furthermore, the package expands the combinations of trimmings that can be used to estimate distribution parameters in comparison to existing packages (which mainly supports parameter estimation with L-moments). To ensure an easy usage, the package only contains a small set of functions. This vignette gives a short introduction to the most important ones and their usage. 
 
-```{r echo=FALSE, message=FALSE}
+```{r}
 library(TLMoments)
+sessionInfo()$otherPkgs$TLMoments$Version
 ```
 
 ## Calculation of empirical TL-moments, parameter and quantile estimates. 
@@ -92,6 +87,21 @@ quantiles(parameters(tlm, "gev"), c(.99, .999))
 ## Distributions 
 
 `TLMoments` offers functions (distributions, density, quantile, random number generation) for the generalized extreme value distribution (`gev`), Gumbel distribution (`gum`), generalized Pareto distribution (`gpd`), and three-parameter lognormal distribution (`ln3`) in the common `p|d|q|r`-syntax. The parameter (and quantile) estimation functionality works for all of them, but more complex functionality like estimation of the covariance matrix of parameter or quantile estimators only works for GEV by now. 
+
+## TL-moment ratio diagram
+
+Version 0.7.4 added functionality to plot TL-moment ratio diagrams of arbitrary trimming orders. 
+Simply plot an object of `TLMoments`. Argument `distr` can be used to specify displayed theoretical 
+distributions. 
+Note that `ggplot2` is used. Therefore changes or additions have to be made by adding 
+`ggplot2`-specific functions. 
+
+```{r}
+tlm <- TLMoments(xmat, leftrim = 0, rightrim = 1)
+plot(tlm)
+plot(tlm, distr = c("gev", "gpd", "exp", "gum"))
+```
+
 
 ## Calculations using theoretical TL-moments and parameters
 

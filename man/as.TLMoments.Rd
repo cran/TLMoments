@@ -6,7 +6,7 @@
 \alias{as.TLMoments.matrix}
 \alias{as.TLMoments.list}
 \alias{as.TLMoments.data.frame}
-\title{Convert vector or matrix to a TLMoments-object}
+\title{Convert to TLMoments-object}
 \usage{
 as.TLMoments(x, ..., leftrim, rightrim, ratios)
 
@@ -19,16 +19,16 @@ as.TLMoments(x, ..., leftrim, rightrim, ratios)
 \method{as.TLMoments}{list}(x, leftrim = 0L, rightrim = 0L,
   ratios = FALSE, ...)
 
-\method{as.TLMoments}{data.frame}(x, formula, leftrim = 0L, rightrim = 0L,
-  ratios = FALSE, ...)
+\method{as.TLMoments}{data.frame}(x, formula, leftrim = 0L,
+  rightrim = 0L, ratios = FALSE, ...)
 }
 \arguments{
 \item{x}{vector or matrix of TL-moments (or TL-moment ratios if ratios is TRUE) or a PWMs-object.
 The first position or row is always used as the L1-moment, if vector or matrix are given.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments.}
 
-\item{leftrim, rightrim}{integer, order of trimmed L-moments}
+\item{leftrim, rightrim}{integer, order of trimmed L-moments.}
 
 \item{ratios}{boolean, if TRUE the non-first positions or rows of x give
 L-moment ratios, if FALSE (default) they give L-moments.
@@ -37,11 +37,12 @@ If ratios are used and the first position or row is NA, L1 is assumed to be 1!}
 \item{formula}{if \code{x} is data.frame. See examples.}
 }
 \value{
-an object with class TLMoments, ready to commit to other TLMoments-functions
+object of class TLMoments, see PWMs help page.
 }
 \description{
-Convert a vector or matrix of TL-moments or TL-moment ratios or a PWMs-object to
-a TLMoments-object in order to be used with TLMoments-functions.
+Convert vector, matrix, list, or data.frame of TL-moments
+or TL-moment ratios or a PWMs-object to a TLMoments-object in order
+to be used with TLMoments-functions.
 The first position of a vector or the first row of a matrix is
 always used as the L1-moment. The \code{ratios} argument determines if the
 following positions or rows are used as TL-moments oder TL-moments ratios.
@@ -60,7 +61,7 @@ The trimming has to be given using the \code{leftrim} and \code{rightrim} argume
 
 \examples{
 ### Vector or matrix as input
-xmat <- cbind(c(1, .2, .05), c(1, .2, .04), c(1.3, .3, .1))
+xmat <- cbind(c(1, .2, .05), c(1, .2, NA), c(1.3, NA, .1))
 xvec <- xmat[, 1]
 xlist <- lapply(1:ncol(xmat), function(i) xmat[, i])
 xdat <- data.frame(

@@ -7,7 +7,8 @@
 \alias{est_quancov.quantiles}
 \title{Estimate the covariance matrix of quantile estimations}
 \usage{
-est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L, ...)
+est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L,
+  ...)
 
 \method{est_quancov}{numeric}(x, distr, p, leftrim = 0L, rightrim = 0L,
   np.cov = FALSE, ...)
@@ -28,7 +29,7 @@ est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L, ...)
 
 \item{leftrim, rightrim}{lower and upper trimming parameter used for parameter calculation, have to be non-negative integers.}
 
-\item{...}{additional arguments, ignored.}
+\item{...}{additional arguments.}
 
 \item{np.cov}{boolean, if TRUE no parametric assumptions are used to calculate the covariance matrix (default FALSE).}
 
