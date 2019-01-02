@@ -5,18 +5,6 @@
 
 using namespace Rcpp;
 
-// pseudo_C
-NumericMatrix pseudo_C(NumericVector x, NumericVector k);
-RcppExport SEXP _TLMoments_pseudo_C(SEXP xSEXP, SEXP kSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type k(kSEXP);
-    rcpp_result_gen = Rcpp::wrap(pseudo_C(x, k));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pwm_C
 double pwm_C(NumericVector x, int r);
 RcppExport SEXP _TLMoments_pwm_C(SEXP xSEXP, SEXP rSEXP) {
@@ -125,9 +113,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pseudo_C
+NumericMatrix pseudo_C(NumericVector x, NumericVector k);
+RcppExport SEXP _TLMoments_pseudo_C(SEXP xSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(pseudo_C(x, k));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_TLMoments_pseudo_C", (DL_FUNC) &_TLMoments_pseudo_C, 2},
     {"_TLMoments_pwm_C", (DL_FUNC) &_TLMoments_pwm_C, 2},
     {"_TLMoments_z_C", (DL_FUNC) &_TLMoments_z_C, 4},
     {"_TLMoments_Z_C", (DL_FUNC) &_TLMoments_Z_C, 3},
@@ -136,6 +135,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TLMoments_TLMoment_direct", (DL_FUNC) &_TLMoments_TLMoment_direct, 4},
     {"_TLMoments_TLMoments_recursive", (DL_FUNC) &_TLMoments_TLMoments_recursive, 4},
     {"_TLMoments_TLMoments_recurrence", (DL_FUNC) &_TLMoments_TLMoments_recurrence, 4},
+    {"_TLMoments_pseudo_C", (DL_FUNC) &_TLMoments_pseudo_C, 2},
     {NULL, NULL, 0}
 };
 
