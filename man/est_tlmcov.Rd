@@ -19,7 +19,7 @@ est_tlmcov(x, leftrim = 0L, rightrim = 0L, order = 1:3,
   reg.weights = NULL, ...)
 
 \method{est_tlmcov}{TLMoments}(x, leftrim = attr(x, "leftrim"),
-  rightrim = attr(x, "leftrim"), order = attr(x, "order"),
+  rightrim = attr(x, "rightrim"), order = attr(x, "order"),
   distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, set.n = NA,
   ...)
 }

@@ -88,7 +88,7 @@ returnPWMs <- function(out, order, ...) {
                      numeric = sum(!is.na(args$data)),
                      matrix = apply(args$data, 2, function(y) sum(!is.na(y))),
                      list = vapply(args$data, length, numeric(1)),
-                     data.frame = aggregate(args$formula, args$data, length)[[2]])
+                     data.frame = aggregate(args$formula, args$data, length)[[getFormulaSides(args$formula)$lhs]])
   }
 
   # Attributes of PWMs

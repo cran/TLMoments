@@ -220,7 +220,7 @@ getQ.parameters <- function(x) {
 
 correctNames <- function(x, forbidden_pattern, preceding) {
 
-  if (class(x) == "data.frame") {
+  if (any(class(x) == "data.frame")) {
     forbids <- grepl(forbidden_pattern, names(x))
     if (any(forbids)) {
       forbidden_names <- names(x)[forbids]
@@ -229,7 +229,7 @@ correctNames <- function(x, forbidden_pattern, preceding) {
       warning("Renamed variables due to invalid names. ")
     }
 
-  } else if (class(x) == "formula") {
+  } else if (any(class(x) == "formula")) {
     forbids <- grepl(forbidden_pattern, all.vars(x))
     if (any(forbids)) {
       forbidden_names <- all.vars(x)[forbids]

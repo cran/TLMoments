@@ -47,7 +47,7 @@ v <- function(r, delta, scale, shape) {
 
 # @return Symmetric Matrix of dimensions determined by \code{betas}.
 PWMCov_GEV <- function(betas = 0:3, scale, shape) {
-  if (shape == 0) shape <- 1e-6
+  if (abs(shape) <= 1e-06) shape <- 1e-6
   mirs <- min(betas)
   mars <- max(betas)
   out <- matrix(NA, nrow = mars+1, ncol = mars+1)

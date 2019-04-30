@@ -2,22 +2,38 @@
 % Please edit documentation in R/regionalize.R
 \name{regionalize}
 \alias{regionalize}
+\alias{regionalize.numeric}
+\alias{regionalize.matrix}
+\alias{regionalize.data.frame}
+\alias{regionalize.list}
 \title{Calculation of regionalized TL-moments}
 \usage{
-regionalize(x, w = rep(1, ncol(x$lambdas)), reg.lambdas = TRUE)
+regionalize(x, ...)
+
+\method{regionalize}{numeric}(x, ...)
+
+\method{regionalize}{matrix}(x, w = attr(x, "source")$n,
+  reg.lambdas = TRUE, ...)
+
+\method{regionalize}{data.frame}(x, w = attr(x, "source")$n,
+  reg.lambdas = TRUE, ...)
+
+\method{regionalize}{list}(x, w = attr(x, "source")$n,
+  reg.lambdas = TRUE, ...)
 }
 \arguments{
-\item{x}{object returned by TLMoments.matrix. TLMoments.list and
-TLMoments.data.frame are not supported by now.}
+\item{x}{object returned by TLMoments.}
 
-\item{w}{numeric vector giving the weights. The function ensures
-that it adds up to 1.}
+\item{...}{additional arguments, not used at the moment.}
+
+\item{w}{numeric vector giving the weights. Default: Sample lengths of corresponding
+data. Internally scaled so that it adds up to 1.}
 
 \item{reg.lambdas}{logical, if TRUE (default) regionalization is
 based upon TL-moments. If false it's based on TL-moment-ratios.}
 }
 \value{
-list of two dimensions: \code{lambdas}/\code{ratios} are a matrix
+list of two dimensions: \code{lambdas}/\code{ratios} are numeric vectors
 consisting of the regionalized TL-moments/TL-moment-ratios. The list has
 the class \code{TLMoments}. The object contains the following attributes: \itemize{
  \item \code{leftrim}: a numeric giving the used leftrim-argument
@@ -28,14 +44,26 @@ the class \code{TLMoments}. The object contains the following attributes: \itemi
 }
 }
 \description{
-regionalize takes the result of TLMoments.matrix and calculates a weighted mean
+regionalize takes the result of TLMoments and calculates a weighted mean
 of TL-moments and TL-moment ratios.
 }
 \examples{
-tlm <- TLMoments(
-  matrix(rgev(200, loc = 10, scale = 5, shape = .3), nc = 5),
-  leftrim = 0, rightrim = 1)
+xmat <- matrix(rgev(100), nc = 4)
+xvec <- xmat[, 3]
+xlist <- lapply(1L:ncol(xmat), function(i) xmat[, i])
+xdat <- data.frame(
+ station = rep(letters[1:2], each = 50),
+ season = rep(c("S", "W"), 50),
+ hq = as.vector(xmat)
+)
 
+regionalize(TLMoments(xmat))
+regionalize(TLMoments(xlist))
+regionalize(TLMoments(xdat, hq ~ station))
+# For numeric vector TLMoments, nothing happens:
+regionalize(TLMoments(xvec))
+
+tlm <- TLMoments(xmat)
 regionalize(tlm)
 regionalize(tlm, reg.lambdas = FALSE)
 

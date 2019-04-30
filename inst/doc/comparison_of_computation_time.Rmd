@@ -45,9 +45,9 @@ Besides our implementation, L-moments and/or TL-moments can be calculated using 
 (all availabe at CRAN). The functions `lmomco::lmoms`, `lmomco::TLmoms`, and `Lmoments::Lmoments` return list objects with (T)L-moments and (T)L-moment-ratios and are therefore compared to our `TLMoments`; `lmom::samlmu` returns a vector of lambdas and is compared to `TLMoment` (which is a fast bare-bone function to compute TL-moments but is not suited to be transmitted to `parameters` or other functions of this package). 
 
 
-# Calculation of L-moments
+## Calculation of L-moments
 
-First we check, if all approaches give the same results (lmomco::lmoms is added as comparison). 
+First we check, if all calculation approaches give the same results (lmomco::lmoms is added as comparison). 
 ```{r}
 n <- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
 sapply(n, function(nn) {
@@ -83,7 +83,9 @@ do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 ```
-As we see, our implementation of the *recursive approach* is clearly the fastest. After this, the *pwm approach* is to be prefered over the *direct approach*. The implementation in `lmomco` is slow, compared to the others, especially for longer data vectors. `Lmoments` is constantly slower than the *recursive approach* of this package. 
+`Lmoments` (since version 1.3-1) is the fastest implementation. 
+In `TLMoments` the *recursive approach* is the fastest. After this, the *pwm approach* is to be prefered over the *direct approach*. 
+The implementation in `lmomco` is slow, compared to the others, especially for longer data vectors. 
 
 Comparison of functions that only return a vector of L-moments:
 ```{r}
@@ -109,10 +111,10 @@ do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 ```
-For smaller data vectors our *recursive*-implementation is as fast as `lmom::samlmu`, but with longer data vectors `lmom::samlmu` excels. 
+For smaller data vectors our *recursive*-implementation is as fast as `lmom::samlmu`, but for longer data vectors `lmom::samlmu` and `Lmoments::Lmoments` are faster.  
 
 
-# Calculation of TL-moments
+## Calculation of TL-moments
 
 First we check, if all approaches give the same results (lmomco::Tlmoms is added as comparison)
 ```{r}
@@ -186,6 +188,9 @@ do.call("rbind", lapply(possib, function(f) {
 In this calculations the *recurrence approach* clearly outperforms the other implementations. Calculation using *probabilty-weighted moments* is relatively fast, but using the *direct calculation* should be avoided, regarding calculation speed. This package's implementation is clearly faster than those in `lmomco`. 
 
 
-# Conclusion
+## Conclusion
 
-This results encourage to use the *recursive approach* for L-moments and the *recurrence approach* when calculating TL-moments. Therefore these are the defaults in this package, but the other computation methods (*direct* and *pwm*) are still available. 
+This results encourage to use the *recursive approach* for L-moments and the *recurrence approach* when calculating TL-moments. 
+Therefore these are the defaults in this package, but the other computation methods (*direct* and *pwm*) are still available. 
+
+In comparison to other packages `Lmoments` is faster but only supports L-moments and TL(1,1)-moments. 

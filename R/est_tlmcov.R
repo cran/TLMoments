@@ -215,7 +215,7 @@ est_tlmcov.matrix <- function(x,
 #' @export
 est_tlmcov.TLMoments <- function(x,
                                  leftrim = attr(x, "leftrim"),
-                                 rightrim = attr(x, "leftrim"),
+                                 rightrim = attr(x, "rightrim"),
                                  order = attr(x, "order"),
                                  distr = NULL,
                                  lambda.cov = TRUE,
@@ -243,9 +243,7 @@ est_tlmcov.TLMoments <- function(x,
   r <- parametricPWMCov(distr, 0:(maxk-1), scale = p["scale"], shape = p["shape"])
   pwmcov <- r / n
 
-  Z <- sapply(0:(maxk-1), function(k) sapply(0:(max(order)-1), function(r) {
-    z_C(r, k, leftrim, rightrim)
-  }))
+  Z <- Z_C(max(order), leftrim, rightrim)
   lambdacov <- (Z %*% pwmcov %*% t(Z))
   rownames(lambdacov) <- colnames(lambdacov) <- paste0("L", 1:max(order))
 

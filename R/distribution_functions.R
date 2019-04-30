@@ -17,7 +17,7 @@ pgev <- function(q, loc = 0, scale = 1, shape = 0) {
   if (scale <= 0) stop("scale must be >0. ")
 
   y <- (q - loc)/scale
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     exp(-exp(-y))
   } else {
     exp(-pmax(1 + shape*y, 0)^(-1/shape))
@@ -32,7 +32,7 @@ dgev <- function(x, loc = 0, scale = 1, shape = 0) {
   if (scale <= 0) stop("scale must be >0. ")
 
   y <- (x - loc)/scale
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     1/scale * exp(-y) * exp(-exp(-y))
   } else {
     1/scale * (1 + shape * y)^(-1/shape - 1) * exp(-(1 + shape*y)^(-1/shape))
@@ -48,7 +48,7 @@ qgev <- function(p, loc = 0, scale = 1, shape = 0) {
 
   if (min(p, na.rm = TRUE) <= 0 || max(p, na.rm = TRUE) >= 1) stop("p must be between 0 and 1. ")
 
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     loc - scale * log(-log(p))
   } else {
     loc + scale * ((-log(p))^(-shape) - 1)/shape
@@ -111,7 +111,7 @@ pgpd <- function(q, loc = 0, scale = 1, shape = 0) {
   if (scale <= 0) stop("scale must be >0. ")
 
   y <- pmax((q - loc)/scale, 0)
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     1 - exp(-y)
   } else {
     if (shape < 0) y <- pmin(y, -1/shape)
@@ -128,7 +128,7 @@ dgpd <- function(x, loc = 0, scale = 1, shape = 0) {
 
   y <- (x - loc)/scale
   y[y < 0] <- Inf
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     exp(-y)/scale
   } else {
     if (shape < 0) y <- pmin(y, -1/shape)
@@ -145,7 +145,7 @@ qgpd <- function(p, loc = 0, scale = 1, shape = 0) {
 
   if (min(p, na.rm = TRUE) <= 0 || max(p, na.rm = TRUE) >= 1) stop("p must be between 0 and 1. ")
 
-  if (shape == 0) {
+  if (abs(shape) < 1e-06) {
     loc - scale*log(1-p)
   } else {
     loc + scale/shape * ((1-p)^(-shape) - 1)
@@ -156,6 +156,26 @@ qgpd <- function(p, loc = 0, scale = 1, shape = 0) {
 rgpd <- function(n, loc = 0, scale = 1, shape = 0) {
   qgpd(runif(n), loc = loc, scale = scale, shape = shape)
 }
+
+
+qp3 <- function(p, loc = 0, scale = 1, shape = 0) {
+  if (length(loc) != 1 || length(scale) != 1 || length(shape) != 1) stop("loc, scale, and shape must have length 1. ")
+  if (!are.numeric(p, loc, scale, shape)) stop("p, loc, scale, and shape must be numeric. ")
+  if (any(is.na(c(loc, scale, shape)))) return(rep(NA, length(p)))
+  if (scale <= 0) stop("scale must be >0. ")
+
+  if (abs(shape) < 1e-06) { # shape = 0
+    loc + scale * stats::qnorm(p)
+  } else {
+    if (shape > 0) {
+      loc - 4 / shape^2 * abs(0.5 * scale * shape) + stats::qgamma(p, 4 / shape^2, 1 / abs(0.5 * scale * shape))
+    }
+    else {
+      loc + 4 / shape^2 * abs(0.5 * scale * shape) - stats::qgamma(1 - p, 4 / shape^2, 1 / abs(0.5 * scale * shape))
+    }
+  }
+}
+
 
 
 #' @title Three-parameter lognormal distribution
@@ -213,3 +233,5 @@ rln3 <- function(n, loc = 0, scale = 1, shape = 1) {
 
   stats::rlnorm(n, meanlog = scale, sdlog = shape) + loc
 }
+
+
