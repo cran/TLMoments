@@ -101,6 +101,6 @@ print.summary.parameters <- function(x, ...) {
     cat("TL(", paste0(attr(x$param, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$param, "distribution")), " parameters. \n", sep = "")
   }
   cat("\n")
-  cat("Approximate ", x$ci.level, "% confidence interval of parameters: \n", sep = "")
+  cat("Approximate ", x$ci.level*100, "% confidence interval of parameters: \n", sep = "")
   print(x$ci)
 }

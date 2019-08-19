@@ -8,7 +8,8 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 double pwm_C(NumericVector x, int r) {
   int n = x.size();
-  x = x.sort();
+  NumericVector xs(clone(x));
+  xs = xs.sort();
   double sum = 0;
   double w;
   double vorfaktor = 1;
@@ -21,7 +22,7 @@ double pwm_C(NumericVector x, int r) {
     for (int i = 1; i <= r; i++) {
       w *= (j-i);
     }
-    sum += w * x[j-1];
+    sum += w * xs[j-1];
   }
   return sum * vorfaktor;
 }

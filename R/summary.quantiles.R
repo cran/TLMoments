@@ -100,7 +100,7 @@ print.summary.quantiles <- function(x, ...) {
     cat("TL(", paste0(attr(x$q, "source")$trim, collapse = ","), ") used to generate ", toupper(attr(x$q, "distr")), " parameters to calculate ", paste0(attr(x$q, "p"), collapse = ", "), " quantile estimates. \n", sep = "")
   }
   cat("\n")
-  cat("Approximate ", x$ci.level, "% confidence interval of quantiles: \n", sep = "")
+  cat("Approximate ", x$ci.level*100, "% confidence interval of quantiles: \n", sep = "")
   print(x$ci)
   #cat("\n")
   #cat("Covariance matrix of quantile estimates: \n", sep = "")

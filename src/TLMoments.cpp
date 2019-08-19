@@ -101,10 +101,11 @@ NumericVector w_direct(int r, int n, double s, double t) {
 double TLMoment_direct(NumericVector x, int r, double s, double t) {
   double out;
   int n = x.size();
-  x = x.sort();
+  NumericVector xs(clone(x));
+  xs = xs.sort();
 
   NumericVector weights = w_direct(r, n, s, t);
-  out = sum(x * weights);
+  out = sum(xs * weights);
   return out;
 }
 
@@ -178,11 +179,12 @@ NumericMatrix W_recursive(int maxr, int n, double s, double t) {
 NumericVector TLMoments_recursive(NumericVector x, int maxr, double s, double t) {
   NumericVector out(maxr);
   int n = x.size();
-  x = x.sort();
+  NumericVector xs(clone(x));
+  xs = xs.sort();
 
   NumericMatrix weights = W_recursive(maxr, n, s, t);
   for (int r = 1; r <= maxr; r++) {
-    out[r-1] = sum(x * weights(r-1, _));
+    out[r-1] = sum(xs * weights(r-1, _));
   }
 
   return out;

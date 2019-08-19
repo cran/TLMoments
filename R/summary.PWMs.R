@@ -89,7 +89,7 @@ print.summary.PWMs <- function(x, ...) {
   ns <- attr(x$pwm, "source")$n
   cat(length(ns), " data row(s) with n = ", paste0(ns, collapse = ", "), ".\n", sep = "")
   cat("\n")
-  cat("Approximate ", x$ci.level, "% confidence interval of PWMs: \n", sep = "")
+  cat("Approximate ", x$ci.level*100, "% confidence interval of PWMs: \n", sep = "")
   print(x$ci)
   #cat("\n")
   #cat("Covariance matrix of PWM estimates: \n", sep = "")

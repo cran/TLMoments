@@ -124,10 +124,10 @@ print.summary.TLMoments <- function(x, ...) {
     cat("TL(", attr(x$tlm, "leftrim"), ",", attr(x$tlm, "rightrim"), ") calculated. \n", sep = "")
   }
   cat("\n")
-  cat("Approximate ", x$ci.level, "% confidence interval of TL moments: \n", sep = "")
+  cat("Approximate ", x$ci.level*100, "% confidence interval of TL moments: \n", sep = "")
   print(x$lambda.ci)
   if (!is.null(x$ratio.ci)) {
-    cat("Approximate ", x$ci.level, "% confidence interval of TL moment ratios: \n", sep = "")
+    cat("Approximate ", x$ci.level*100, "% confidence interval of TL moment ratios: \n", sep = "")
     print(x$ratio.ci)
   }
 }
