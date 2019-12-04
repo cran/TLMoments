@@ -17,8 +17,7 @@ PWMs(x, ...)
 
 \method{PWMs}{list}(x, max.order = 4L, na.rm = FALSE, ...)
 
-\method{PWMs}{data.frame}(x, formula, max.order = 4L, na.rm = FALSE,
-  ...)
+\method{PWMs}{data.frame}(x, formula, max.order = 4L, na.rm = FALSE, ...)
 
 \method{PWMs}{TLMoments}(x, ...)
 }

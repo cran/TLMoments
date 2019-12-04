@@ -58,7 +58,7 @@
 #' @rdname regionalize
 #' @export
 regionalize <- function(x, ...)  {
-  if (!("TLMoments" %in% class(x)))
+  if (!inherits(x, "TLMoments"))
     stop("x must be object of class TLMoments. ")
 
   UseMethod("regionalize", x$lambdas)

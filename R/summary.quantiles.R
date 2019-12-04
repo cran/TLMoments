@@ -38,7 +38,7 @@
 #' @export
 summary.quantiles <- function(object, ci.level = .9, ...) {
   if (length(ci.level) != 1 | !is.numeric(ci.level)) stop("ci must be a numeric vector of length 1. ")
-  if (!("quantiles" %in% class(object))) stop("First argument has to be of class parameters ")
+  if (!inherits(object, "quantiles")) stop("First argument has to be of class parameters ")
 
   UseMethod("summary.quantiles")
 }

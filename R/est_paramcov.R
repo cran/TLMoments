@@ -57,7 +57,7 @@ est_paramcov <- function(x,
                          rightrim = 0L,
                          ...) {
 
-  if ("parameters" %in% class(x)) {
+  if (inherits(x, "parameters")) {
     distr <- attr(x, "distribution")
     if (!any(is.null(attr(x, "source")$trimming))) {
       leftrim <- attr(x, "source")$trimming[1]
@@ -152,7 +152,7 @@ est_paramcov.parameters <- function(x,
                                     rightrim = attr(x, "source")$trimmings[2],
                                     set.n = NA,
                                     ...) {
-  if (!("numeric" %in% class(x)))
+  if (!inherits(x, "numeric"))
     stop("x must be a numeric parameters-object. ")
   if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("est_paramcov.parameters only for theoretical values. ")

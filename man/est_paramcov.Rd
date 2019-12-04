@@ -9,15 +9,26 @@
 \usage{
 est_paramcov(x, distr = "", leftrim = 0L, rightrim = 0L, ...)
 
-\method{est_paramcov}{numeric}(x, distr, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, ...)
+\method{est_paramcov}{numeric}(x, distr, leftrim = 0L, rightrim = 0L, np.cov = FALSE, ...)
 
-\method{est_paramcov}{matrix}(x, distr, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, reg.weights = NULL, ...)
+\method{est_paramcov}{matrix}(
+  x,
+  distr,
+  leftrim = 0L,
+  rightrim = 0L,
+  np.cov = FALSE,
+  reg.weights = NULL,
+  ...
+)
 
-\method{est_paramcov}{parameters}(x, distr = attr(x, "distribution"),
-  leftrim = attr(x, "source")$trimmings[1], rightrim = attr(x,
-  "source")$trimmings[2], set.n = NA, ...)
+\method{est_paramcov}{parameters}(
+  x,
+  distr = attr(x, "distribution"),
+  leftrim = attr(x, "source")$trimmings[1],
+  rightrim = attr(x, "source")$trimmings[2],
+  set.n = NA,
+  ...
+)
 }
 \arguments{
 \item{x}{numeric vector or matrix containing data OR an object of parameters.}

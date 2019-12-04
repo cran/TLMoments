@@ -1,12 +1,11 @@
 #' @title
 #' Converting TL-moments to distribution parameters
 #' @description
-#' Converts TL-moments to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
+#' Converts TL-moments (or PWMs) to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
 #' are available. Important trimming options are calculated through known formulas (see references for
-#' some of them), other options are calculated through a numerical optimization. In this case there's a
-#' warning informing about the experimental nature of this feature.
+#' some of them), other options are calculated through a numerical optimization.
 #'
-#' @param x object returned by TLMoments.
+#' @param x object returned by TLMoments (or PWMs, in which case TLMoments with no trimming is used).
 #' @param distr character object defining the distribution. Supported types are
 #' "gev", "gum", "gpd", and "ln3".
 #' @param ... additional arguments.
@@ -34,6 +33,10 @@
 #'  hq = as.vector(xmat)
 #' )
 #'
+#' # TLMoments-objects or PWMs-objects can be used. However, in case of PWMs
+#' # simply the TLMoments(., leftrim = 0, rightrim = 0)-variant is used.
+#'
+#' parameters(PWMs(xvec), "gev")
 #' tlm <- TLMoments(xvec, leftrim = 0, rightrim = 0)
 #' parameters(tlm, "gev")
 #'
@@ -49,11 +52,10 @@
 #' tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
 #' parameters(tlm, "gev")
 #'
-#' tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
-#' parameters(tlm, "ln3")
 #'
-#'
-#' # Numerical calculation
+#' # If no explicit formula is implemented, it is tried to calculate
+#' # parameters numerically. The attribute source$param.computation.method
+#' # indicates if this is the case.
 #'
 #' tlm <- TLMoments(rgum(200, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
 #' parameters(tlm, "gum")
@@ -64,7 +66,7 @@
 #' tlm <- TLMoments(rln3(200, loc = 3, scale = 1.5, shape = 2), leftrim = 0, rightrim = 1)
 #' parameters(tlm, "ln3")
 #'
-#' # It's A LOT slower:
+#' # Numerical calculation is A LOT slower:
 #' \dontrun{
 #' system.time(replicate(500,
 #'   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")
@@ -91,7 +93,7 @@
 #'
 #' @export
 parameters <- function(x, distr, ...) {
-  if (!("TLMoments" %in% class(x))) stop("tlm has to be of class TLMoments")
+  if (!inherits(x, c("TLMoments", "PWMs"))) stop("tlm has to be of class TLMoments or PWMs")
 
   valid.distr <- c("gev", "gum", "gpd", "ln3")
   if (!(distr %in% valid.distr))
@@ -110,7 +112,7 @@ parameters <- function(x, distr, ...) {
     if (!all(c(1, 2, 3) %in% attr(x, "order"))) stop("Parameter calculation of \"ln3\" needs at least the first three TL-moments")
   }
 
-  UseMethod("parameters", x$lambdas)
+  UseMethod("parameters")
 }
 
 #' @title returnParameters
@@ -153,9 +155,23 @@ returnParameters <- function(out, distribution, ...) {
   out
 }
 
-#' @method parameters numeric
+#' @describeIn parameters parameters for PWMs-object
+#' @method parameters PWMs
 #' @export
-parameters.numeric <- function(x, distr, ...) {
+parameters.PWMs <- function(x, distr, ...) {
+  parameters.TLMoments(TLMoments(x), distr = distr)
+}
+
+#' @describeIn parameters parameters for TLMoments-object
+#' @method parameters TLMoments
+#' @export
+parameters.TLMoments <- function(x, distr, ...) {
+  UseMethod("parameters.TLMoments", x$lambdas)
+}
+
+#' @method parameters.TLMoments numeric
+#' @export
+parameters.TLMoments.numeric <- function(x, distr, ...) {
   leftrim <- attr(x, "leftrim")
   rightrim <- attr(x, "rightrim")
 
@@ -174,9 +190,9 @@ parameters.numeric <- function(x, distr, ...) {
   ))
 }
 
-#' @method parameters matrix
+#' @method parameters.TLMoments matrix
 #' @export
-parameters.matrix <- function(x, distr, ...) {
+parameters.TLMoments.matrix <- function(x, distr, ...) {
   leftrim <- attr(x, "leftrim")
   rightrim <- attr(x, "rightrim")
 
@@ -197,9 +213,9 @@ parameters.matrix <- function(x, distr, ...) {
   ))
 }
 
-#' @method parameters list
+#' @method parameters.TLMoments list
 #' @export
-parameters.list <- function(x, distr, ...) {
+parameters.TLMoments.list <- function(x, distr, ...) {
   leftrim <- attr(x, "leftrim")
   rightrim <- attr(x, "rightrim")
 
@@ -223,9 +239,9 @@ parameters.list <- function(x, distr, ...) {
   ))
 }
 
-#' @method parameters data.frame
+#' @method parameters.TLMoments data.frame
 #' @export
-parameters.data.frame <- function(x, distr, ...) {
+parameters.TLMoments.data.frame <- function(x, distr, ...) {
   leftrim <- attr(x, "leftrim")
   rightrim <- attr(x, "rightrim")
 
@@ -251,7 +267,7 @@ parameters.data.frame <- function(x, distr, ...) {
 
 #' @export
 print.parameters <- function(x, ...) {
-  if ("data.frame" %in% class(x)) {
+  if (inherits(x, "data.frame")) {
     print.data.frame(x)
     return(invisible(x))
   }

@@ -146,7 +146,7 @@
 #' @export
 est_cov <- function(x, ...) {
   # TODO: General error catches
-  if (!any(c("PWMs", "TLMoments", "parameters", "quantiles") %in% class(x)))
+  if (!inherits(x, c("PWMs", "TLMoments", "parameters", "quantiles")))
     stop("x must be of class PWMs, TLMoments, parameters, or quantiles. ")
 
   UseMethod("est_cov")
@@ -160,7 +160,7 @@ est_cov.PWMs <- function(x,
                          ...) {
 
   # TODO: General error catches
-  if (!any(c("numeric", "matrix") %in% class(x)))
+  if (!inherits(x, c("numeric", "matrix")))
     stop("To date, only numeric and matrix types of PWMs are supported. ")
 
 
@@ -181,7 +181,7 @@ est_cov.TLMoments <- function(x,
                               ...) {
 
   # TODO: General error catches
-  if (!any(c("numeric", "matrix") %in% class(x$lambdas)))
+  if (!inherits(x$lambdas, c("numeric", "matrix")))
     stop("To date, only numeric and matrix types of TLMoments are supported. ")
 
   if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) { # theoretical values
@@ -220,7 +220,7 @@ est_cov.parameters <- function(x,
                                ...) {
 
   # TODO: General error catches
-  if (!any(c("numeric", "matrix") %in% class(x)))
+  if (!inherits(x, c("numeric", "matrix")))
     stop("To date, only numeric and matrix types of parameters are supported. ")
 
   if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {  # theoretical values
@@ -255,7 +255,7 @@ est_cov.quantiles <- function(x,
                               ...) {
 
   # TODO: General error catches
-  if (!any(c("numeric", "matrix") %in% class(x)))
+  if (!inherits(x, c("numeric", "matrix")))
     stop("To date, only numeric and matrix types of quantiles are supported. ")
 
   if (any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters"))) {  # theoretical values

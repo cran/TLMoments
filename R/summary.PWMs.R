@@ -34,7 +34,7 @@
 summary.PWMs <- function(object, ci.level = .9, ...) {
   if (length(ci.level) != 1 | !is.numeric(ci.level))
     stop("ci must be a numeric vector of length 1. ")
-  if (!("PWMs" %in% class(object)))
+  if (!inherits(object, "PWMs"))
     stop("First argument has to be of class parameters ")
   if (any(attr(object, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("No summary for theoretical PWMs available. ")

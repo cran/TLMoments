@@ -4,8 +4,14 @@
 \alias{TLMoment}
 \title{Trimmed L Moments}
 \usage{
-TLMoment(x, order = 1L, leftrim = 0L, rightrim = 0L, na.rm = FALSE,
-  computation.method = "auto")
+TLMoment(
+  x,
+  order = 1L,
+  leftrim = 0L,
+  rightrim = 0L,
+  na.rm = FALSE,
+  computation.method = "auto"
+)
 }
 \arguments{
 \item{x}{numeric vector of data.}

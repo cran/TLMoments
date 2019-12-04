@@ -2,12 +2,18 @@
 % Please edit documentation in R/parameters.R
 \name{parameters}
 \alias{parameters}
+\alias{parameters.PWMs}
+\alias{parameters.TLMoments}
 \title{Converting TL-moments to distribution parameters}
 \usage{
 parameters(x, distr, ...)
+
+\method{parameters}{PWMs}(x, distr, ...)
+
+\method{parameters}{TLMoments}(x, distr, ...)
 }
 \arguments{
-\item{x}{object returned by TLMoments.}
+\item{x}{object returned by TLMoments (or PWMs, in which case TLMoments with no trimming is used).}
 
 \item{distr}{character object defining the distribution. Supported types are
 "gev", "gum", "gpd", and "ln3".}
@@ -23,11 +29,17 @@ class \code{parameters}. The object contains the following attributes: \itemize{
 The attributes are hidden in the print-function for a clearer presentation.
 }
 \description{
-Converts TL-moments to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
+Converts TL-moments (or PWMs) to distribution parameters. By now, conversions for gev, gumbel, gpd, and ln3
 are available. Important trimming options are calculated through known formulas (see references for
-some of them), other options are calculated through a numerical optimization. In this case there's a
-warning informing about the experimental nature of this feature.
+some of them), other options are calculated through a numerical optimization.
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{PWMs}: parameters for PWMs-object
+
+\item \code{TLMoments}: parameters for TLMoments-object
+}}
+
 \examples{
 xmat <- matrix(rgev(100, shape = .2), nc = 4)
 xvec <- xmat[, 3]
@@ -38,6 +50,10 @@ xdat <- data.frame(
  hq = as.vector(xmat)
 )
 
+# TLMoments-objects or PWMs-objects can be used. However, in case of PWMs
+# simply the TLMoments(., leftrim = 0, rightrim = 0)-variant is used.
+
+parameters(PWMs(xvec), "gev")
 tlm <- TLMoments(xvec, leftrim = 0, rightrim = 0)
 parameters(tlm, "gev")
 
@@ -53,11 +69,10 @@ parameters(tlm, "gev")
 tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
 parameters(tlm, "gev")
 
-tlm <- TLMoments(xdat, hq ~ station + season, leftrim = 0, rightrim = 2)
-parameters(tlm, "ln3")
 
-
-# Numerical calculation
+# If no explicit formula is implemented, it is tried to calculate
+# parameters numerically. The attribute source$param.computation.method
+# indicates if this is the case.
 
 tlm <- TLMoments(rgum(200, loc = 5, scale = 2), leftrim = 1, rightrim = 4)
 parameters(tlm, "gum")
@@ -68,7 +83,7 @@ parameters(tlm, "gev")
 tlm <- TLMoments(rln3(200, loc = 3, scale = 1.5, shape = 2), leftrim = 0, rightrim = 1)
 parameters(tlm, "ln3")
 
-# It's A LOT slower:
+# Numerical calculation is A LOT slower:
 \dontrun{
 system.time(replicate(500,
   parameters(TLMoments(rgum(100, loc = 5, scale = 2), 1, 1), "gum")

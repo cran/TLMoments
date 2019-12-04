@@ -10,17 +10,13 @@
 \usage{
 \method{plot}{TLMoments}(x, ...)
 
-\method{plot.TLMoments}{numeric}(x, distr = "all", add_center = FALSE,
-  use_internal = TRUE, ...)
+\method{plot.TLMoments}{numeric}(x, distr = "all", add_center = FALSE, use_internal = TRUE, ...)
 
-\method{plot.TLMoments}{matrix}(x, distr = "all", add_center = TRUE,
-  use_internal = TRUE, ...)
+\method{plot.TLMoments}{matrix}(x, distr = "all", add_center = TRUE, use_internal = TRUE, ...)
 
-\method{plot.TLMoments}{list}(x, distr = "all", add_center = TRUE,
-  use_internal = TRUE, ...)
+\method{plot.TLMoments}{list}(x, distr = "all", add_center = TRUE, use_internal = TRUE, ...)
 
-\method{plot.TLMoments}{data.frame}(x, distr = "all",
-  add_center = TRUE, use_internal = TRUE, ...)
+\method{plot.TLMoments}{data.frame}(x, distr = "all", add_center = TRUE, use_internal = TRUE, ...)
 }
 \arguments{
 \item{x}{object of TLMoments.}

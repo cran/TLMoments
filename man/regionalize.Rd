@@ -12,14 +12,11 @@ regionalize(x, ...)
 
 \method{regionalize}{numeric}(x, ...)
 
-\method{regionalize}{matrix}(x, w = attr(x, "source")$n,
-  reg.lambdas = TRUE, ...)
+\method{regionalize}{matrix}(x, w = attr(x, "source")$n, reg.lambdas = TRUE, ...)
 
-\method{regionalize}{data.frame}(x, w = attr(x, "source")$n,
-  reg.lambdas = TRUE, ...)
+\method{regionalize}{data.frame}(x, w = attr(x, "source")$n, reg.lambdas = TRUE, ...)
 
-\method{regionalize}{list}(x, w = attr(x, "source")$n,
-  reg.lambdas = TRUE, ...)
+\method{regionalize}{list}(x, w = attr(x, "source")$n, reg.lambdas = TRUE, ...)
 }
 \arguments{
 \item{x}{object returned by TLMoments.}

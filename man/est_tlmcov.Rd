@@ -7,21 +7,51 @@
 \alias{est_tlmcov.TLMoments}
 \title{Estimate the covariance matrix of TL-moments estimations}
 \usage{
-est_tlmcov(x, leftrim = 0L, rightrim = 0L, order = 1:3,
-  distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, ...)
+est_tlmcov(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  order = 1:3,
+  distr = NULL,
+  lambda.cov = TRUE,
+  ratio.cov = TRUE,
+  ...
+)
 
-\method{est_tlmcov}{numeric}(x, leftrim = 0L, rightrim = 0L,
-  order = 1:3, distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE,
-  ...)
+\method{est_tlmcov}{numeric}(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  order = 1:3,
+  distr = NULL,
+  lambda.cov = TRUE,
+  ratio.cov = TRUE,
+  ...
+)
 
-\method{est_tlmcov}{matrix}(x, leftrim = 0L, rightrim = 0L,
-  order = 1:3, distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE,
-  reg.weights = NULL, ...)
+\method{est_tlmcov}{matrix}(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  order = 1:3,
+  distr = NULL,
+  lambda.cov = TRUE,
+  ratio.cov = TRUE,
+  reg.weights = NULL,
+  ...
+)
 
-\method{est_tlmcov}{TLMoments}(x, leftrim = attr(x, "leftrim"),
-  rightrim = attr(x, "rightrim"), order = attr(x, "order"),
-  distr = NULL, lambda.cov = TRUE, ratio.cov = TRUE, set.n = NA,
-  ...)
+\method{est_tlmcov}{TLMoments}(
+  x,
+  leftrim = attr(x, "leftrim"),
+  rightrim = attr(x, "rightrim"),
+  order = attr(x, "order"),
+  distr = NULL,
+  lambda.cov = TRUE,
+  ratio.cov = TRUE,
+  set.n = NA,
+  ...
+)
 }
 \arguments{
 \item{x}{numeric vector or matrix containing data OR an object of TLMoments.}

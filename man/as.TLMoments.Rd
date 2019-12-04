@@ -10,17 +10,13 @@
 \usage{
 as.TLMoments(x, ..., leftrim, rightrim, ratios)
 
-\method{as.TLMoments}{numeric}(x, leftrim = 0L, rightrim = 0L,
-  ratios = FALSE, ...)
+\method{as.TLMoments}{numeric}(x, leftrim = 0L, rightrim = 0L, ratios = FALSE, ...)
 
-\method{as.TLMoments}{matrix}(x, leftrim = 0L, rightrim = 0L,
-  ratios = FALSE, ...)
+\method{as.TLMoments}{matrix}(x, leftrim = 0L, rightrim = 0L, ratios = FALSE, ...)
 
-\method{as.TLMoments}{list}(x, leftrim = 0L, rightrim = 0L,
-  ratios = FALSE, ...)
+\method{as.TLMoments}{list}(x, leftrim = 0L, rightrim = 0L, ratios = FALSE, ...)
 
-\method{as.TLMoments}{data.frame}(x, formula, leftrim = 0L,
-  rightrim = 0L, ratios = FALSE, ...)
+\method{as.TLMoments}{data.frame}(x, formula, leftrim = 0L, rightrim = 0L, ratios = FALSE, ...)
 }
 \arguments{
 \item{x}{vector or matrix of TL-moments (or TL-moment ratios if ratios is TRUE) or a PWMs-object.

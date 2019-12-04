@@ -26,7 +26,7 @@
 #' @rdname est_pwmcov
 #' @export
 est_pwmcov <- function(x, order = 0:3, distr = NULL, distr.trim = c(0, 0)) {
-  if (("PWMs" %in% class(x)) || ("TLMoments" %in% class(x)) || ("parameters" %in% class(x)) || ("quantiles" %in% class(x)))
+  if (inherits(x, c("PWMs", "TLMoments", "parameters", "quantiles")))
     stop("est_pwmcov is only for data vectors or matrices. ")
 
   if (is.double(order)) order <- as.integer(order)

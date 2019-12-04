@@ -223,7 +223,7 @@ est_tlmcov.TLMoments <- function(x,
                                  set.n = NA,
                                  ...) {
 
-  if (!("numeric" %in% class(x$lambdas)))
+  if (!inherits(x$lambdas, "numeric"))
     stop("x must be a numeric TLMoments-object. ")
 
   if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))

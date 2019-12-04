@@ -61,7 +61,7 @@ est_quancov <- function(x,
                         leftrim = 0L,
                         rightrim = 0L,
                         ...) {
-  if ("quantiles" %in% class(x)) {
+  if (inherits(x, "quantiles")) {
     distr <- attr(x, "distribution")
     p <- attr(x, "p")
     if (!any(is.null(attr(x, "source")$trimming))) {
@@ -163,7 +163,7 @@ est_quancov.quantiles <- function(x,
                                   rightrim = attr(x, "source")$trimmings[2],
                                   set.n = NA,
                                   ...) {
-  if (!("numeric" %in% class(x)))
+  if (!inherits(x, "numeric"))
     stop("x must be a numeric quantiles-object. ")
   if (!any(attr(x, "source")$func %in% c("as.PWMs", "as.TLMoments", "as.parameters")))
     stop("est_quancov.quantiles only for theoretical values. ")

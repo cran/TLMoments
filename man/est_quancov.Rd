@@ -7,18 +7,30 @@
 \alias{est_quancov.quantiles}
 \title{Estimate the covariance matrix of quantile estimations}
 \usage{
-est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L,
-  ...)
+est_quancov(x, distr = "", p = NULL, leftrim = 0L, rightrim = 0L, ...)
 
-\method{est_quancov}{numeric}(x, distr, p, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, ...)
+\method{est_quancov}{numeric}(x, distr, p, leftrim = 0L, rightrim = 0L, np.cov = FALSE, ...)
 
-\method{est_quancov}{matrix}(x, distr, p, leftrim = 0L, rightrim = 0L,
-  np.cov = FALSE, reg.weights = NULL, ...)
+\method{est_quancov}{matrix}(
+  x,
+  distr,
+  p,
+  leftrim = 0L,
+  rightrim = 0L,
+  np.cov = FALSE,
+  reg.weights = NULL,
+  ...
+)
 
-\method{est_quancov}{quantiles}(x, distr = attr(x, "distribution"),
-  p = attr(x, "p"), leftrim = attr(x, "source")$trimmings[1],
-  rightrim = attr(x, "source")$trimmings[2], set.n = NA, ...)
+\method{est_quancov}{quantiles}(
+  x,
+  distr = attr(x, "distribution"),
+  p = attr(x, "p"),
+  leftrim = attr(x, "source")$trimmings[1],
+  rightrim = attr(x, "source")$trimmings[2],
+  set.n = NA,
+  ...
+)
 }
 \arguments{
 \item{x}{numeric vector or matrix containing data.}

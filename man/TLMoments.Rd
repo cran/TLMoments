@@ -12,23 +12,56 @@
 \usage{
 TLMoments(x, ...)
 
-\method{TLMoments}{numeric}(x, leftrim = 0L, rightrim = 0L,
-  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{numeric}(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  max.order = 4L,
+  na.rm = FALSE,
+  computation.method = "auto",
+  ...
+)
 
-\method{TLMoments}{matrix}(x, leftrim = 0L, rightrim = 0L,
-  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{matrix}(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  max.order = 4L,
+  na.rm = FALSE,
+  computation.method = "auto",
+  ...
+)
 
-\method{TLMoments}{list}(x, leftrim = 0L, rightrim = 0L,
-  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{list}(
+  x,
+  leftrim = 0L,
+  rightrim = 0L,
+  max.order = 4L,
+  na.rm = FALSE,
+  computation.method = "auto",
+  ...
+)
 
-\method{TLMoments}{data.frame}(x, formula, leftrim = 0L, rightrim = 0L,
-  max.order = 4L, na.rm = FALSE, computation.method = "auto", ...)
+\method{TLMoments}{data.frame}(
+  x,
+  formula,
+  leftrim = 0L,
+  rightrim = 0L,
+  max.order = 4L,
+  na.rm = FALSE,
+  computation.method = "auto",
+  ...
+)
 
 \method{TLMoments}{PWMs}(x, leftrim = 0L, rightrim = 0L, ...)
 
-\method{TLMoments}{parameters}(x, leftrim = attr(x,
-  "source")$trimmings[1], rightrim = attr(x, "source")$trimmings[2],
-  max.order = 4L, ...)
+\method{TLMoments}{parameters}(
+  x,
+  leftrim = attr(x, "source")$trimmings[1],
+  rightrim = attr(x, "source")$trimmings[2],
+  max.order = 4L,
+  ...
+)
 }
 \arguments{
 \item{x}{numeric data in form of vector, matrix, list, or data.frame OR an object
@@ -146,7 +179,7 @@ TLMoments(p)
 \references{
 Elamir, E. A., & Seheult, A. H. (2003). Trimmed L-moments. Computational Statistics & Data Analysis, 43(3), 299-314.
 
-Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
+Hosking, J. R. M. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 
 Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 

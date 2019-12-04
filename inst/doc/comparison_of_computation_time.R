@@ -1,14 +1,14 @@
-## ----echo=FALSE, message=FALSE-------------------------------------------
+## ----echo=FALSE, message=FALSE------------------------------------------------
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(TLMoments)
 library(lmomco)
 library(Lmoments)
 library(lmom)
 sessionInfo()
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 n <- c(25, 50, 100, 200, 500, 1000, 10000, 50000)
 sapply(n, function(nn) {
   x <- rgev(nn)
@@ -18,7 +18,7 @@ sapply(n, function(nn) {
   })
 })
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 possib <- list(
   TLMoments_direct = function(x) TLMoments(x, max.order = 4, computation.method = "direct"), 
   TLMoments_pwm = function(x) TLMoments(x, max.order = 4, computation.method = "pwm"), 
@@ -41,7 +41,7 @@ do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 possib <- list(
   TLMoments_direct = function(x) TLMoment(x, order = 1:4, computation.method = "direct"), 
   TLMoments_pwm = function(x) TLMoment(x, order = 1:4, computation.method = "pwm"), 
@@ -64,7 +64,7 @@ do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 n <- c(25, 50, 100, 150, 200, 500, 1000, 10000)
 names(n) <- paste("n", n, sep = "=")
 sapply(n, function(nn) {
@@ -84,7 +84,7 @@ sapply(n, function(nn) {
   })
 })
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 possib <- list(
   TLMoments_direct = function(x) TLMoments(x, leftrim = 0, rightrim = 1, max.order = 4, computation.method = "direct"), 
   TLMoments_pwm = function(x) TLMoments(x, leftrim = 0, rightrim = 1, max.order = 4, computation.method = "pwm"), 
@@ -106,7 +106,7 @@ do.call("rbind", lapply(possib, function(f) {
   system.time(lapply(datalist, f))[3]
 }))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 possib <- list(
   TLMoments_direct = function(x) TLMoments(x, leftrim = 2, rightrim = 4, max.order = 4, computation.method = "direct"), 
   TLMoments_pwm = function(x) TLMoments(x, leftrim = 2, rightrim = 4, max.order = 4, computation.method = "pwm"), 

@@ -35,7 +35,7 @@
 #' The attributes are hidden in the print-function for a clearer presentation.
 #'
 #' @references Elamir, E. A., & Seheult, A. H. (2003). Trimmed L-moments. Computational Statistics & Data Analysis, 43(3), 299-314.
-#' @references Hosking, J. R. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
+#' @references Hosking, J. R. M. (1990). L-moments: analysis and estimation of distributions using linear combinations of order statistics. Journal of the Royal Statistical Society. Series B (Methodological), 105-124.
 #' @references Hosking, J. R. M. (2007). Some theory and practical uses of trimmed L-moments. Journal of Statistical Planning and Inference, 137(9), 3024-3039.
 #' @references Hosking, J. R. M., & Balakrishnan, N. (2015). A uniqueness result for L-estimators, with applications to L-moments. Statistical Methodology, 24, 69-80.
 #' @seealso \code{\link{PWMs}}, \code{\link{parameters}}, \code{\link{quantiles}}, \code{\link{summary.TLMoments}}, \code{\link{as.TLMoments}}
@@ -134,11 +134,15 @@ returnTLMoments <- function(out, leftrim, rightrim, order, ...) {
 
   # Calculate n if not available and data exists.
   if (!exists("n", args) && exists("data", args)) {
-    args$n <- switch(class,
-                     numeric = sum(!is.na(args$data)),
-                     matrix = apply(args$data, 2, function(y) sum(!is.na(y))),
-                     list = vapply(args$data, length, numeric(1)),
-                     data.frame = aggregate(args$formula, args$data, length)[[getFormulaSides(args$formula)$lhs]])
+    if (inherits(out$lambdas, "numeric")) {
+      args$n <- sum(!is.na(args$data))
+    } else if (inherits(out$lambdas, "matrix")) {
+      args$n <- apply(args$data, 2, function(y) sum(!is.na(y)))
+    } else if (inherits(out$lambdas, "list")) {
+      args$n <- vapply(args$data, length, numeric(1))
+    } else if (inherits(out$lambdas, "data.frame")) {
+      args$n <- aggregate(args$formula, args$data, length)[[getFormulaSides(args$formula)$lhs]]
+    }
   }
 
   # Attributes of TLMoments

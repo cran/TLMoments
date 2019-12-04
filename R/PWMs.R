@@ -84,11 +84,15 @@ returnPWMs <- function(out, order, ...) {
 
   # Calculate n if not available and data exists.
   if (!exists("n", args) && exists("data", args)) {# && args$func == "PWMs") {
-    args$n <- switch(class,
-                     numeric = sum(!is.na(args$data)),
-                     matrix = apply(args$data, 2, function(y) sum(!is.na(y))),
-                     list = vapply(args$data, length, numeric(1)),
-                     data.frame = aggregate(args$formula, args$data, length)[[getFormulaSides(args$formula)$lhs]])
+    if (inherits(out, "numeric")) {
+      args$n <- sum(!is.na(args$data))
+    } else if (inherits(out, "matrix")) {
+      args$n <- apply(args$data, 2, function(y) sum(!is.na(y)))
+    } else if (inherits(out, "list")) {
+      args$n <- vapply(args$data, length, numeric(1))
+    } else if (inherits(out, "data.frame")) {
+      args$n <- aggregate(args$formula, args$data, length)[[getFormulaSides(args$formula)$lhs]]
+    }
   }
 
   # Attributes of PWMs
@@ -250,7 +254,7 @@ PWMs.TLMoments.data.frame <- function(x, ...) {
 
 #' @export
 print.PWMs <- function(x, ...) {
-  if ("data.frame" %in% class(x)) {
+  if (inherits(x, "data.frame")) {
     print.data.frame(x)
     return(invisible(x))
   }

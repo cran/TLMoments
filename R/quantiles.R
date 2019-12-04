@@ -187,7 +187,7 @@ quantiles.numeric <- function(x, p,
                               distr = attr(x, "distribution")) {
   if (is.null(distr)) stop("Argument distr defining the distribution must be submitted.")
 
-  if (!("parameters" %in% class(x))) {
+  if (!inherits(x, "parameters")) {
     x <- as.parameters(x, distr = distr)
   }
 
@@ -206,7 +206,7 @@ quantiles.numeric <- function(x, p,
 
 #' @export
 print.quantiles <- function(x, ...) {
-  if ("data.frame" %in% class(x)) {
+  if (inherits(x, "data.frame")) {
     print.data.frame(x)
     return(invisible(x))
   }

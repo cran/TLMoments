@@ -51,7 +51,7 @@
 #' @method plot TLMoments
 #' @export
 plot.TLMoments <- function(x, ...) {
-  if (!("TLMoments" %in% class(x))) stop("First argument has to be of class TLMoments. ")
+  if (!inherits(x, "TLMoments")) stop("First argument has to be of class TLMoments. ")
   if (!all(c(3, 4) %in% attr(x, "order"))) stop("Object must contain T2 and T3. ")
 
   UseMethod("plot.TLMoments", x$lambdas)

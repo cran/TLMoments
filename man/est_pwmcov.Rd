@@ -8,11 +8,9 @@
 \usage{
 est_pwmcov(x, order = 0:3, distr = NULL, distr.trim = c(0, 0))
 
-\method{est_pwmcov}{numeric}(x, order = 0:3, distr = NULL,
-  distr.trim = c(0, 0))
+\method{est_pwmcov}{numeric}(x, order = 0:3, distr = NULL, distr.trim = c(0, 0))
 
-\method{est_pwmcov}{matrix}(x, order = 0:3, distr = NULL,
-  distr.trim = c(0, 0))
+\method{est_pwmcov}{matrix}(x, order = 0:3, distr = NULL, distr.trim = c(0, 0))
 }
 \arguments{
 \item{x}{numeric vector or matrix of data.}

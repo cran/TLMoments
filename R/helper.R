@@ -188,7 +188,7 @@ checkParameterNames <- function(args, distr) {
 # getQ(as.parameters(loc = 9, scale = 5, shape = .3, distr = "evd::gev"))
 # getQ("evd::gev", loc = 10, scale = 4, shape = .2)
 getQ <- function(x, ...) {
-  if (!("parameters" %in% class(x)) & !("character" %in% class(x)))
+  if (!inherits(x, c("parameters", "character")))
     stop("x must be of class parameters or character vector")
 
   UseMethod("getQ")
@@ -210,7 +210,7 @@ getQ.character <- function(x, ...) {
   q
 }
 getQ.parameters <- function(x) {
-  if (!("numeric" %in% class(x))) stop("By now only for parameters, numeric!")
+  if (!inherits(x, "numeric")) stop("By now only for parameters, numeric!")
 
   distr <- attr(x, "distribution")
   args <- as.list(x)
@@ -220,7 +220,7 @@ getQ.parameters <- function(x) {
 
 correctNames <- function(x, forbidden_pattern, preceding) {
 
-  if (any(class(x) == "data.frame")) {
+  if (inherits(x, "data.frame")) {
     forbids <- grepl(forbidden_pattern, names(x))
     if (any(forbids)) {
       forbidden_names <- names(x)[forbids]
@@ -229,7 +229,7 @@ correctNames <- function(x, forbidden_pattern, preceding) {
       warning("Renamed variables due to invalid names. ")
     }
 
-  } else if (any(class(x) == "formula")) {
+  } else if (inherits(x, "formula")) {
     forbids <- grepl(forbidden_pattern, all.vars(x))
     if (any(forbids)) {
       forbidden_names <- all.vars(x)[forbids]
