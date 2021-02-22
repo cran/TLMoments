@@ -1,4 +1,4 @@
-11db9223ac8fc5f33591399c67dd8f85 *DESCRIPTION
+f5b0bfaa0cecfbbaf362f2e38a271893 *DESCRIPTION
 60e9816d8d12628c2ff501d467b05acb *NAMESPACE
 b116fb1a4d1a53b4516d3e82831b5a77 *R/PWM.R
 0a1d821218b4c7b3a7e18d1ef9464fcd *R/PWMs.R
@@ -24,15 +24,15 @@ f4047782fe118b7715b901564f7d8c58 *R/summary.PWMs.R
 d458a0dafe7ec5da6895083818b2cece *R/summary.TLMoments.R
 12fa5ec42626f971ca36346d7d051a42 *R/summary.parameters.R
 7d4187f036fcb96739f5cad2270d3b89 *R/summary.quantiles.R
-3e2895e026cb4c3f9a2a57966b28af55 *R/sysdata.rda
+d8583e6104b373cb033951894f117274 *R/sysdata.rda
 5d49b4b225ee4160b7ec415d3aa941df *R/zzz.R
-6ddab6a730b6b7c40c43df05ac6f63c9 *build/vignette.rds
+dd4883e459b0e27515a666d105f3f6c5 *build/vignette.rds
 b52be4d99e88d15ee4d651c386cb238a *inst/doc/comparison_of_computation_time.R
 cfd162d254975dc01fa9d6fc961b0219 *inst/doc/comparison_of_computation_time.Rmd
-87d6a5f6397db9fbd5c88e1cfa3c8338 *inst/doc/comparison_of_computation_time.html
+3136101e69ae215619c2478c95fbf264 *inst/doc/comparison_of_computation_time.html
 21506c021955fd374820bd3c3d1a4e12 *inst/doc/short_introduction.R
 7330492b73e4b813ad4e67632ffdd3ce *inst/doc/short_introduction.Rmd
-8bbb3dd0f2ff948dfe44801b2f479aab *inst/doc/short_introduction.html
+6c9a1cec6124280b6d8fe852588d8ffc *inst/doc/short_introduction.html
 2905d16cabc786054be9a437e6c51cd1 *man/PWM.Rd
 75f06eca5dad869c1624d40872edae87 *man/PWMs.Rd
 040d13d266aa0498a26633bfe5e1bb29 *man/TLMoment.Rd
