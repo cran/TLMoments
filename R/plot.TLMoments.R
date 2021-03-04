@@ -63,7 +63,7 @@ plot.TLMoments <- function(x, ...) {
 plot.TLMoments.numeric <- function(x, distr = "all", add_center = FALSE, use_internal = TRUE, ...) {
   lmrdiagram(x$ratios[3], x$ratios[4],
              trim = c(attr(x, "leftrim"), attr(x, "rightrim")),
-             distr = distr, add_center = add_center)
+             distr = distr, add_center = add_center, use_internal = use_internal)
 }
 
 #' @describeIn plot.TLMoments plot.TLMoments for numeric matrix
@@ -72,7 +72,7 @@ plot.TLMoments.numeric <- function(x, distr = "all", add_center = FALSE, use_int
 plot.TLMoments.matrix <- function(x, distr = "all", add_center = TRUE, use_internal = TRUE, ...) {
   lmrdiagram(x$ratios[3, ], x$ratios[4, ],
              trim = c(attr(x, "leftrim"), attr(x, "rightrim")),
-             distr = distr, add_center = add_center)
+             distr = distr, add_center = add_center, use_internal = use_internal)
 }
 
 #' @describeIn plot.TLMoments plot.TLMoments for numeric list
@@ -82,7 +82,7 @@ plot.TLMoments.list <- function(x, distr = "all", add_center = TRUE, use_interna
   lmrdiagram(vapply(x$ratios, getElement, "T3", FUN.VALUE = numeric(1)),
              vapply(x$ratios, getElement, "T4", FUN.VALUE = numeric(1)),
              trim = c(attr(x, "leftrim"), attr(x, "rightrim")),
-             distr = distr, add_center = add_center)
+             distr = distr, add_center = add_center, use_internal = use_internal)
 }
 
 #' @describeIn plot.TLMoments plot.TLMoments for numeric data.frame
@@ -91,7 +91,7 @@ plot.TLMoments.list <- function(x, distr = "all", add_center = TRUE, use_interna
 plot.TLMoments.data.frame <- function(x, distr = "all", add_center = TRUE, use_internal = TRUE, ...) {
   lmrdiagram(x$ratios$T3, x$ratios$T4,
              trim = c(attr(x, "leftrim"), attr(x, "rightrim")),
-             distr = distr, add_center = add_center)
+             distr = distr, add_center = add_center, use_internal = use_internal)
 }
 
 lmrdiagram <- function(t3, t4, trim = c(0, 0), distr = c("all"), add_center = TRUE, use_internal = TRUE) {

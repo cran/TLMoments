@@ -43,17 +43,37 @@ are.numeric <- function(...) {
 # Used by plot.TLMoments
 # @return data.frame
 # @examples
-# getTLMomsByDistr(c("gev", "gpd", "gum", "norm"), c(2, 1))
+# getTLMomsByDistr(c("gev", "gpd", "gum", "norm", "ln3", "pe3", "glo"), c(2, 1))
 getTLMomsByDistr <- function(distr, trim) {
   # "Lines" & "Points"
   .lines <- function(distr, shapes, trim) {
-    sapply(shapes, function(shape) {
-      r <- tryCatch(
-        calcTLMom(4, trim[1], trim[2], qfunc = getQ.character(distr, loc = 0, scale = 1, shape = shape)),
-        error = function(e) rep(NA, 4)
-      )
-      setNames(r, paste0("L", 1:4))
-    })
+    if (distr %in% c("gev", "gpd", "ln3")) {
+      sapply(shapes, function(shape) {
+        r <- tryCatch(
+          calcTLMom(4, trim[1], trim[2], qfunc = getQ.character(distr, loc = 0, scale = 1, shape = shape)),
+          error = function(e) rep(NA, 4)
+        )
+        setNames(r, paste0("L", 1:4))
+      })
+    } else if (distr == "pe3") {
+      sapply(shapes, function(shape) {
+        r <- tryCatch(
+          calcTLMom(4, trim[1], trim[2], qfunc = function(p) lmomco::quape3(p, lmomco::vec2par(c(0, 1, shape), "pe3"))),
+          error = function(e) rep(NA, 4)
+        )
+        setNames(r, paste0("L", 1:4))
+      })
+    } else if (distr == "glo") {
+      sapply(shapes, function(shape) {
+        r <- tryCatch(
+          calcTLMom(4, trim[1], trim[2], qfunc = function(p) lmomco::quaglo(p, lmomco::vec2par(c(0, 1, shape), "glo"))),
+          error = function(e) rep(NA, 4)
+        )
+        setNames(r, paste0("L", 1:4))
+      })
+    } else {
+      stop("Unsupported distribution. ")
+    }
   }
   .points  <- function(distr, trim) tryCatch(calcTLMom(4, trim[1], trim[2], qfunc = getQ.character(distr)), error = function(e) rep(NA, 4))
 
@@ -88,7 +108,7 @@ getTLMomsByDistr <- function(distr, trim) {
   } else norm <- NULL
 
   if ("gev" %in% distr) {
-    shapes <- seq(-.99, .99, .01)
+    shapes <- c(seq(-20, -5), seq(-5+.01, 5-.01, .01))
     gev <- data.frame(
       distr = "gev",
       leftrim = trim[1],
@@ -101,7 +121,7 @@ getTLMomsByDistr <- function(distr, trim) {
   } else gev <- NULL
 
   if ("gpd" %in% distr) {
-    shapes <- seq(-.99, .99, .01)
+    shapes <- c(seq(-100, -5), seq(-5+.01, 5-.01, .01))
     gpd <- data.frame(
       distr = "gpd",
       leftrim = trim[1],
@@ -114,7 +134,7 @@ getTLMomsByDistr <- function(distr, trim) {
   } else gpd <- NULL
 
   if ("ln3" %in% distr) {
-    shapes <- seq(-.99, .99, .01)
+    shapes <- c(seq(.001, .01, length.out = 10), seq(.01, 5, .01))
     ln3 <- data.frame(
       distr = "ln3",
       leftrim = trim[1],
@@ -126,7 +146,33 @@ getTLMomsByDistr <- function(distr, trim) {
     )
   } else ln3 <- NULL
 
-  dat <- rbind(gum, exp, norm, gev, gpd, ln3)
+  if ("pe3" %in% distr) {
+    shapes <- seq(-10, 10, .1)
+    pe3 <- data.frame(
+      distr = "pe3",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      cbind(
+        shape = shapes,
+        t(.lines("pe3", shapes, trim))
+      )
+    )
+  } else pe3 <- NULL
+
+  if ("glo" %in% distr) {
+    shapes <- c(seq(-1, -.9, .001), seq(-.9, .9, .01), seq(.9, 1, .001))#seq(-.99, .99, .01)
+    glo <- data.frame(
+      distr = "glo",
+      leftrim = trim[1],
+      rightrim = trim[2],
+      cbind(
+        shape = shapes,
+        t(.lines("glo", shapes, trim))
+      )
+    )
+  } else glo <- NULL
+
+  dat <- rbind(gum, exp, norm, gev, gpd, ln3, pe3, glo)
   dat$T3 <- dat$L3 / dat$L2
   dat$T4 <- dat$L4 / dat$L2
   dat <- dat[!(is.na(dat$T3) | is.na(dat$T4)), ]
