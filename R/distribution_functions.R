@@ -35,7 +35,9 @@ dgev <- function(x, loc = 0, scale = 1, shape = 0) {
   if (abs(shape) < 1e-06) {
     1/scale * exp(-y) * exp(-exp(-y))
   } else {
-    1/scale * (1 + shape * y)^(-1/shape - 1) * exp(-(1 + shape*y)^(-1/shape))
+    out <- 1/scale * pmax(1 + shape*y, 0)^(-1/shape - 1) * exp(-pmax(1 + shape*y, 0)^(-1/shape))
+    out[y*shape <= -1] <- 0
+    out
   }
 }
 #' @rdname gev
